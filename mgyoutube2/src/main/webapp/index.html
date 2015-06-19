@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MG YouTube v2</title>
+	<meta charset="UTF-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	
+	<script>
+	
+	function whenSearchSucceeds(jsonVideoList) {
+		var jsonMovieListStr = JSON.stringify(jsonVideoList);
+		$("#searchresultsjson").html(jsonMovieListStr);
+
+		var arrayLength = jsonVideoList.length;
+		var videoHtml = "";
+		
+		for (var i = 0; i < arrayLength; i++) {
+			var video = jsonVideoList[i];
+			if ( i == 0 ) {
+				alert( JSON.stringify(video));
+			}
+		
+			videoHtml += "<div class='video'>";
+			videoHtml += "<img class='poster' src='"+ video.thumbnailUrl +"'/>"
+			videoHtml += "<div class='videotitle'>" + video.title + "</div>";
+			videoHtml += "<div class='videoby'>by " + video.channelId + "</div>";
+			videoHtml += "<div class='videodate'>" + video.publishedAt + "</div>";
+			videoHtml += "</div>";
+		}
+		
+		$("#searchresults").html( videoHtml );
+	}
+	
+	function whenSearchFails() {
+		alert("Unable to get search results");
+	}
+	
+	function onSearchClicked() {
+		var searchWordsStr = $("#searchwords").val();
+		
+		if ( searchWordsStr.length > 0 ) {
+			console.info("searching:" + searchWordsStr);
+			
+			doSearch(searchWordsStr, whenSearchSucceeds, whenSearchFails);
+		}
+		else{
+			alert("no text submitted for searching: " + searchWordsStr );
+		}
+	}
+	
+	function doSearch( searchWords, whenSearchRequestIsSuccessful, whenSearchRequestFails ) {
+		console.log("in doSearch");
+		var lookupUrl = "/ws/youtube/search?terms=" + encodeURI(searchWords);
+		console.info("lookupUrl:" + lookupUrl);
+
+		//disableSearch();
+		
+		$.ajax({
+			url: lookupUrl, 
+			type: 'GET',
+			success: function(data) {
+				whenSearchRequestIsSuccessful( data ) ;
+				//enableSearch();
+			},
+			error: function() {
+				whenSearchRequestFails();
+				//enableSearch();
+			}
+		});
+	}
+	</script>
+	<style>
+		// #cc181e  red for key highlights
+		// #168ed6  blue for link text (underline on hover
+		// #7676a0  light grey for basic text
+		// #fff 	white for most backgrounds
+		// #f1f1f1  very light grey for internal box
+		
+		// basic video box in a list
+		//		video image to left, Title over "by" user over date "," views over truncated description
+		// basic video box on front page
+		//		video image on top over Title over "by" user over views "bullet" date 
+	</style>
+</head>
+<body>
+	<div id="banner">
+		MG YouTube
+		<div id="searchbox">
+			<input type="text" id="searchwords"/>
+			<input type="button" value="Search" onclick="onSearchClicked()"/>
+		</div>
+	</div>
+	<div id="searchresults">
+	</div>
+	<div id="searchresultsjson">
+	</div>
+	
+</body>
+</html>
