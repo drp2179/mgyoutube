@@ -18,6 +18,7 @@ if ( user != null ) {
 }
 
 pageContext.setAttribute("isLoggedIn", (user != null) );
+pageContext.setAttribute("user", user);
 pageContext.setAttribute("loginUrl", loginUrl);
 pageContext.setAttribute("logoutUrl", logoutUrl);
 %>
@@ -41,7 +42,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	</div>
 	<c:choose>
 		<c:when test="${isLoggedIn}">
-			Hello <% user.getUserId(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
+			Hello <% user.getEmail(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
 		</c:when>
 		<c:otherwise>
 			<a href="<c:out value='${loginUrl}' />">Login</a>

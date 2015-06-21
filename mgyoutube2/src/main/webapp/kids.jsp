@@ -18,6 +18,7 @@ if ( user != null ) {
 }
 
 pageContext.setAttribute("isLoggedIn", (user != null) );
+pageContext.setAttribute("user", user);
 pageContext.setAttribute("loginUrl", loginUrl);
 pageContext.setAttribute("logoutUrl", logoutUrl);
 %>
@@ -50,12 +51,12 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 //		var blockwidth = $("#videoblock").width();
 //			var thewidth = Math.min( 854, blockwidth ) ;
 //			var theheight =  510 * thewidth / 854 ;
-			var thewidth = 640 ;
-			var theheight =  390;
+		var thewidth = 640;
+		var theheight =  390;
 			
 		$('#videoplayer iframe').remove();
 //		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen='1'></iframe>");
-		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"' frameborder='0' allowfullscreen='1'></iframe>");
+		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?' frameborder='0' allowfullscreen='1'></iframe>");
 		
 //		<iframe id="videoplayer" style="display: block;"                              src="https://www.youtube.com/embed/dTV1qoceV-U?"></iframe>
 	}
@@ -72,6 +73,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 					{
 						height: '390',
 						width: '640',
+						rel: '0',
 //						videoId: theVideoId
 						videoId: video.videoId
 //						,
@@ -83,7 +85,8 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 				);
 		}
 		else {
-			player.loadVideoById(video.videoId);
+			//player.loadVideoById(video.videoId);
+			player.cueVideoById(video.videoId);
 		}
 	}
 	
@@ -202,7 +205,8 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 				video image on top over Title over "by" user over views "bullet" date
 	*/
 		
-		#searchresults { position:relative; overflow:scroll;}
+		/*#searchresults { position:relative; overflow:scroll;}*/
+		#searchresults { position:relative; }
 		#searchresults .video { width:250px; float:left; height:300px;overflow:clipped; margin:1em;}
 		#searchresults .video .poster { width:100%; }
 		#searchcontrols {display:none;} 
@@ -223,7 +227,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		</div>
 		<c:choose>
 			<c:when test="${isLoggedIn}">
-		    	Hello <% user.getUserId(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
+		    	Hello <% user.getEmail(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
 			</c:when>
 			<c:otherwise>
 				<a href="<c:out value='${loginUrl}' />">Login</a>
@@ -239,11 +243,15 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			<h3>Approved Channels</h3>
 			<div id="whitelistedchannelslist"></div>
 		</div>
+		<div id="personalplaylists">
+			<h3>Personal Playlists</h3>
+			<div id="personalplaylistslist"></div>
+		</div>
 	</div>
 	<div id="videos">
 		<div id="videoplayer"></div>
 		<div id="searchcontrols">
-			<button id="saveSearch" onClick="saveCurrentSearch()">Save</button>
+			<button id="saveSearch" onClick="saveCurrentSearch()">Save Search</button>
 			<!-- 
 			<button id="removeSearch" onClick="removeCurrentSearch()">Remove</button>
 			 -->
