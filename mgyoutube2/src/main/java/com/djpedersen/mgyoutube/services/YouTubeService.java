@@ -61,6 +61,7 @@ public class YouTubeService {
 		// To increase efficiency, only retrieve the fields that the
 		// application uses.
 		// search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+		// @See https://developers.google.com/youtube/v3/getting-started#partial
 
 		final SearchListResponse searchResponse = search.execute();
 		final List<SearchResult> searchResultList = searchResponse.getItems();

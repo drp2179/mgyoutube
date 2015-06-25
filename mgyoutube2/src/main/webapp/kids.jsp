@@ -4,21 +4,22 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 
 <%
-UserService userService= UserServiceFactory.getUserService();
-User user = userService.getCurrentUser();
-String loginUrl = userService.createLoginURL(request.getRequestURI()) ;
-String logoutUrl = userService.createLogoutURL(request.getRequestURI()) ;
+final UserService userService= UserServiceFactory.getUserService();
+final User user = userService.getCurrentUser();
+final String loginUrl = userService.createLoginURL(request.getRequestURI()) ;
+final String logoutUrl = userService.createLogoutURL(request.getRequestURI()) ;
 
-System.out.println("user:" + user) ;
 if ( user != null ) {
-	System.out.println("user.getEmail:" + user.getEmail() ) ;
-	System.out.println("user.getUserId:" + user.getUserId() ) ;
-	System.out.println("user.getAuthDomain:" + user.getAuthDomain() ) ;
-	System.out.println("user.getNickname:" + user.getNickname() ) ;
+//	System.out.println("user.getEmail:" + user.getEmail() ) ;
+//	System.out.println("user.getUserId:" + user.getUserId() ) ;
+//	System.out.println("user.getAuthDomain:" + user.getAuthDomain() ) ;
+//	System.out.println("user.getNickname:" + user.getNickname() ) ;
+
+	pageContext.setAttribute("user", user);
+	pageContext.setAttribute("userEmail", user.getEmail());
 }
 
 pageContext.setAttribute("isLoggedIn", (user != null) );
-pageContext.setAttribute("user", user);
 pageContext.setAttribute("loginUrl", loginUrl);
 pageContext.setAttribute("logoutUrl", logoutUrl);
 %>
@@ -56,7 +57,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			
 		$('#videoplayer iframe').remove();
 //		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen='1'></iframe>");
-		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?' frameborder='0' allowfullscreen='1'></iframe>");
+		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='//www.youtube.com/embed/"+videoId+"?rel=0?&autoplay=0' frameborder='0' allowfullscreen='1'></iframe>");
 		
 //		<iframe id="videoplayer" style="display: block;"                              src="https://www.youtube.com/embed/dTV1qoceV-U?"></iframe>
 	}
@@ -128,7 +129,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		if ( currentSearchWordsStr.length > 0 ) {
 			console.info("searching:" + currentSearchWordsStr);
 			
-			doSearch(currentSearchWordsStr, whenSearchSucceeds, whenSearchFails);
+			doSearch(currentSearchWordsStr, whenSearchSucceeds, whenSearchFails, true);
 		}
 		else{
 			alert("no text submitted for searching: " + currentSearchWordsStr );
@@ -137,13 +138,20 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	
 	function savedSearchClicked(savedSearchWords) {
 		currentSearchWordsStr = savedSearchWords;
-		doSearch(currentSearchWordsStr, whenSearchSucceeds, whenSearchFails);
+		doSearch(currentSearchWordsStr, whenSearchSucceeds, whenSearchFails, false);
 	}
 	
-	function doSearch( searchWords, whenSearchRequestIsSuccessful, whenSearchRequestFails ) {
+	function doSearch( searchWords, whenSearchRequestIsSuccessful, whenSearchRequestFails, allowSearchSave ) {
 		console.log("in doSearch");
 		var lookupUrl = "/ws/youtube/search?terms=" + encodeURI(searchWords);
 		console.info("lookupUrl:" + lookupUrl);
+		
+		if ( allowSearchSave ) {
+			$("#saveSearch").show();
+		}
+		else {
+			$("#saveSearch").hide();
+		}
 
 		//disableSearch();
 		
@@ -165,8 +173,24 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		var video = currentSearchResults[0];
 		var aSearch = { searchTerms: currentSearchWordsStr, exampleVideo: video };
 		savedSearches.push( aSearch );
+
+		//saveSearch( currentSearchWordsStr, video.thumbnailUrl );
+		var lookupUrl = "/ws/youtube/search/save";
+		console.info("lookupUrl:" + lookupUrl);
 		
-		refreshSavedSearches();
+		var thePostData = { searchTerms: currentSearchWordsStr, thumbnailUrl: video.thumbnailUrl};
+
+		$.ajax({
+			url: lookupUrl, 
+			type: 'POST',
+			data: thePostData,
+			success: function(data) {
+				refreshSavedSearches();
+			},
+			error: function() {
+				alert("Unable to save search");
+			}
+		});
 	}
 	function removeCurrentSearch() {
 		// remove from the list
@@ -174,22 +198,78 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		refreshSavedSearches();
 	}
 	
-	function refreshSavedSearches() {
-		var arrayLength = savedSearches.length;
+	function whenSavedSearchRequestIsSuccessful(savedSearchJsonList) {
+		var arrayLength = savedSearchJsonList.length;
 		var theHtml = "";
+
+//		console.log("whenSavedSearchRequestIsSuccessful, length=" + arrayLength);
 		
 		for (var i = 0; i < arrayLength; i++) {
-			aSearch = savedSearches[i];
+			aSearch = savedSearchJsonList[i];
+
+//			console.log(aSearch.id);
+//			console.log(aSearch.searchTerms);
+//			console.log(aSearch.thumbnailUrl);
+			
 			theLink = "javascript:savedSearchClicked(\"" +aSearch.searchTerms + "\")" ;
 			
 			theHtml += "<div class='savedsearch'>";
 			theHtml += "<div class='searchterms'><a href='"+theLink+"'>"+ aSearch.searchTerms + "</a></div>";
-			theHtml += "<a href='"+theLink+"'><img class='poster' src='"+ aSearch.exampleVideo.thumbnailUrl +"'/></a>";
+			theHtml += "<a href='"+theLink+"'><img class='poster' src='"+ aSearch.thumbnailUrl +"'/></a>";
 			theHtml += "</div>";
 		}
 
 		$("#savedsearcheslist").html( theHtml );
 	}
+	
+	function whenSavedSearchRequestFails() {
+		alert("Unable to fetch saved searches");
+	}
+	
+	function refreshSavedSearches() {
+//		var arrayLength = savedSearches.length;
+//		var theHtml = "";
+//		
+//		for (var i = 0; i < arrayLength; i++) {
+//			aSearch = savedSearches[i];
+//			theLink = "javascript:savedSearchClicked(\"" +aSearch.searchTerms + "\")" ;
+//			
+//			theHtml += "<div class='savedsearch'>";
+//			theHtml += "<div class='searchterms'><a href='"+theLink+"'>"+ aSearch.searchTerms + "</a></div>";
+//			theHtml += "<a href='"+theLink+"'><img class='poster' src='"+ aSearch.exampleVideo.thumbnailUrl +"'/></a>";
+//			theHtml += "</div>";
+//		}
+//
+//		$("#savedsearcheslist").html( theHtml );
+
+		console.log("in refreshSavedSearches");
+		var lookupUrl = "/ws/youtube/savedsearches";
+		console.info("lookupUrl:" + lookupUrl);
+
+		$.ajax({
+			url: lookupUrl, 
+			type: 'GET',
+			success: function(data) {
+				whenSavedSearchRequestIsSuccessful( data ) ;
+			},
+			error: function() {
+				whenSavedSearchRequestFails();
+			}
+		});
+	}
+	
+	//$("#searchwords").keyup(function (e) {
+	//	console.info("keyCode:" + e.keyCode);
+	//   if (e.keyCode == 13) {
+	//    	onSearchClicked();
+	//    }
+	//});
+	
+	<c:if test="${isLoggedIn}">
+		$( document ).ready(function() {
+			refreshSavedSearches();
+		});	
+	</c:if>
 	</script>
 	<style>
 	/*
@@ -220,14 +300,14 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 </head>
 <body>
 	<div id="banner">
-		MG YouTube - Kids
+		MG YouTube - For Kids
 		<div id="searchbox">
 			<input type="text" id="searchwords"/>
 			<input type="button" value="Search" onclick="onSearchClicked()"/>
 		</div>
 		<c:choose>
 			<c:when test="${isLoggedIn}">
-		    	Hello <% user.getEmail(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
+		    	Hello <c:out value="${userEmail}" /> | <a href='<c:out value="${logoutUrl}" />'>Logout</a>
 			</c:when>
 			<c:otherwise>
 				<a href="<c:out value='${loginUrl}' />">Login</a>

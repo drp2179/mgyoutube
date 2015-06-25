@@ -4,21 +4,22 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 
 <%
-UserService userService= UserServiceFactory.getUserService();
-User user = userService.getCurrentUser();
-String loginUrl = userService.createLoginURL(request.getRequestURI()) ;
-String logoutUrl = userService.createLogoutURL(request.getRequestURI()) ;
+final UserService userService= UserServiceFactory.getUserService();
+final User user = userService.getCurrentUser();
+final String loginUrl = userService.createLoginURL(request.getRequestURI()) ;
+final String logoutUrl = userService.createLogoutURL(request.getRequestURI()) ;
 
-System.out.println("user:" + user) ;
 if ( user != null ) {
-	System.out.println("user.getEmail:" + user.getEmail() ) ;
-	System.out.println("user.getUserId:" + user.getUserId() ) ;
-	System.out.println("user.getAuthDomain:" + user.getAuthDomain() ) ;
-	System.out.println("user.getNickname:" + user.getNickname() ) ;
+//	System.out.println("user.getEmail:" + user.getEmail() ) ;
+//	System.out.println("user.getUserId:" + user.getUserId() ) ;
+//	System.out.println("user.getAuthDomain:" + user.getAuthDomain() ) ;
+//	System.out.println("user.getNickname:" + user.getNickname() ) ;
+
+	pageContext.setAttribute("user", user);
+	pageContext.setAttribute("userEmail", user.getEmail());
 }
 
 pageContext.setAttribute("isLoggedIn", (user != null) );
-pageContext.setAttribute("user", user);
 pageContext.setAttribute("loginUrl", loginUrl);
 pageContext.setAttribute("logoutUrl", logoutUrl);
 %>
@@ -38,15 +39,49 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 <body>
 	
 	<div id="banner">
-		MG YouTube - Parents
+		MG YouTube - For Parents
 	</div>
 	<c:choose>
 		<c:when test="${isLoggedIn}">
-			Hello <% user.getEmail(); %> <a href='<c:out value="${logoutUrl}" />'>Logout</a>
+			Hello <c:out value="${userEmail}" /> | <a href='<c:out value="${logoutUrl}" />'>Logout</a>
 		</c:when>
 		<c:otherwise>
 			<a href="<c:out value='${loginUrl}' />">Login</a>
 		</c:otherwise>
 	</c:choose>
+	<c:if test="${isLoggedIn}">
+		<div id="associatedaccounts">
+		<h2>Associated Accounts</h2>
+		<a href="">Associate New Account...</a>
+			<ul>
+				<li><a href="">abc@xyz.com</a></li>
+			</ul>
+		</div>
+		
+		<div id="accountdetails">
+			<div id="recentlywatched">
+				<h3>Recently Watched</h3>
+				<ul>
+					<li>video 1</li>
+					<li>video 2</li>
+				</ul>
+			</div>
+			<div id="recentsearches">
+				<h3>Recently Searched</h3>
+				<ul>
+					<li>search 1</li>
+					<li>search 2</li>
+				</ul>
+			</div>
+			
+			<div id="savedsearches">
+				<h3>Saved Searches</h3>
+				<ul>
+					<li>search terms 1</li>
+					<li>search terms 2</li>
+				</ul>
+			</div>
+		</div>
+	</c:if>
 </body>
 </html>
