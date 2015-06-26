@@ -32,6 +32,9 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	<script src="https://www.youtube.com/iframe_api"></script>
 	
 	<script>
+	var videosCollapsedWidth = 300 ;
+	var userNavWidth = 200 ;
+	var browserPadding = 5*2 ;
 	var player = null;
 	var currentSearchWordsStr = null;
 	var currentSearchResults = null;
@@ -53,7 +56,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 //			var thewidth = Math.min( 854, blockwidth ) ;
 //			var theheight =  510 * thewidth / 854 ;
 		var thewidth = 640;
-		var theheight =  390;
+		var theheight = 390;
 			
 		$('#videoplayer iframe').remove();
 //		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen='1'></iframe>");
@@ -63,7 +66,14 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	}
 
 	function showVideo( videoIndex ) {
-		$("#videoplayer").css("display", "block");
+		var viewportWidth = document.documentElement.clientWidth;
+		var videoWidth = viewportWidth - userNavWidth - videosCollapsedWidth - browserPadding -10;
+
+		$("#singlevideo").css("display", "block");
+		$("#singlevideo").width(videoWidth).css("left","200px");
+		//$("#videoplayer").css("left","50%").css("margin-left", (videoWidth*-1/2));
+		$("#videoplayer").css("left", (videoWidth - 640)/2);
+		$("#videos").width(videosCollapsedWidth);
 		
 		var video = currentSearchResults[videoIndex];
 		
@@ -92,7 +102,11 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	}
 	
 	function whenSearchSucceeds(jsonVideoList) {
-		$("#videoplayer").css("display", "none");
+		var viewportWidth = document.documentElement.clientWidth;
+		var videosWidth = viewportWidth - userNavWidth - browserPadding ;
+		
+		$("#singlevideo").css("display", "none");
+		$("#videos").width( videosWidth );
 
 		currentSearchResults = jsonVideoList;
 		var jsonMovieListStr = JSON.stringify(jsonVideoList);
@@ -109,7 +123,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		
 			videoHtml += "<div class='video'>";
 			videoHtml += "<a href='"+theLink+"'><img class='poster' src='"+ video.thumbnailUrl +"'/></a>"
-			//videoHtml += "<div class='videotitle'><a href='javascript:showVideo(\""+video.videoId+"\")'>" + video.title + "</a></div>";
+			/*videoHtml += "<div class='videotitle'><a href='javascript:showVideo(\""+video.videoId+"\")'>" + video.title + "</a></div>";*/
 			videoHtml += "<div class='videotitle'><a href='"+theLink+"'>" + video.title + "</a></div>";
 			videoHtml += "<div class='videoby'>by " + video.channelTitle + "</div>";
 			videoHtml += "<div class='videodate'>" + releasedDate.toDateString() + "</div>";
@@ -174,7 +188,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		var aSearch = { searchTerms: currentSearchWordsStr, exampleVideo: video };
 		savedSearches.push( aSearch );
 
-		//saveSearch( currentSearchWordsStr, video.thumbnailUrl );
 		var lookupUrl = "/ws/youtube/search/save";
 		console.info("lookupUrl:" + lookupUrl);
 		
@@ -193,7 +206,9 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		});
 	}
 	function removeCurrentSearch() {
-		// remove from the list
+		// 
+		// TODO: remove from the list
+		//
 	
 		refreshSavedSearches();
 	}
@@ -202,15 +217,9 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		var arrayLength = savedSearchJsonList.length;
 		var theHtml = "";
 
-//		console.log("whenSavedSearchRequestIsSuccessful, length=" + arrayLength);
-		
 		for (var i = 0; i < arrayLength; i++) {
 			aSearch = savedSearchJsonList[i];
 
-//			console.log(aSearch.id);
-//			console.log(aSearch.searchTerms);
-//			console.log(aSearch.thumbnailUrl);
-			
 			theLink = "javascript:savedSearchClicked(\"" +aSearch.searchTerms + "\")" ;
 			
 			theHtml += "<div class='savedsearch'>";
@@ -227,21 +236,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	}
 	
 	function refreshSavedSearches() {
-//		var arrayLength = savedSearches.length;
-//		var theHtml = "";
-//		
-//		for (var i = 0; i < arrayLength; i++) {
-//			aSearch = savedSearches[i];
-//			theLink = "javascript:savedSearchClicked(\"" +aSearch.searchTerms + "\")" ;
-//			
-//			theHtml += "<div class='savedsearch'>";
-//			theHtml += "<div class='searchterms'><a href='"+theLink+"'>"+ aSearch.searchTerms + "</a></div>";
-//			theHtml += "<a href='"+theLink+"'><img class='poster' src='"+ aSearch.exampleVideo.thumbnailUrl +"'/></a>";
-//			theHtml += "</div>";
-//		}
-//
-//		$("#savedsearcheslist").html( theHtml );
-
 		console.log("in refreshSavedSearches");
 		var lookupUrl = "/ws/youtube/savedsearches";
 		console.info("lookupUrl:" + lookupUrl);
@@ -257,7 +251,12 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			}
 		});
 	}
-	
+
+	function adjustViewport() {
+		//var bannerHeight = $("#banner").height();
+		//var viewportHeight = document.documentElement.clientHeight;
+		//$("#videos").height(viewportHeight-bannerHeight-browserPadding);
+	}
 	//$("#searchwords").keyup(function (e) {
 	//	console.info("keyCode:" + e.keyCode);
 	//   if (e.keyCode == 13) {
@@ -267,9 +266,15 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	
 	<c:if test="${isLoggedIn}">
 		$( document ).ready(function() {
+			adjustViewport();
 			refreshSavedSearches();
 		});	
 	</c:if>
+	<c:if test="not ${isLoggedIn}">
+	$( document ).ready(function() {
+		adjustViewport();
+	});	
+</c:if>
 	</script>
 	<style>
 	/*
@@ -284,18 +289,19 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		basic video box on front page
 				video image on top over Title over "by" user over views "bullet" date
 	*/
-		
-		/*#searchresults { position:relative; overflow:scroll;}*/
-		#searchresults { position:relative; }
-		#searchresults .video { width:250px; float:left; height:300px;overflow:clipped; margin:1em;}
-		#searchresults .video .poster { width:100%; }
+		body { margin:0;padding:5px; background-color:#7676a0}
+		#searchresults { position:relative;}
+		#searchresults .video { float:left; height:300px;width:300px;overflow:clipped; margin:5px;}
+		#searchresults .video .poster { width:290px; }
 		#searchcontrols {display:none;} 
 		
-		#searchresultsjson { clear:both; font-size:small; color:grey; display:none; }
-		#videoplayer { display:none; width:640px; height:400px; position:relative; left:50%; margin-left:-320px;}
+		#searchresultsjson { clear:both; display:none; }
 		
-		#usernav { width: 20%; float:left;}
-		#videos { width: 78%; float:left;}
+		#banner {background-color:white;padding:5px;margin:-5px;margin-bottom:0;}
+		
+		/*
+		#videoplayer { display:none; width:640px; height:400px; position:relative; left:50%; margin-left:-320px;}
+		*/
 	</style>
 </head>
 <body>
@@ -305,6 +311,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			<input type="text" id="searchwords"/>
 			<input type="button" value="Search" onclick="onSearchClicked()"/>
 		</div>
+		<div style="text-align:right;font-size:small;">
 		<c:choose>
 			<c:when test="${isLoggedIn}">
 		    	Hello <c:out value="${userEmail}" /> | <a href='<c:out value="${logoutUrl}" />'>Logout</a>
@@ -313,30 +320,35 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 				<a href="<c:out value='${loginUrl}' />">Login</a>
 			</c:otherwise>
 		</c:choose>
-	</div>
-	<div id="usernav">
-		<div id="savedsearches">
-			<h3>Saved Searches</h3>
-			<div id="savedsearcheslist"></div>
-		</div>
-		<div id="whitelistedchannels">
-			<h3>Approved Channels</h3>
-			<div id="whitelistedchannelslist"></div>
-		</div>
-		<div id="personalplaylists">
-			<h3>Personal Playlists</h3>
-			<div id="personalplaylistslist"></div>
 		</div>
 	</div>
-	<div id="videos">
-		<div id="videoplayer"></div>
-		<div id="searchcontrols">
-			<button id="saveSearch" onClick="saveCurrentSearch()">Save Search</button>
-			<!-- 
-			<button id="removeSearch" onClick="removeCurrentSearch()">Remove</button>
-			 -->
+	<div id="maincontent" style="position:relative;padding-left:200px;">
+		<div id="usernav" style="position:relative;left:-200px;width:200px;background-color:white;padding-left:5px;padding-right:5px;">
+			<div id="savedsearches">
+				<h3>Saved Searches</h3>
+				<div id="savedsearcheslist"></div>
+			</div>
+			<div id="whitelistedchannels">
+				<h3>Approved Channels</h3>
+				<div id="whitelistedchannelslist"></div>
+			</div>
+			<div id="personalplaylists">
+				<h3>Personal Playlists</h3>
+				<div id="personalplaylistslist"></div>
+			</div>
 		</div>
-		<div id="searchresults">
+		<div id="singlevideo" style="position:absolute;top:0;">
+			<div id="videoplayer"></div>
+		</div>
+		<div id="videos" style="position:absolute;top:0;right:0;background-color:white;">
+			<div id="searchcontrols">
+				<button id="saveSearch" onClick="saveCurrentSearch()">Save Search</button>
+				<!-- 
+				<button id="removeSearch" onClick="removeCurrentSearch()">Remove</button>
+				 -->
+			</div>
+			<div id="searchresults">
+			</div>
 		</div>
 	</div>
 	<div id="searchresultsjson"></div>
