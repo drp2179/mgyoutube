@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.djpedersen.mgyoutube.services.AccountsService;
 import com.djpedersen.mgyoutube.services.SearchTermsService;
 import com.djpedersen.mgyoutube.services.YouTubeService;
 import com.djpedersen.mgyoutube.services.YouTubeVideo;
@@ -23,8 +24,10 @@ import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig
 public class TestYouTubeWebService {
 
 	private YouTubeWebService webService;
+
 	private YouTubeService mockYouTubeService;
 	private SearchTermsService mockSearchTermsService;
+	private AccountsService mockAccountsService;
 
 	private final LocalServiceTestHelper gaeLocalServiceHelper = new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig(), new LocalUserServiceTestConfig());
@@ -33,7 +36,8 @@ public class TestYouTubeWebService {
 	public void setup() {
 		mockYouTubeService = Mockito.mock(YouTubeService.class);
 		mockSearchTermsService = Mockito.mock(SearchTermsService.class);
-		webService = new YouTubeWebService(mockYouTubeService, mockSearchTermsService);
+		mockAccountsService = Mockito.mock(AccountsService.class);
+		webService = new YouTubeWebService(mockYouTubeService, mockSearchTermsService, mockAccountsService);
 
 		gaeLocalServiceHelper.setUp();
 	}

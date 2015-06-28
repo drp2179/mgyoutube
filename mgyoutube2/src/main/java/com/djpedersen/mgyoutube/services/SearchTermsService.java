@@ -8,8 +8,8 @@ import org.joda.time.DateTime;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
@@ -47,13 +47,12 @@ public class SearchTermsService {
 		final SearchConverter converter = new SearchConverter();
 		final List<UserSearchAuditRecord> records = new ArrayList<UserSearchAuditRecord>();
 
-		// final Filter userIdFilter = new
-		// Query.FilterPredicate(USA_FIELD_NAME_USERID,
-		// Query.FilterOperator.EQUAL, userId);
+		final Filter userIdFilter = new Query.FilterPredicate(SearchConverter.USA_FIELD_NAME_USERID,
+				Query.FilterOperator.EQUAL, userId);
 
+		final Query q = new Query(SearchConverter.USER_SEARCH_AUDIT_ENTITY_NAME).setFilter(userIdFilter);
 		// final Query q = new
-		// Query(USER_SEARCH_AUDIT_ENTITY_NAME).setFilter(userIdFilter);
-		final Query q = new Query(SearchConverter.USER_SEARCH_AUDIT_ENTITY_NAME);
+		// Query(SearchConverter.USER_SEARCH_AUDIT_ENTITY_NAME);
 
 		// q.addSort(USA_FIELD_NAME_TIMESTAMP, SortDirection.DESCENDING);
 
@@ -61,15 +60,14 @@ public class SearchTermsService {
 		// pq.countEntities();
 		// final Iterable<Entity> iterator =
 		// pq.asIterable(FetchOptions.Builder.withLimit(64));
-		// final Iterable<Entity> iterable = pq.asIterable();
+		final Iterable<Entity> iterable = pq.asIterable();
 		// Iterator<Entity> iterator = iterable.iterator();
 		// boolean hasNext = iterator.hasNext();
-		List<Entity> asList = pq.asList(FetchOptions.Builder.withLimit(64));
-		int size = asList.size();
+		// List<Entity> asList = pq.asList(FetchOptions.Builder.withLimit(64));
 
-		// for (Entity entity : iterable) {
+		for (Entity entity : iterable) {
 
-		for (Entity entity : asList) {
+			// for (Entity entity : asList) {
 			final UserSearchAuditRecord record = converter.entityToUserSearchAuditRecord(entity);
 			records.add(record);
 		}
@@ -108,5 +106,12 @@ public class SearchTermsService {
 		}
 
 		return searches;
+	}
+
+	public void deleteSavedSearch(long searchId) {
+
+		final Key key = KeyFactory.createKey(SearchConverter.SAVED_SEARCH_ENTITY_NAME, searchId);
+		datastore.delete(key);
+
 	}
 }

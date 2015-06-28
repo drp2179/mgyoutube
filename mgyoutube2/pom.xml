@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>war</packaging>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.5-SNAPSHOT</version>
 	<artifactId>mgyoutube</artifactId>
 
 	<groupId>com.djpedersen</groupId>
@@ -137,10 +137,10 @@
 			<version>1.5.3</version>
 		</dependency>
 		<dependency>
-    <groupId>com.google.apis</groupId>
-    <artifactId>google-api-services-youtube</artifactId>
-    <version>v3-rev140-1.20.0</version>
-</dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-youtube</artifactId>
+			<version>v3-rev140-1.20.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
