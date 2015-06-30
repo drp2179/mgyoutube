@@ -88,4 +88,22 @@ public class AccountsService {
 
 		return iterable.iterator().hasNext();
 	}
+
+	public String getParentAccountForChildAccount(final String childAccount) {
+		final Filter childIdFilter = new Query.FilterPredicate(CHILD_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
+				childAccount);
+
+		final Query q = new Query(PARENTS_KIDS_ENTITY_NAME).setFilter(childIdFilter);
+
+		final PreparedQuery pq = datastore.prepare(q);
+		final Iterable<Entity> iterable = pq.asIterable();
+
+		if (iterable.iterator().hasNext()) {
+			final Entity parentEntity = iterable.iterator().next();
+			return (String) parentEntity.getProperty(PARENT_ACCOUNT_FIELD_NAME);
+		} else {
+			logger.warning("unable to find parent account for child:" + childAccount);
+			return null;
+		}
+	}
 }

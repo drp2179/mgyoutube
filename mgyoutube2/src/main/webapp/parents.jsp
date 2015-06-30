@@ -104,14 +104,13 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	
 	function refreshRecentlySaved() {}
 	function refreshRecentlyWatched() {}
-	function refreshBlacklistedWords() {}
 	
 	function showChildAccountHistory(childAccount) {
 		currentlySelectedChildAccount = childAccount;
 		refreshSavedSearches(childAccount) ;
+		refreshBlacklistedWords(); // no child account because its for the parents
 		refreshRecentlySaved() ;
 		refreshRecentlyWatched() ;
-		refreshBlacklistedWords();
 	}
 	
 	function whenAssociateAccountSucceeds(data) {
@@ -180,7 +179,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			url: lookupUrl, 
 			type: 'GET',
 			success: function(data) {
-				console.log("refresh successful");
+				console.log("refresh associated accounts successful");
 				whenRefreshAccociateAccountsSucceeds(data);
 			},
 			error: function() {
@@ -190,6 +189,107 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		});
 	}
 	
+	function whenDeleteBlacklistedWordSucceeds() {
+		refreshBlacklistedWords();
+	}
+	function whenDeleteBlacklistedWordFails() {
+		alerts("unable to delete saved search");
+	}
+	
+	function deleteBlacklistedWord( wordToRemove ) {
+		var lookupUrl = "/ws/blacklists/words/" + wordToRemove;
+		console.info("deleteUrl:" + lookupUrl);
+		
+		$.ajax({
+			url: lookupUrl, 
+			type: 'DELETE',
+			success: function(data) {
+				console.log("delete blacklisted word successful");
+				whenDeleteBlacklistedWordSucceeds();
+			},
+			error: function() {
+				console.log("delete blacklisted word failed");
+				whenDeleteBlacklistedWordFails();
+			}
+		});
+	}
+	
+	function whenRefreshBlacklistedWordsSucceeds ( jsonBlacklistedWordList ) {
+		console.log("whenRefreshBlacklistedWordsSucceeds:" + jsonBlacklistedWordList);
+		var arrayLength = jsonBlacklistedWordList.length;
+		console.log("arrayLength:" + arrayLength);
+		var blacklistedWordsHtml = "<ul>";
+		
+		for (var i = 0; i < arrayLength; i++) {
+			blacklistedWordsHtml += "<li>"+ jsonBlacklistedWordList[i] + "<a href='javascript:deleteBlacklistedWord(\"" + jsonBlacklistedWordList[i]+"\");'>(delete)</a></li>";
+		}
+		
+		blacklistedWordsHtml += "</ul>";
+		
+		$("#blacklistedwordslist").html( blacklistedWordsHtml );
+		$("#newBlacklistWord").val("");
+	}
+	
+	function whenRefreshBlacklistedWordsFails () {
+		alert("unable to refresh blacklisted words");
+	}
+	
+	function refreshBlacklistedWords() {
+		var lookupUrl = "/ws/blacklists/words/";
+		console.info("getUrl:" + lookupUrl);
+		
+		$.ajax({
+			url: lookupUrl, 
+			type: 'GET',
+			success: function(data) {
+				console.log("refresh blacklist successful");
+				whenRefreshBlacklistedWordsSucceeds(data);
+			},
+			error: function() {
+				console.log("refresh blacklist failed");
+				whenRefreshBlacklistedWordsFails();
+			}
+		});
+	}
+	
+	function whenBlacklistWordSucceedsCallback( data ) {
+		refreshBlacklistedWords();
+	}
+	
+	function whenBlacklistWordFailsCallback() {
+		alert("unable to blacklist the word");
+	}
+	
+	function doBlacklistWord( wordToBlacklist ){
+		var lookupUrl = "/ws/blacklists/words/"+wordToBlacklist;
+		console.info("putUrl:" + lookupUrl);
+		
+//		var thePutData = { blackword: accountToAssociate };
+
+		$.ajax({
+			url: lookupUrl, 
+			type: 'PUT',
+//			data: thePutData,
+			success: function(data) {
+				whenBlacklistWordSucceedsCallback(data);
+			},
+			error: function() {
+				whenBlacklistWordFailsCallback();
+			}
+		});
+	}
+	
+	function blacklistNewWordClicked() {
+		var newBlacklistedWord = $("#newBlacklistWord").val();
+		
+		if ( newBlacklistedWord.length > 0 ) {
+			doBlacklistWord(newBlacklistedWord);
+		}
+		else{
+			alert("no word provided to black list.") ;
+		}
+	}
+	
 	<c:if test="${isLoggedIn}">
 	$( document ).ready(function() {
 		refreshAssociatedAccounts();
@@ -197,23 +297,28 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	</c:if>
 	</script>
 	<style>
+		body { background-color:white;}
 	</style>
 </head>
 <body>
 	
-	<div id="banner">
-		MG YouTube - For Parents
+	<div id="banner" style="background-color:#f1f1f1;">
+		<div>
+			MG YouTube - For Parents
+		</div>
+		<div>
+		<c:choose>
+			<c:when test="${isLoggedIn}">
+				Hello <c:out value="${userEmail}" /> | <a href='<c:out value="${logoutUrl}" />'>Logout</a>
+			</c:when>
+			<c:otherwise>
+				<a href="<c:out value='${loginUrl}' />">Login</a>
+			</c:otherwise>
+		</c:choose>
+		</div>
 	</div>
-	<c:choose>
-		<c:when test="${isLoggedIn}">
-			Hello <c:out value="${userEmail}" /> | <a href='<c:out value="${logoutUrl}" />'>Logout</a>
-		</c:when>
-		<c:otherwise>
-			<a href="<c:out value='${loginUrl}' />">Login</a>
-		</c:otherwise>
-	</c:choose>
 	<c:if test="${isLoggedIn}">
-		<div id="associatedaccounts" style="width:35%;float:left;">
+		<div id="associatedaccounts" style="width:35%;float:left;background-color:#f1f1f1;">
 			<h2>Associated Accounts</h2>
 			<div>
 				<div><input type="text" id="newAccount" /></div>
@@ -223,25 +328,31 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			</div>
 		</div>
 		
-		<div id="accountdetails" style="width:62%;float:right;">
+		<div id="accountdetails" style="width:62%;float:right;background-color:#f1f1f1;">
 			<div id="recentlywatched">
 				<h3>Recently Watched</h3>
-				<ul>
-					<li>video 1</li>
-					<li>video 2</li>
-				</ul>
+				<div id="recentwatchlist">
+				</div>
 			</div>
 			<div id="recentsearches">
 				<h3>Recently Searched</h3>
-				<ul>
-					<li>search 1</li>
-					<li>search 2</li>
-				</ul>
+				<div id="recentsearchlist">
+				</div>
 			</div>
 			
 			<div id="savedsearches">
 				<h3>Saved Searches</h3>
 				<div id="savedSearchList">
+				</div>
+			</div>
+
+			<div id="blacklistedwords">
+				<h3>Blacklisted Words</h3>
+				<div>
+					<div><input type="text" id="newBlacklistWord" /></div>
+					<div><button id="blackListWordButton" onClick="blacklistNewWordClicked()">Add to Blacklist</button></div>
+				</div>
+				<div id="blacklistedwordslist">
 				</div>
 			</div>
 		</div>

@@ -72,9 +72,10 @@ public class YouTubeService {
 			final Iterator<SearchResult> searchResultIterator = searchResultList.iterator();
 			while (searchResultIterator.hasNext()) {
 				final SearchResult searchResult = searchResultIterator.next();
-				final ResourceId resourceId = searchResult.getId();
-				final SearchResultSnippet snippet = searchResult.getSnippet();
-				final ThumbnailDetails thumbnails = snippet.getThumbnails();
+
+				final ResourceId resourceId = searchResult.getId(); // id
+				final SearchResultSnippet snippet = searchResult.getSnippet(); // snippet
+				final ThumbnailDetails thumbnails = snippet.getThumbnails(); // thumbnails
 
 				final YouTubeVideo video = new YouTubeVideo();
 				video.setVideoId(resourceId.getVideoId());

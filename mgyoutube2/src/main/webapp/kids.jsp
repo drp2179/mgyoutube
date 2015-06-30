@@ -131,6 +131,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		}
 		
 		$("#searchresults").html( videoHtml );
+		$("#searchwords").val("");
 	}
 	
 	function whenSearchFails() {

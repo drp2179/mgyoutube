@@ -1,6 +1,7 @@
 package com.djpedersen.mgyoutube.webservices;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import javax.ws.rs.core.Response;
 import org.joda.time.DateTime;
 
 import com.djpedersen.mgyoutube.services.AccountsService;
+import com.djpedersen.mgyoutube.services.BlacklistsService;
 import com.djpedersen.mgyoutube.services.SavedSearch;
 import com.djpedersen.mgyoutube.services.SearchConverter;
 import com.djpedersen.mgyoutube.services.SearchTermsService;
@@ -49,6 +51,8 @@ public class YouTubeWebService {
 
 	private final AccountsService accountsService;
 
+	private final BlacklistsService blacklistsService;
+
 	public YouTubeWebService() throws IOException {
 		logger.info("YouTubeWebService()");
 
@@ -61,15 +65,17 @@ public class YouTubeWebService {
 		this.searchTermsService = new SearchTermsService(datastoreService);
 		this.userService = UserServiceFactory.getUserService();
 		this.accountsService = new AccountsService(datastoreService);
+		this.blacklistsService = new BlacklistsService(datastoreService);
 	}
 
 	public YouTubeWebService(final YouTubeService youTubeService, final SearchTermsService searchTermService,
-			final AccountsService accountsService) {
+			final AccountsService accountsService, final BlacklistsService blacklistsService) {
 		logger.info("YouTubeWebService(youTubeService)");
 		this.youTubeService = youTubeService;
 		this.searchTermsService = searchTermService;
 		this.userService = UserServiceFactory.getUserService();
 		this.accountsService = accountsService;
+		this.blacklistsService = blacklistsService;
 	}
 
 	private void ensureAuthenticated(final User user) {
@@ -88,19 +94,63 @@ public class YouTubeWebService {
 		// TODO:sanitize inputs
 		final String searchTerms = uncleanSearchTerms;
 		logger.info("search:" + searchTerms);
-		final List<YouTubeVideo> searchResults = youTubeService.search(searchTerms);
-		final YouTubeVideoConverter converter = new YouTubeVideoConverter();
-		final String youTubeVideoListToJson = converter.youTubeVideoListToJson(searchResults);
+		List<YouTubeVideo> searchResults = youTubeService.search(searchTerms);
 
 		final User user = userService.getCurrentUser();
 
-		// create search audit record if logged in
 		if (user != null) {
+			//
+			// create search audit record if logged in
+			//
 			final DateTime now = new DateTime();
 			searchTermsService.recordUserSearchAudit(user.getEmail(), searchTerms, now);
+
+			//
+			// remove blacklisted videos
+			//
+			searchResults = screenVideoListForBlacklists(user, searchResults);
 		}
 
+		final YouTubeVideoConverter converter = new YouTubeVideoConverter();
+		final String youTubeVideoListToJson = converter.youTubeVideoListToJson(searchResults);
+
 		return youTubeVideoListToJson;
+	}
+
+	private List<YouTubeVideo> screenVideoListForBlacklists(final User childUser, final List<YouTubeVideo> initialList) {
+		final List<YouTubeVideo> screenedList = new ArrayList<YouTubeVideo>();
+		final String childAccount = childUser.getEmail();
+		final String parentAccount = accountsService.getParentAccountForChildAccount(childAccount);
+
+		final List<String> blacklistedWords = blacklistsService.getBlacklistedWordsForParent(parentAccount);
+
+		for (YouTubeVideo video : initialList) {
+			if (videoHasOneOfTheseWords(video, blacklistedWords)) {
+				logger.info("found a blacklisted word in video " + video.getVideoId() + " \"" + video.getTitle() + "\"");
+			} else {
+				screenedList.add(video);
+			}
+		}
+
+		return screenedList;
+	}
+
+	private boolean videoHasOneOfTheseWords(final YouTubeVideo video, final List<String> wordList) {
+		boolean hasAWord = false;
+		final String title = video.getTitle().toLowerCase();
+		final String description = video.getDescription().toLowerCase();
+
+		for (String word : wordList) {
+			if (title.contains(word.toLowerCase())) {
+				hasAWord = true;
+				break;
+			} else if (description.contains(word.toLowerCase())) {
+				hasAWord = true;
+				break;
+			}
+		}
+
+		return hasAWord;
 	}
 
 	@POST
