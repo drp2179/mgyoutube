@@ -50,6 +50,8 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 //			$('#videoblock').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen></iframe>");
 //		}
 	function newshowVideo( videoId ) {
+		
+		window.scrollTo(0, 0);
 		$("#videoplayer").css("display", "block");
 
 //		var blockwidth = $("#videoblock").width();
@@ -66,14 +68,16 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	}
 
 	function showVideo( videoIndex ) {
-		var viewportWidth = document.documentElement.clientWidth;
-		var videoWidth = viewportWidth - userNavWidth - videosCollapsedWidth - browserPadding -10;
+		window.scrollTo(0, 0);
+
+		//var viewportWidth = document.documentElement.clientWidth;
+		//var videoWidth = viewportWidth - userNavWidth - videosCollapsedWidth - browserPadding -10;
 
 		$("#singlevideo").css("display", "block");
-		$("#singlevideo").width(videoWidth).css("left","200px");
+		//$("#singlevideo").width(videoWidth).css("left","200px");
 		//$("#videoplayer").css("left","50%").css("margin-left", (videoWidth*-1/2));
-		$("#videoplayer").css("left", (videoWidth - 640)/2);
-		$("#videos").width(videosCollapsedWidth);
+		//$("#videoplayer").css("left", (videoWidth - 640)/2);
+		//$("#videos").width(videosCollapsedWidth);
 		
 		var video = currentSearchResults[videoIndex];
 		
@@ -323,8 +327,8 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		</c:choose>
 		</div>
 	</div>
-	<div id="maincontent" style="position:relative;padding-left:200px;">
-		<div id="usernav" style="position:relative;left:-200px;width:200px;background-color:white;padding-left:5px;padding-right:5px;">
+	<div id="maincontent" style="position:relative;margin-left:200px;">
+		<div id="usernav" style="width:200px;background-color:white;padding-left:5px;padding-right:5px;position:absolute;left:-200px;">
 			<div id="savedsearches">
 				<h3>Saved Searches</h3>
 				<div id="savedsearcheslist"></div>
@@ -338,17 +342,20 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 				<div id="personalplaylistslist"></div>
 			</div>
 		</div>
-		<div id="singlevideo" style="position:absolute;top:0;">
-			<div id="videoplayer"></div>
-		</div>
-		<div id="videos" style="position:absolute;top:0;right:0;background-color:white;">
-			<div id="searchcontrols">
-				<button id="saveSearch" onClick="saveCurrentSearch()">Save Search</button>
-				<!-- 
-				<button id="removeSearch" onClick="removeCurrentSearch()">Remove</button>
-				 -->
+		<div style="position:relative;">
+		
+			<div id="singlevideo" style="display:none;">
+				<div id="videoplayer"></div>
 			</div>
-			<div id="searchresults">
+			<div id="videos" style="background-color:white;">
+				<div id="searchcontrols">
+					<button id="saveSearch" onClick="saveCurrentSearch()">Save Search</button>
+					<!-- 
+					<button id="removeSearch" onClick="removeCurrentSearch()">Remove</button>
+					 -->
+				</div>
+				<div id="searchresults">
+				</div>
 			</div>
 		</div>
 	</div>

@@ -11,8 +11,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class AccountsService {
 	private static final String TIMESTAMP_FIELD_NAME = "timestamp";
@@ -23,9 +24,11 @@ public class AccountsService {
 	private static final Logger logger = Logger.getLogger(AccountsService.class.getName());
 
 	private final DatastoreService datastore;
+	private final MemcacheService cache;
 
 	public AccountsService(final DatastoreService datastore) {
 		this.datastore = datastore;
+		cache = MemcacheServiceFactory.getMemcacheService();
 	}
 
 	public void associateParentChildAccounts(final String parentAccount, final String childAccount) {
@@ -41,6 +44,8 @@ public class AccountsService {
 		final Entity entity = createParentChildEntity(parentAccount, childAccount);
 		final Key key = datastore.put(entity);
 		logger.info("Associated '" + parentAccount + "' with '" + childAccount + "', key:" + key.toString());
+
+		invalidateChildAccountCache(childAccount);
 	}
 
 	private Entity createParentChildEntity(final String parentAccount, final String childAccount) {
@@ -75,35 +80,56 @@ public class AccountsService {
 	}
 
 	public boolean isChildAssociatedWithParent(final String childAccount, final String parentAccount) {
-		final Filter userIdFilter = new Query.FilterPredicate(PARENT_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
-				parentAccount);
-		final Filter childIdFilter = new Query.FilterPredicate(CHILD_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
-				childAccount);
-
-		final Filter parentChildFilter = CompositeFilterOperator.and(userIdFilter, childIdFilter);
-		final Query q = new Query(PARENTS_KIDS_ENTITY_NAME).setFilter(parentChildFilter);
-
-		final PreparedQuery pq = datastore.prepare(q);
-		final Iterable<Entity> iterable = pq.asIterable();
-
-		return iterable.iterator().hasNext();
+		// final Filter userIdFilter = new Query.FilterPredicate(PARENT_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
+		// parentAccount);
+		// final Filter childIdFilter = new Query.FilterPredicate(CHILD_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
+		// childAccount);
+		//
+		// final Filter parentChildFilter = CompositeFilterOperator.and(userIdFilter, childIdFilter);
+		// final Query q = new Query(PARENTS_KIDS_ENTITY_NAME).setFilter(parentChildFilter);
+		//
+		// final PreparedQuery pq = datastore.prepare(q);
+		// final Iterable<Entity> iterable = pq.asIterable();
+		//
+		// return iterable.iterator().hasNext();
+		final String foundParentAccountForChildAccount = getParentAccountForChildAccount(childAccount);
+		return parentAccount.equalsIgnoreCase(foundParentAccountForChildAccount);
 	}
 
 	public String getParentAccountForChildAccount(final String childAccount) {
-		final Filter childIdFilter = new Query.FilterPredicate(CHILD_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
-				childAccount);
+		final String cacheKey = this.getCacheKeyChildAccount(childAccount);
+		final String parentCacheAccount = (String) cache.get(cacheKey);
 
-		final Query q = new Query(PARENTS_KIDS_ENTITY_NAME).setFilter(childIdFilter);
-
-		final PreparedQuery pq = datastore.prepare(q);
-		final Iterable<Entity> iterable = pq.asIterable();
-
-		if (iterable.iterator().hasNext()) {
-			final Entity parentEntity = iterable.iterator().next();
-			return (String) parentEntity.getProperty(PARENT_ACCOUNT_FIELD_NAME);
+		if (parentCacheAccount != null) {
+			return parentCacheAccount;
 		} else {
-			logger.warning("unable to find parent account for child:" + childAccount);
-			return null;
+
+			final Filter childIdFilter = new Query.FilterPredicate(CHILD_ACCOUNT_FIELD_NAME,
+					Query.FilterOperator.EQUAL, childAccount);
+
+			final Query q = new Query(PARENTS_KIDS_ENTITY_NAME).setFilter(childIdFilter);
+
+			final PreparedQuery pq = datastore.prepare(q);
+			final Iterable<Entity> iterable = pq.asIterable();
+
+			if (iterable.iterator().hasNext()) {
+				final Entity parentEntity = iterable.iterator().next();
+				final String parentAccount = (String) parentEntity.getProperty(PARENT_ACCOUNT_FIELD_NAME);
+				cache.put(cacheKey, parentAccount);
+				return parentAccount;
+			} else {
+				logger.warning("unable to find parent account for child:" + childAccount);
+				return null;
+			}
 		}
+	}
+
+	private String getCacheKeyChildAccount(final String childAccount) {
+		return childAccount + "-parentchildaccount";
+	}
+
+	private void invalidateChildAccountCache(final String childAccount) {
+		final String cacheKey = this.getCacheKeyChildAccount(childAccount);
+		cache.delete(cacheKey);
 	}
 }

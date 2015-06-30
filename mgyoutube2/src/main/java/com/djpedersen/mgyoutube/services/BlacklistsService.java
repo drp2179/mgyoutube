@@ -13,6 +13,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class BlacklistsService {
 
@@ -25,28 +27,42 @@ public class BlacklistsService {
 
 	private final DatastoreService datastoreService;
 
+	private final MemcacheService cache;
+
 	public BlacklistsService(final DatastoreService datastoreService) {
 		this.datastoreService = datastoreService;
+		cache = MemcacheServiceFactory.getMemcacheService();
 	}
 
 	public List<String> getBlacklistedWordsForParent(final String parentAccount) {
-		final List<String> words = new ArrayList<String>();
+		final String cacheKey = getCacheKeyBlacklistedWords(parentAccount);
 
-		final Filter userIdFilter = new Query.FilterPredicate(PARENT_ACCOUNT_FIELD_NAME, Query.FilterOperator.EQUAL,
-				parentAccount);
+		@SuppressWarnings("unchecked")
+		final List<String> cachedWords = (List<String>) cache.get(cacheKey);
 
-		final Query q = new Query(PARENTS_BLACKLIST_WORDS_ENTITY_NAME).setFilter(userIdFilter);
+		if (cachedWords != null) {
+			return cachedWords;
+		} else {
+			final List<String> words = new ArrayList<String>();
 
-		final PreparedQuery pq = datastoreService.prepare(q);
-		final Iterable<Entity> iterable = pq.asIterable();
+			final Filter userIdFilter = new Query.FilterPredicate(PARENT_ACCOUNT_FIELD_NAME,
+					Query.FilterOperator.EQUAL, parentAccount);
 
-		for (Entity entity : iterable) {
+			final Query q = new Query(PARENTS_BLACKLIST_WORDS_ENTITY_NAME).setFilter(userIdFilter);
 
-			final String record = (String) entity.getProperty(BLACKLISTED_WORD_FIELD_NAME);
-			words.add(record);
+			final PreparedQuery pq = datastoreService.prepare(q);
+			final Iterable<Entity> iterable = pq.asIterable();
+
+			for (Entity entity : iterable) {
+
+				final String record = (String) entity.getProperty(BLACKLISTED_WORD_FIELD_NAME);
+				words.add(record);
+			}
+
+			cache.put(cacheKey, words);
+
+			return words;
 		}
-
-		return words;
 	}
 
 	public void blacklistWordForParent(final String parentAccount, final String wordToBlacklist) {
@@ -61,7 +77,18 @@ public class BlacklistsService {
 
 		final Entity entity = createParentBlacklistEntity(parentAccount, wordToBlacklist);
 		final Key key = datastoreService.put(entity);
-		logger.info("Blaclisted '" + wordToBlacklist + "' for '" + parentAccount + "', key:" + key.toString());
+		logger.info("Blacklisted '" + wordToBlacklist + "' for '" + parentAccount + "', key:" + key.toString());
+
+		invalidateBlacklistedWordsCacheForParent(parentAccount);
+	}
+
+	private String getCacheKeyBlacklistedWords(final String parentAccount) {
+		return parentAccount + "-blacklistwords";
+	}
+
+	private void invalidateBlacklistedWordsCacheForParent(final String parentAccount) {
+		final String cacheKey = this.getCacheKeyBlacklistedWords(parentAccount);
+		cache.delete(cacheKey);
 	}
 
 	private Entity createParentBlacklistEntity(final String parentAccount, final String wordToBlacklist) {
@@ -80,6 +107,7 @@ public class BlacklistsService {
 		final String keyValue = parentAccount + "-" + wordToRemove;
 		final Key key = KeyFactory.createKey(PARENTS_BLACKLIST_WORDS_ENTITY_NAME, keyValue);
 		datastoreService.delete(key);
+		invalidateBlacklistedWordsCacheForParent(parentAccount);
 	}
 
 }
