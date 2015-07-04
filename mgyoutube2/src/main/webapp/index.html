@@ -16,6 +16,7 @@
 		#fff 	white for most backgrounds
 		#f1f1f1  very light grey for internal box
 	*/
+	.block { width: 200px; float:left; height:200px;}
 		
 	</style>
 </head>
@@ -23,7 +24,11 @@
 	<div id="banner">
 		MG YouTube
 	</div>
-	<div id="kids" style="border:1px solid black;padding:1em;margin:1em;"><a href="/kids/"><span style="font-size:x-large;font-weight:bold;">Kids</span></a></div>
-	<div id="parents" style="border:1px solid black;padding:1em;margin:1em;"><a href="/parents/"><span style="font-size:x-large;font-weight:bold;">Parents</span></a></div>
+	<div id="kids" style="border:1px solid black;padding:1em;margin:1em;" class="block">
+		<a href="/kids/"><img src="/resources/kids-icon.jpg"/><span style="font-size:x-large;font-weight:bold;">Kids</span></a>
+	</div>
+	<div id="parents" style="border:1px solid black;padding:1em;margin:1em;" class="block">
+		<a href="/parents/"><span style="font-size:x-large;font-weight:bold;">Parents</span></a>
+	</div>
 </body>
 </html>
