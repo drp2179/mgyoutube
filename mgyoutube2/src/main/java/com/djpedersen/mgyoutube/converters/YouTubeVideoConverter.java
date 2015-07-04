@@ -1,7 +1,8 @@
-package com.djpedersen.mgyoutube.services;
+package com.djpedersen.mgyoutube.converters;
 
 import java.util.List;
 
+import com.djpedersen.mgyoutube.entities.YouTubeVideo;
 import com.google.gson.Gson;
 
 public class YouTubeVideoConverter {

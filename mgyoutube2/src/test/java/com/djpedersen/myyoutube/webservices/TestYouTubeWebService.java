@@ -12,11 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.djpedersen.mgyoutube.entities.YouTubeVideo;
 import com.djpedersen.mgyoutube.services.AccountsService;
+import com.djpedersen.mgyoutube.services.AuditsService;
 import com.djpedersen.mgyoutube.services.BlacklistsService;
 import com.djpedersen.mgyoutube.services.SearchTermsService;
 import com.djpedersen.mgyoutube.services.YouTubeService;
-import com.djpedersen.mgyoutube.services.YouTubeVideo;
 import com.djpedersen.mgyoutube.webservices.YouTubeWebService;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -30,6 +31,7 @@ public class TestYouTubeWebService {
 	private SearchTermsService mockSearchTermsService;
 	private AccountsService mockAccountsService;
 	private BlacklistsService mockBlacklistsService;
+	private AuditsService mockAuditsService;
 
 	private final LocalServiceTestHelper gaeLocalServiceHelper = new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig(), new LocalUserServiceTestConfig());
@@ -40,8 +42,9 @@ public class TestYouTubeWebService {
 		mockSearchTermsService = Mockito.mock(SearchTermsService.class);
 		mockAccountsService = Mockito.mock(AccountsService.class);
 		mockBlacklistsService = Mockito.mock(BlacklistsService.class);
+		mockAuditsService = Mockito.mock(AuditsService.class);
 		webService = new YouTubeWebService(mockYouTubeService, mockSearchTermsService, mockAccountsService,
-				mockBlacklistsService);
+				mockBlacklistsService, mockAuditsService);
 
 		gaeLocalServiceHelper.setUp();
 	}
@@ -75,7 +78,7 @@ public class TestYouTubeWebService {
 		final String searchResults = webService.search(searchTerms);
 
 		assertNotNull(searchResults);
-		Mockito.verify(mockSearchTermsService).recordUserSearchAudit(Mockito.anyString(), Mockito.eq(searchTerms),
+		Mockito.verify(mockAuditsService).recordUserSearchAudit(Mockito.anyString(), Mockito.eq(searchTerms),
 				Mockito.any(DateTime.class));
 	}
 
@@ -90,7 +93,7 @@ public class TestYouTubeWebService {
 		final String searchResults = webService.search(searchTerms);
 
 		assertNotNull(searchResults);
-		Mockito.verify(mockSearchTermsService, Mockito.never()).recordUserSearchAudit(Mockito.anyString(),
+		Mockito.verify(mockAuditsService, Mockito.never()).recordUserSearchAudit(Mockito.anyString(),
 				Mockito.eq(searchTerms), Mockito.any(DateTime.class));
 	}
 }

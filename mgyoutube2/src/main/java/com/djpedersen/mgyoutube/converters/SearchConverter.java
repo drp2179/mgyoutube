@@ -1,10 +1,12 @@
-package com.djpedersen.mgyoutube.services;
+package com.djpedersen.mgyoutube.converters;
 
 import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
 
+import com.djpedersen.mgyoutube.entities.SavedSearch;
+import com.djpedersen.mgyoutube.entities.UserSearchAuditRecord;
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
 

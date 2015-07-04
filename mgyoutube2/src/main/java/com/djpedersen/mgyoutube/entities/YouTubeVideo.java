@@ -1,4 +1,4 @@
-package com.djpedersen.mgyoutube.services;
+package com.djpedersen.mgyoutube.entities;
 
 import com.google.api.client.util.DateTime;
 

@@ -20,15 +20,18 @@ import javax.ws.rs.core.Response;
 
 import org.joda.time.DateTime;
 
+import com.djpedersen.mgyoutube.converters.SearchConverter;
+import com.djpedersen.mgyoutube.converters.WatchedVideoConverter;
+import com.djpedersen.mgyoutube.converters.YouTubeVideoConverter;
+import com.djpedersen.mgyoutube.entities.SavedSearch;
+import com.djpedersen.mgyoutube.entities.WatchedVideoAuditRecord;
+import com.djpedersen.mgyoutube.entities.YouTubeVideo;
 import com.djpedersen.mgyoutube.services.AccountsService;
+import com.djpedersen.mgyoutube.services.AuditsService;
 import com.djpedersen.mgyoutube.services.BlacklistsService;
-import com.djpedersen.mgyoutube.services.SavedSearch;
-import com.djpedersen.mgyoutube.services.SearchConverter;
 import com.djpedersen.mgyoutube.services.SearchTermsService;
 import com.djpedersen.mgyoutube.services.YouTubeProperties;
 import com.djpedersen.mgyoutube.services.YouTubeService;
-import com.djpedersen.mgyoutube.services.YouTubeVideo;
-import com.djpedersen.mgyoutube.services.YouTubeVideoConverter;
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -53,6 +56,8 @@ public class YouTubeWebService {
 
 	private final BlacklistsService blacklistsService;
 
+	private final AuditsService auditsService;
+
 	public YouTubeWebService() throws IOException {
 		logger.info("YouTubeWebService()");
 
@@ -66,16 +71,19 @@ public class YouTubeWebService {
 		this.userService = UserServiceFactory.getUserService();
 		this.accountsService = new AccountsService(datastoreService);
 		this.blacklistsService = new BlacklistsService(datastoreService);
+		this.auditsService = new AuditsService(datastoreService);
 	}
 
 	public YouTubeWebService(final YouTubeService youTubeService, final SearchTermsService searchTermService,
-			final AccountsService accountsService, final BlacklistsService blacklistsService) {
+			final AccountsService accountsService, final BlacklistsService blacklistsService,
+			final AuditsService auditsService) {
 		logger.info("YouTubeWebService(youTubeService)");
 		this.youTubeService = youTubeService;
 		this.searchTermsService = searchTermService;
 		this.userService = UserServiceFactory.getUserService();
 		this.accountsService = accountsService;
 		this.blacklistsService = blacklistsService;
+		this.auditsService = auditsService;
 	}
 
 	private void ensureAuthenticated(final User user) {
@@ -103,7 +111,7 @@ public class YouTubeWebService {
 			// create search audit record if logged in
 			//
 			final DateTime now = new DateTime();
-			searchTermsService.recordUserSearchAudit(user.getEmail(), searchTerms, now);
+			auditsService.recordUserSearchAudit(user.getEmail(), searchTerms, now);
 
 			//
 			// remove blacklisted videos
@@ -230,6 +238,52 @@ public class YouTubeWebService {
 		logger.info(savedSearchListToJson);
 
 		return savedSearchListToJson;
+	}
+
+	@POST
+	@Path("/watched/{videoid}")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public void recordWatchedVideo(@PathParam("videoid") final String uncleanVideoId,
+			@FormParam("thumbnailUrl") final String uncleanThumbnailUrl,
+			@FormParam("videoTitle") final String uncleanTitle) {
+
+		final User user = userService.getCurrentUser();
+
+		if (user == null) {
+			logger.fine("No user so not recording watch video audit");
+		} else {
+			// TODO: sanitize inputs
+			final String videoId = uncleanVideoId;
+			final String thumbnailUrl = uncleanThumbnailUrl;
+			final String title = uncleanTitle;
+
+			this.auditsService.recordWatchedVideo(user.getEmail(), videoId, thumbnailUrl, title);
+		}
+	}
+
+	@GET
+	@Path("/watched/{childAccount}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getRecentlyWatchedVideos(@PathParam("childAccount") final String uncleanChildAccount) {
+
+		// TODO: sanitize inputs
+		final String childAccount = uncleanChildAccount;
+		logger.info("getRecentlyWatchedVideos:" + childAccount);
+
+		final User user = userService.getCurrentUser();
+		this.ensureAuthenticated(user);
+		this.ensureParentChildRelationship(user, childAccount);
+
+		final List<WatchedVideoAuditRecord> recentlyWatchedVideosForUser = this.auditsService
+				.getRecentlyWatchedVideosForUser(childAccount);
+
+		final WatchedVideoConverter converter = new WatchedVideoConverter();
+		final String watchedVideosListToJson = converter.watchedVideosListToJson(recentlyWatchedVideosForUser);
+
+		logger.info(watchedVideosListToJson);
+
+		return watchedVideosListToJson;
+
 	}
 
 	private void ensureParentChildRelationship(final User user, final String childAccount) {

@@ -102,15 +102,60 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		});
 	}
 	
-	function refreshRecentlySaved() {}
-	function refreshRecentlyWatched() {}
+	function refreshRecentlySaved() {
+		
+	}
+
+	function whenRefreshRecentlyWatchedSucceeds(jsonRecentlyWatchedList) {
+		console.log("whenRefreshRecentlyWatchedSucceeds:" + jsonRecentlyWatchedList);
+		var arrayLength = jsonRecentlyWatchedList.length;
+		console.log("arrayLength:" + arrayLength);
+		var savedSearchListHtml = "<div>";
+		
+		for (var i = 0; i < arrayLength; i++) {
+			var watched = jsonRecentlyWatchedList[i];
+			savedSearchListHtml += "<div style='border:1px solid black;'>";
+			savedSearchListHtml += "<div><img src='"+watched.thumbnailUrl+"' style='width:100px;'/>";
+			savedSearchListHtml += "<div>" + watched.videoTitle + "</div>";
+			savedSearchListHtml += "<div>" + watched.timestamp + "</div>";
+			savedSearchListHtml += "<div><a href='javascript:blockVideo(\""+watched.videoId+"\");' style='font-size:small;'>block</a></div>";
+			savedSearchListHtml += "</div>";
+		}
+		
+		savedSearchListHtml += "</div>";
+		
+		$("#recentwatchlist").html( savedSearchListHtml );
+	}
+	
+	function whenRefreshRecentlyWatchedFails() {
+		alert("Unable to refresh recently watched");
+	} 
+	
+	function refreshRecentlyWatched(childAccount) {
+		console.log("refreshRecentlyWatched:" + childAccount);
+		var lookupUrl = "/ws/youtube/watched/" + childAccount;
+		console.info("getUrl:" + lookupUrl);
+		
+		$.ajax({
+			url: lookupUrl, 
+			type: 'GET',
+			success: function(data) {
+				console.log("refreshRecentlyWatched successful");
+				whenRefreshRecentlyWatchedSucceeds(data);
+			},
+			error: function(data, errorStatus, thrownException) {
+				console.log("refreshRecentlyWatched failed, " +errorStatus + ", " + thrownException);
+				whenRefreshRecentlyWatchedFails();
+			}
+		});
+	}
 	
 	function showChildAccountHistory(childAccount) {
 		currentlySelectedChildAccount = childAccount;
 		refreshSavedSearches(childAccount) ;
 		refreshBlacklistedWords(); // no child account because its for the parents
 		refreshRecentlySaved() ;
-		refreshRecentlyWatched() ;
+		refreshRecentlyWatched(childAccount) ;
 	}
 	
 	function whenAssociateAccountSucceeds(data) {
@@ -123,6 +168,7 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	}
 	
 	function doAssociateAccount( accountToAssociate, whenAccociateAccountSucceedsCallback, whenAccociateAccountFailsCallback) {
+		console.log("doAssociateAccount:" + accountToAssociate);
 		var lookupUrl = "/ws/accounts/associated/";
 		console.info("putUrl:" + lookupUrl);
 		
@@ -301,7 +347,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	</style>
 </head>
 <body>
-	
 	<div id="banner" style="background-color:#f1f1f1;">
 		<div>
 			MG YouTube - For Parents

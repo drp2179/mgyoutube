@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.djpedersen.mgyoutube.services.SearchTermsService;
-import com.djpedersen.mgyoutube.services.UserSearchAuditRecord;
+import com.djpedersen.mgyoutube.entities.UserSearchAuditRecord;
+import com.djpedersen.mgyoutube.services.AuditsService;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -21,7 +21,7 @@ public class TestUserSearchAuditSearchTerms {
 	private final LocalServiceTestHelper gaeLocalServiceHelper = new LocalServiceTestHelper(
 			new LocalDatastoreServiceTestConfig());
 
-	private SearchTermsService service;
+	private AuditsService service;
 
 	private DatastoreService datastoreService;
 
@@ -31,7 +31,7 @@ public class TestUserSearchAuditSearchTerms {
 
 		datastoreService = DatastoreServiceFactory.getDatastoreService();
 
-		service = new SearchTermsService(datastoreService);
+		service = new AuditsService(datastoreService);
 	}
 
 	@After

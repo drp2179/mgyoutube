@@ -12,7 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.djpedersen.mgyoutube.services.SavedSearch;
+import com.djpedersen.mgyoutube.entities.SavedSearch;
 import com.djpedersen.mgyoutube.services.SearchTermsService;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;

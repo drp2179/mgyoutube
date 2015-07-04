@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.djpedersen.mgyoutube.entities.YouTubeVideo;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
@@ -33,7 +34,7 @@ public class YouTubeService {
 		this.youTube = buildYouTube(httpTransport, jsonFactory);
 	}
 
-	public YouTubeService(final String apiKey, YouTube youTube) {
+	public YouTubeService(final String apiKey, final YouTube youTube) {
 		this.apiKey = apiKey;
 		this.youTube = youTube;
 	}

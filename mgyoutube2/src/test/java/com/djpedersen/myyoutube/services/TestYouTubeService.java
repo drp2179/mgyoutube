@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.djpedersen.mgyoutube.entities.YouTubeVideo;
 import com.djpedersen.mgyoutube.services.YouTubeProperties;
 import com.djpedersen.mgyoutube.services.YouTubeService;
-import com.djpedersen.mgyoutube.services.YouTubeVideo;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 

@@ -29,7 +29,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	<title>MG YouTube - Kids</title>
 	<meta charset="UTF-8">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-	<script src="https://www.youtube.com/iframe_api"></script>
 	
 	<script>
 	var videosCollapsedWidth = 300 ;
@@ -40,69 +39,41 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 	var currentSearchResults = null;
 	var savedSearches = [];
 	
-//	function showVideo( videoId ) {
-//			var blockwidth = $("#videoblock").width();
-//			var thewidth = Math.min( 854, blockwidth ) ;
-//			var theheight =  510 * thewidth / 854 ;
-//			
-//			$('#videoblock iframe').remove();
-//			//$('#videoblock').append("<iframe width='854' height='510' src='//www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen></iframe>");
-//			$('#videoblock').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen></iframe>");
-//		}
-	function newshowVideo( videoId ) {
-		
-		window.scrollTo(0, 0);
-		$("#videoplayer").css("display", "block");
-
-//		var blockwidth = $("#videoblock").width();
-//			var thewidth = Math.min( 854, blockwidth ) ;
-//			var theheight =  510 * thewidth / 854 ;
-		var thewidth = 640;
-		var theheight = 390;
-			
-		$('#videoplayer iframe').remove();
-//		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+videoId+"?rel=0' frameborder='0' allowfullscreen='1'></iframe>");
-		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='//www.youtube.com/embed/"+videoId+"?rel=0?&autoplay=0' frameborder='0' allowfullscreen='1'></iframe>");
-		
-//		<iframe id="videoplayer" style="display: block;"                              src="https://www.youtube.com/embed/dTV1qoceV-U?"></iframe>
-	}
-
 	function showVideo( videoIndex ) {
 		window.scrollTo(0, 0);
 
-		//var viewportWidth = document.documentElement.clientWidth;
-		//var videoWidth = viewportWidth - userNavWidth - videosCollapsedWidth - browserPadding -10;
-
 		$("#singlevideo").css("display", "block");
-		//$("#singlevideo").width(videoWidth).css("left","200px");
-		//$("#videoplayer").css("left","50%").css("margin-left", (videoWidth*-1/2));
-		//$("#videoplayer").css("left", (videoWidth - 640)/2);
-		//$("#videos").width(videosCollapsedWidth);
+		
+		recordMovieShown( videoIndex ) ;
 		
 		var video = currentSearchResults[videoIndex];
+		var thewidth=640;
+		var theheight=390;
+
+		$('#videoplayer iframe').remove();
+		$('#videoplayer').append("<iframe width='"+thewidth+"' height='"+theheight+"' src='https://www.youtube.com/embed/"+video.videoId+"?rel=0' frameborder='0' allowfullscreen></iframe>");
+	}
+
+	function recordMovieShown( videoIndex ) {
+		console.log("in recordMovieShown:" + videoIndex );
+		var video = currentSearchResults[videoIndex];
 		
-		//https://developers.google.com/youtube/iframe_api_reference
-		if (player == null) {
-			player = new YT.Player(
-					'videoplayer', 
-					{
-						height: '390',
-						width: '640',
-						rel: '0',
-//						videoId: theVideoId
-						videoId: video.videoId
-//						,
-//						events: {
-//							'onReady': onPlayerReady,
-//							'onStateChange': onPlayerStateChange
-//						}
-					}
-				);
-		}
-		else {
-			//player.loadVideoById(video.videoId);
-			player.cueVideoById(video.videoId);
-		}
+		var lookupUrl = "/ws/youtube/watched/" +video.videoId ;
+		console.info("postUrl:" + lookupUrl);
+
+		var thePutData = { thumbnailUrl: video.thumbnailUrl, videoTitle:video.title};
+		
+		$.ajax({
+			url: lookupUrl, 
+			type: 'POST',
+			data: thePutData,
+			success: function(data) {
+				// really nothing to do
+			},
+			error: function() {
+				// really nothing to do
+			}
+		});
 	}
 	
 	function whenSearchSucceeds(jsonVideoList) {
@@ -127,7 +98,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 		
 			videoHtml += "<div class='video'>";
 			videoHtml += "<a href='"+theLink+"'><img class='poster' src='"+ video.thumbnailUrl +"'/></a>"
-			/*videoHtml += "<div class='videotitle'><a href='javascript:showVideo(\""+video.videoId+"\")'>" + video.title + "</a></div>";*/
 			videoHtml += "<div class='videotitle'><a href='"+theLink+"'>" + video.title + "</a></div>";
 			videoHtml += "<div class='videoby'>by " + video.channelTitle + "</div>";
 			videoHtml += "<div class='videodate'>" + releasedDate.toDateString() + "</div>";
@@ -256,30 +226,17 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			}
 		});
 	}
-
-	function adjustViewport() {
-		//var bannerHeight = $("#banner").height();
-		//var viewportHeight = document.documentElement.clientHeight;
-		//$("#videos").height(viewportHeight-bannerHeight-browserPadding);
-	}
-	//$("#searchwords").keyup(function (e) {
-	//	console.info("keyCode:" + e.keyCode);
-	//   if (e.keyCode == 13) {
-	//    	onSearchClicked();
-	//    }
-	//});
 	
 	<c:if test="${isLoggedIn}">
 		$( document ).ready(function() {
-			adjustViewport();
 			refreshSavedSearches();
 		});	
 	</c:if>
 	<c:if test="not ${isLoggedIn}">
-	$( document ).ready(function() {
-		adjustViewport();
-	});	
-</c:if>
+		$( document ).ready(function() {
+			// nothing right now
+		});	
+	</c:if>
 	</script>
 	<style>
 	/*
@@ -343,7 +300,6 @@ pageContext.setAttribute("logoutUrl", logoutUrl);
 			</div>
 		</div>
 		<div style="position:relative;">
-		
 			<div id="singlevideo" style="display:none;">
 				<div id="videoplayer"></div>
 			</div>
