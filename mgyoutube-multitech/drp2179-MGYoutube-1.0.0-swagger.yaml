@@ -1,0 +1,207 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: MG YouTube API Auto Mocking
+    url: https://virtserver.swaggerhub.com/drp2179/MGYoutube/1.0.0
+info:
+  description: MG YouTube API Specification
+  version: "1.0.0"
+  title: MG YouTube API
+  contact:
+    email: drp2179@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: parents
+    description: Operations available to parents
+  - name: children
+    description: Operations available to children
+  - name: support
+    description: Operations for testing layers
+paths:
+  /api/parents/auth/:
+    post:
+      tags:
+        - parents
+      summary: takes an UserCredential structure and returns the User structure if the creds match
+      operationId: authParentUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredential'
+      responses:
+        '200':
+          description: this is the user that auth'ed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/parents/{parentusername}/children:
+    get:
+      tags:
+        - parents
+      summary: get the children who are assocatited with the named parent
+      operationId: getParentsChildren
+      parameters:
+        - name: parentusername
+          in: path
+          description: the parentusername to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the list of children
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '404':
+          description: Unable to find parentusername
+  /api/parents/{parentusername}/children/{childusername}:
+    put:
+      tags:
+        - parents
+      summary: create or replace existing child user associated with named parent
+      operationId: addUpdateChildToParent
+      parameters:
+        - name: parentusername
+          in: path
+          description: the parentusername to add to
+          required: true
+          schema:
+            type: string
+        - name: childusername
+          in: path
+          description: the childusername to add
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: if the child user was created or replaced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Unable to find parentusername
+  /api/children/auth/:
+    post:
+      tags:
+        - children
+      summary: takes an UserCredential structure and returns the User structure if the creds match
+      operationId: authChilrenUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredential'
+      responses:
+        '200':
+          description: this is the user that auth'ed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/support/user:
+    post:
+      tags:
+        - support
+      summary: creates a user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Created
+  /api/support/user/{username}:
+    get:
+      tags:
+        - support
+      summary: get the user for the username
+      operationId: getUserByUsername
+      parameters:
+        - name: username
+          in: path
+          description: the username to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+    delete:
+      tags:
+        - support
+      summary: remove the user by the username
+      operationId: removeUserByUsername
+      parameters:
+        - name: username
+          in: path
+          description: the username to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+        '404':
+          description: Not Found
+          
+        
+
+components:
+  schemas:
+    UserCredential:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          example: aUserName
+        password:
+          type: string
+          example: aPassword
+    User:
+      type: object
+      required:
+        - userId
+        - username
+        - isParent
+      properties:
+        userId:
+          type: integer
+          example: 44
+        username:
+          type: string
+          example: aUserName
+        isParent:
+          type: boolean
+          example: true
+        password:
+          type: string
+          example: aPassword
