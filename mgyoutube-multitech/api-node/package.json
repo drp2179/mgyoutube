@@ -1,0 +1,22 @@
+{
+  "name": "api-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/restify": "^8.4.0",
+    "@types/restify-errors": "^4.3.3",
+    "@types/restify-plugins": "^1.5.12",
+    "restify": "^8.4.0",
+    "restify-errors": "^8.0.1",
+    "restify-plugins": "^1.6.0",
+    "typescript": "^3.6.2"
+  }
+}
