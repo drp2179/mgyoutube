@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="icon" href="/favicon.ico">
+
+<head>
+	<title>MG YouTube - Parents - Vue.JS</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<body>
+	<h1>MG YouTube - Parents</h1>
+
+	<div id="parentsapp">
+	</div>
+
+	<script src="api.login.functions.js"></script>
+	<script src="api.parents.functions.js"></script>
+	<script>
+
+		const globalState = {
+			loggedInUsername: null,
+		};
+
+		Vue.component('addchildrenpanel', {
+			props: [
+				'on-child-added'
+			],
+			data: function () {
+				return {
+					theChildUsername: null,
+					theChildPassword: null
+				}
+			},
+			// validations: {
+			// 	form: {
+
+			// 	}
+			// },
+			methods: {
+				addNewChildClickHandler: function (event) {
+					api_addChildToParent(globalState.loggedInUsername, this.theChildUsername, this.theChildPassword, this.addNewChildSuccess, this.addNewChildFailed);
+				},
+				addNewChildSuccess: function (newChild) {
+					console.log("addchildrenpanel.addNewChildSuccess", newChild);
+					this.$emit('on-child-added', newChild)
+					this.theChildUsername = null;
+					this.theChildPassword = null;
+				},
+				addNewChildFailed: function () {
+					alert("adding child " + this.theChildUsername + " failed");
+				}
+			},
+			template: '\
+			<div id="addchildpanel">\
+				<label for="newchildnamefield">New Child Username</label>\
+				<input id="newchildnamefield" type="text" v-model="theChildUsername"/>\
+				<label for="newchildpasswordfield">New Child Password</label>\
+				<input id="newchildpasswordfield" type="password" v-model="theChildPassword"/>\
+				<button id="addNewChildButton" v-on:click="addNewChildClickHandler">Add Child</button>\
+			</div>\
+			'
+		});
+
+		Vue.component('childrenpanel', {
+			props: [],
+			data: function () {
+				return {
+					children: [],
+				}
+			},
+			methods: {
+				childAddedHandler: function (event) {
+					console.log("childrenpanel.childAddedHandler");
+					api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
+				},
+				getAllChildrenSuccess: function (children) {
+					console.log("getting all children for " + globalState.loggedInUsername + " was successful");
+					console.log("children", children);
+					this.children = children;
+				},
+				getAllChildrenFailed: function () {
+					alert("getting all children for " + globalState.loggedInUsername + " failed");
+				},
+				selectChild: function (childIndex) {
+					console.log("selectChild", childIndex);
+					console.log("selectChild", this.children[childIndex]);
+				}
+			},
+			template: '\
+			<div id="childrenpanel">\
+				<div v-for="(child, index) in children">\
+					<div><a v-on:click="selectChild(index)" href="#">{{child.username}}</a></div>\
+				</div>\
+				<addchildrenpanel v-on:on-child-added="childAddedHandler" />\
+			</div>\
+			',
+			created() {
+				console.log("childrenpanel.created");
+				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
+			}
+		});
+
+
+		Vue.component('loginform', {
+			props: [],
+			data: function () {
+				return {
+					theUsername: null,
+					thePassword: null
+				}
+			},
+			methods: {
+				loginClickHandler: function (event) {
+					//api_login(this.theUsername, this.thePassword, this.$parent.loginSuccessful, this.$parent.loginFailed);
+					api_login(this.theUsername, this.thePassword, this.loginSuccessful, this.loginFailed);
+				},
+				loginSuccessful: function (loggedInUser) {
+					this.$emit("logged-in", loggedInUser)
+				},
+				loginFailed: function (event) {
+					alert("login failed");
+				}
+			},
+			template: '<div id="auth"><input name="username" type="text" v-model="theUsername"/><input name="password" type="password" v-model="thePassword"/><button id="loginButton" v-on:click="loginClickHandler">Login</button></div>'
+		});
+
+		Vue.component('logoutform', {
+			props: [],
+			methods: {
+				logoutClickHandler: function (event) {
+					this.$emit('logged-out')
+				}
+			},
+			template: '<div id="auth"><button id="logoutButton" v-on:click="logoutClickHandler">Logout</button></div>'
+		});
+
+
+		var parentsapp = new Vue({
+			el: '#parentsapp',
+			methods: {
+				loginSuccessful: function (loggedInUser) {
+					console.log("parentsapp.loginSuccessful", loggedInUser);
+					this.userIsAuthenticated = true;
+					globalState.loggedInUsername = loggedInUser.username;
+					// console.log("parentsapp.loginSuccessful", globalState);
+					// console.log("parentsapp.loginSuccessful", globalState.loggedInUsername);
+				},
+				logoutSuccessful: function () {
+					console.log("parentsapp.logoutSuccessful");
+					this.userIsAuthenticated = false;
+					globalState.loggedInUsername = null;
+					// },
+					// loginFailed: function () {
+					// 	alert("login failed");
+					// 	this.userIsAuthenticated = false;
+					// 	globalState.loggedInUsername = null;
+				}
+			},
+			data: {
+				userIsAuthenticated: false
+			},
+			template: '\
+				<div>\
+				<logoutform v-if="userIsAuthenticated" v-on:logged-out="logoutSuccessful"></logoutform>\
+				<loginform v-else-if="!userIsAuthenticated" v-on:logged-in="loginSuccessful"></loginform>\
+				<childrenpanel v-if="userIsAuthenticated"></childrenpanel>\
+				</div>\
+			'
+		})
+	</script>
+</body>
+
+</html>
