@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="icon" href="/favicon.ico">
+
+<head>
+    <title>MG YouTube - Parents - React.JS</title>
+</head>
+
+<body>
+    <h1>MG YouTube - Parents</h1>
+
+    <div id="parentsapp">
+    </div>
+
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="login.functions.js"></script>
+    <script src="api.login.functions.js"></script>
+    <script src="api.parents.functions.js"></script>
+    <script type="text/babel">
+		const globalState = {
+			loggedInUsername: null,
+		};
+
+        class AddChildrenPanel extends React.Component {
+            constructor(props) {
+                super(props);
+
+                this.state = {theChildUsername: '', theChildPassword: ''};
+
+                this.addNewChildClickHandler = this.addNewChildClickHandler.bind(this);
+                this.usernameChangeHandler = this.usernameChangeHandler.bind(this);
+                this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
+                this.addNewChildSuccess = this.addNewChildSuccess.bind(this);
+                this.addNewChildFailed = this.addNewChildFailed.bind(this);
+            }
+
+            addNewChildClickHandler() {
+                api_addChildToParent(globalState.loggedInUsername, this.state.theChildUsername, this.state.theChildPassword, this.addNewChildSuccess, this.addNewChildFailed);
+            }
+            usernameChangeHandler(event) {
+                this.setState({theChildUsername: event.target.value});
+            }
+            passwordChangeHandler(event) {
+                this.setState({theChildPassword: event.target.value});
+            }
+
+            addNewChildSuccess(newChild){
+                console.log("addchildrenpanel.addNewChildSuccess", newChild);
+                
+                this.setState( {theChildUsername : null});
+                this.setState( {theChildPassword : null});
+
+                this.props.onChildAdded( newChild);
+            }
+
+            addNewChildFailed() {
+                alert("adding child " + this.state.theChildUsername + " failed");
+            }
+
+            render() {
+                return(
+                    <div id="addchildpanel">
+				        <label htmlFor="newchildnamefield">New Child Username</label>
+				        <input id="newchildnamefield" type="text" onChange={this.usernameChangeHandler} />
+				        <label htmlFor="newchildpasswordfield">New Child Password</label>
+				        <input id="newchildpasswordfield" type="password" onChange={this.passwordChangeHandler} />
+        				<button id="addNewChildButton" onClick={this.addNewChildClickHandler}>Add Child</button>
+        			</div>
+                );
+            }
+        }
+
+        class ChildrenPanel extends React.Component {
+
+            constructor(props) {
+                super(props);
+
+                this.state = {children: [] };
+
+                this.childAddedHandler = this.childAddedHandler.bind(this);
+                this.getAllChildrenSuccess = this.getAllChildrenSuccess.bind(this);
+                this.getAllChildrenFailed = this.getAllChildrenFailed.bind(this);
+                this.selectChild = this.selectChild.bind(this);
+            }
+
+            childAddedHandler() {
+                console.log("childrenpanel.childAddedHandler");
+				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
+            }
+
+            getAllChildrenSuccess(theNewChildren) {
+                console.log("getting all children for " + globalState.loggedInUsername + " was successful");
+                console.log("theNewChildren", theNewChildren);
+                this.setState({children: theNewChildren});
+            }
+
+            getAllChildrenFailed() {
+                alert("getting all children for " + globalState.loggedInUsername + " failed");
+            }
+            
+            selectChild(childIndex) {
+                console.log("selectChild", childIndex);
+                console.log("selectChild", this.state.children[childIndex]);
+            }
+
+            componentDidMount() {
+				console.log("childrenpanel.componentDidMount");
+				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
+            }
+
+            render() {
+                return (
+                    <div id="childrenpanel">
+                        {this.state.children.map((child, index) => {
+					        return( <div key={index}><a onClick={this.selectChild(index)} href="#">{child.username}</a></div> );
+                        })}
+				        <AddChildrenPanel onChildAdded={this.childAddedHandler} />
+                    </div>
+                );
+            }
+        }
+
+        class LoginForm extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {theUsername: '', thePassword: ''};
+
+                this.usernameChangeHandler = this.usernameChangeHandler.bind(this);
+                this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
+                this.loginClickHandler = this.loginClickHandler.bind(this);
+            }
+
+            loginClickHandler() {
+                this.props.onLoginClicked(this.state.theUsername, this.state.thePassword);
+            }
+
+            usernameChangeHandler(event) {
+                this.setState({theUsername: event.target.value});
+            }
+            passwordChangeHandler(event) {
+                this.setState({thePassword: event.target.value});
+            }
+
+            render() {
+                return(
+                    <div id="auth">
+                        <input name="username" type="text" value={this.state.theUsername} onChange={this.usernameChangeHandler} />
+                        <input name="password" type="password" value={this.state.thePassword} onChange={this.passwordChangeHandler} />
+                        <button id="loginButton" onClick={this.loginClickHandler} >Login</button>
+                    </div>
+                );
+            }
+        }
+        // function LogoutForm(props) {
+        //     return <div id="auth"><button id="logoutButton" onClick={logoutClickHandler}>Logout</button></div>;
+        // };
+        class LogoutForm extends React.Component {
+            constructor(props) {
+                super(props);
+                //this.state = {theUsername: '', thePassword: ''};
+
+                this.logoutClickHandler = this.logoutClickHandler.bind(this);
+            }
+
+            logoutClickHandler() {
+                this.props.onLogoutClicked();
+            }
+
+            render() {
+                return(
+                    <div id="auth"><button id="logoutButton" onClick={this.logoutClickHandler}>Logout</button></div>
+                )
+            }
+        }
+
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {userIsAuthenticated: false};
+
+                this.loginClickedHandler = this.loginClickedHandler.bind(this);
+                this.logoutClickedHandler = this.logoutClickedHandler.bind(this);
+                this.loginSuccessful = this.loginSuccessful.bind(this);
+                this.loginFailed = this.loginFailed.bind(this);
+                this.logoutSuccessful = this.logoutSuccessful.bind(this);
+            }
+
+            loginClickedHandler(username, password) {
+                //executeLogin(username, password, this.loginSuccessful, this.loginFailed);
+                api_login(username, password, this.loginSuccessful, this.loginFailed);
+            }
+
+            logoutClickedHandler() {
+                //executeLogout( this.logoutSuccessful );
+                api_logout( this.logoutSuccessful );
+            }
+
+            loginSuccessful(loggedInUser) {
+                console.log("parentsapp.loginSuccessful", loggedInUser);
+                globalState.loggedInUsername = loggedInUser.username;
+                this.setState({userIsAuthenticated: true});
+            }
+
+            loginFailed() {
+                alert("login failed");
+                globalState.loggedInUsername = null;
+                this.setState({userIsAuthenticated: false});
+            }
+
+            logoutSuccessful() {
+                console.log("parentsapp.logoutSuccessful");
+                globalState.loggedInUsername = null;
+                this.setState({userIsAuthenticated: false});
+            }
+
+            render() {
+                if (this.state.userIsAuthenticated) {
+                    return (
+                        <div>
+                        <LogoutForm onLogoutClicked={this.logoutClickedHandler} />
+                        <ChildrenPanel />
+                        </div>
+                    );
+                }
+                return <LoginForm onLoginClicked={this.loginClickedHandler}/>;
+            }
+        }
+
+        ReactDOM.render(
+            <App />,
+            document.getElementById('parentsapp')
+        );
+    </script>
+</body>
+
+</html>
