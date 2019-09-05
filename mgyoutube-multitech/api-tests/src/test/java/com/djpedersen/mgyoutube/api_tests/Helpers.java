@@ -29,7 +29,7 @@ public class Helpers {
 
 			final String bodyJson = response.getBody().asString();
 
-			System.out.println("getChildrenForParent(" + parentUsername + ") returned json " + bodyJson);
+			System.out.println("getChildrenForParent(" + parentUsername + ") returned json: \"" + bodyJson + "\"");
 
 			// final Type listType = new TypeToken<ArrayList<User>>() {
 			// }.getType();
