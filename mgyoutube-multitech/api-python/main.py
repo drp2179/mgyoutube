@@ -39,7 +39,7 @@ def marshalUserFromJson(userJson: str) -> User:
     return user
 
 
-@view_config(route_name='support-getdeleteuser', request_method='GET')
+@view_config(route_name='support-getcreateupatedeleteuser', request_method='GET')
 def support_getuser(request):
     username = request.matchdict['username']
     santizedUsername = username
@@ -58,7 +58,7 @@ def support_getuser(request):
     return Response(body=responseJson, content_type='application/json', charset="UTF-8")
 
 
-@view_config(route_name='support-getdeleteuser', request_method='DELETE')
+@view_config(route_name='support-getcreateupatedeleteuser', request_method='DELETE')
 def support_deleteuser(request):
     username = request.matchdict['username']
     santizedUsername = username
@@ -74,7 +74,7 @@ def support_deleteuser(request):
     return Response(status=200)
 
 
-@view_config(route_name='support-createuser', request_method='POST')
+@view_config(route_name='support-getcreateupatedeleteuser', request_method='PUT')
 def support_createuser(request):
     userJson = request.body
     print("createUser: userJson=", userJson)
@@ -82,9 +82,12 @@ def support_createuser(request):
     user = marshalUserFromJson(sanitizedUserJson)
     print("createUser: user=", user)
     createdUser = userModule.createUser(user)
-    location = "/users/" + str(createdUser.userId)
-    print("createUser: userJson=", userJson, " returning CREATED")
-    return Response(status=201, location=location)
+    createdUser.password = None
+
+    responseJson = json.dumps(createdUser.__dict__)
+    print("createUser: userJson=", userJson,
+          " returning OK and ", responseJson)
+    return Response(body=responseJson, content_type='application/json', charset="UTF-8")
 
 
 @view_config(route_name='parents-auth', request_method='POST')
@@ -162,16 +165,6 @@ def addUpdateChildToParent(request):
         addedUpdatedUser = userModule.addUpdateChildToParent(
             sanitizedParentUsername, childUser)
 
-        # // if (addedUpdatedUser == null) {
-        #     // System.out.println("authParentUser: userCredentialJson=" + userCredentialJson
-        #                           // + " failed auth, returning UNAUTHORIZED")
-        #     // return Response.status(Status.UNAUTHORIZED).build()
-        #     //} else if (!authedUser.isParent) {
-        #     // System.out.println("authParentUser: userCredentialJson=" + userCredentialJson
-        #                           // + " is not a parent, returning UNAUTHORIZED")
-        #     // return Response.status(Status.UNAUTHORIZED).build()
-        #     //}
-
         addedUpdatedUser.password = None
 
         responseJson = json.dumps(addedUpdatedUser.__dict__)
@@ -222,9 +215,8 @@ if __name__ == '__main__':
         config.add_route('parents-addupdatechildren',
                          '/api/parents/{parentusername}/children/{childusername}')
         config.add_route('children-auth',       '/api/children/auth')
-        config.add_route('support-createuser',  '/api/support/user')
-        config.add_route('support-getdeleteuser',
-                         '/api/support/user/{username}')
+        config.add_route('support-getcreateupatedeleteuser',
+                         '/api/support/users/{username}')
         config.scan()
         app = config.make_wsgi_app()
     server = make_server('0.0.0.0', 6543, app)

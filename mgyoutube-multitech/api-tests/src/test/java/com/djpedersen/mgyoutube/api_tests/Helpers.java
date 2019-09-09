@@ -58,21 +58,20 @@ public class Helpers {
 		try {
 			RestAssured.basePath = "/api/support";
 
-			final String getUserUrl = "/user/" + childUsername;
+			final String userUrl = "/users/" + childUsername;
 			final RequestSpecification getRequestSpec = RestAssured.given();
 
-			final Response getResponse = getRequestSpec.get(getUserUrl);
+			final Response getResponse = getRequestSpec.get(userUrl);
 			if (getResponse.getStatusCode() != HttpStatus.SC_OK) {
 				final String userPayload = ("{'username':'" + childUsername + "', 'password' : '" + childPassword
 						+ "'}").replace('\'', '"');
 
-				final RequestSpecification postRequestSpec = RestAssured.given();
-				postRequestSpec.body(userPayload);
-				postRequestSpec.contentType(ContentType.JSON);
+				final RequestSpecification putRequestSpec = RestAssured.given();
+				putRequestSpec.body(userPayload);
+				putRequestSpec.contentType(ContentType.JSON);
 
-				final Response postResponse = postRequestSpec.post("/user");
-				Assert.assertEquals("should have created child user", HttpStatus.SC_CREATED,
-						postResponse.getStatusCode());
+				final Response putResponse = putRequestSpec.put(userUrl);
+				Assert.assertEquals("should have created child user", HttpStatus.SC_OK, putResponse.getStatusCode());
 			}
 		} finally {
 			RestAssured.basePath = savedBasePath;
@@ -85,21 +84,20 @@ public class Helpers {
 		try {
 			RestAssured.basePath = "/api/support";
 
-			final String getUserUrl = "/user/" + parentUsername;
+			final String userUrl = "/users/" + parentUsername;
 			final RequestSpecification getRequestSpec = RestAssured.given();
 
-			final Response getResponse = getRequestSpec.get(getUserUrl);
+			final Response getResponse = getRequestSpec.get(userUrl);
 			if (getResponse.getStatusCode() != HttpStatus.SC_OK) {
 				final String userPayload = ("{'username':'" + parentUsername + "', 'password' : '" + parentPassword
 						+ "', 'isParent': true}").replace('\'', '"');
 
-				final RequestSpecification postRequestSpec = RestAssured.given();
-				postRequestSpec.body(userPayload);
-				postRequestSpec.contentType(ContentType.JSON);
+				final RequestSpecification putRequestSpec = RestAssured.given();
+				putRequestSpec.body(userPayload);
+				putRequestSpec.contentType(ContentType.JSON);
 
-				final Response postResponse = postRequestSpec.post("/user");
-				Assert.assertEquals("should have created parent user", HttpStatus.SC_CREATED,
-						postResponse.getStatusCode());
+				final Response putResponse = putRequestSpec.put(userUrl);
+				Assert.assertEquals("should have created parent user", HttpStatus.SC_OK, putResponse.getStatusCode());
 			}
 		} finally {
 			RestAssured.basePath = savedBasePath;

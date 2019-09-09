@@ -8,13 +8,6 @@ export class SimplisticUserDataRepoImpl implements UserDataRepo {
     private parentChildrenMap: Map<number, Array<number>> = new Map()
     private nextUserId: number = 1
 
-    // constructor() {
-    //     this.usernameMap = new Map()
-    //     this.userIdMap = new Map()
-    //     this.parentChildrenMap = new Map()
-    //     this.nextUserId = 1
-    // }
-
     getUserByUsername(username: string): User | undefined {
         const user = this.usernameMap.get(username)
         if (user !== undefined) {

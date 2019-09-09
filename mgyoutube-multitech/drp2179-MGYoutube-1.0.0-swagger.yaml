@@ -117,21 +117,7 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: Unauthorized
-  /api/support/user:
-    post:
-      tags:
-        - support
-      summary: creates a user
-      operationId: createUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '201':
-          description: Created
-  /api/support/user/{username}:
+  /api/support/users/{username}:
     get:
       tags:
         - support
@@ -153,6 +139,26 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: Not Found
+    put:
+      tags:
+        - support
+      summary: creates a user
+      operationId: createUser
+      parameters:
+        - name: username
+          in: path
+          description: the username to search for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Ok
     delete:
       tags:
         - support
@@ -171,8 +177,6 @@ paths:
         '404':
           description: Not Found
           
-        
-
 components:
   schemas:
     UserCredential:

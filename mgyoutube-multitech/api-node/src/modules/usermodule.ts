@@ -1,8 +1,12 @@
 import { UserCredential } from '../apimodel/usercredential';
 import { User } from '../apimodel/user';
+import { UserDataRepo } from '../repos/userdatarepo';
 
 
 export interface UserModule {
+
+    setUserDataRepo(udr: UserDataRepo): void;
+
     authUser(userCredential: UserCredential): User | undefined;
 
 

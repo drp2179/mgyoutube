@@ -5,13 +5,6 @@ export class User {
     username: string;
     password: string | undefined;
     isParent: boolean = false;
-
-    // constructor() {
-    //     // this.userId = 0;
-    //     // this.username = undefined;
-    //     // this.password = null;
-    //     // this.isParent = false;
-    // }
 }
 
 export function cloneUser(userToClone: User): User {

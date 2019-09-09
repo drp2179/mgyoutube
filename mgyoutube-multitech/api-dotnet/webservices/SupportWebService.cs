@@ -22,9 +22,9 @@ namespace api_dotnet.webservices
 
         public void SetupRoutes(IRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("/api/support/user", CreateUser);
-            routeBuilder.MapGet("/api/support/user/{username}", GetUserByUsername);
-            routeBuilder.MapDelete("/api/support/user/{username}", DeleteUserByUsername);
+            routeBuilder.MapPut("/api/support/users/{username}", CreateUser);
+            routeBuilder.MapGet("/api/support/users/{username}", GetUserByUsername);
+            routeBuilder.MapDelete("/api/support/users/{username}", DeleteUserByUsername);
         }
 
         public Task CreateUser(HttpContext context)
@@ -38,12 +38,12 @@ namespace api_dotnet.webservices
             Console.WriteLine("createUser: user=" + user);
 
             User createdUser = userModule.CreateUser(user);
+            createdUser.password = null;
 
-            string location = "/users/" + createdUser.userId;
             string responseJson = JsonConvert.SerializeObject(createdUser);
 
-            Console.WriteLine("createUser: userJson=" + userJson + " returning CREATED at " + location + " and " + responseJson);
-            return ResponseHelper.Created(context.Response, location, responseJson, MediaType.APPLICATION_JSON);
+            Console.WriteLine("createUser: userJson=" + userJson + " returning OK and " + responseJson);
+            return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
         }
 
 

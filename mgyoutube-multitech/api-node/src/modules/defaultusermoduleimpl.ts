@@ -9,7 +9,11 @@ export class DefaultUserModuleImpl implements UserModule {
     userDataRepo: UserDataRepo;
 
     constructor(aUserDataRepo: UserDataRepo) {
-        this.userDataRepo = aUserDataRepo
+        this.setUserDataRepo(aUserDataRepo);
+    }
+
+    setUserDataRepo(udr: UserDataRepo): void {
+        this.userDataRepo = udr;
     }
 
     authUser(userCredential: UserCredential): User | undefined {

@@ -12,7 +12,6 @@ import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -40,7 +39,7 @@ public class ApiSdk {
 
 	protected User getUser(final String username, final CloseableHttpClient httpclient) throws IOException {
 
-		final String uri = "http://localhost/api/support/user/" + username;
+		final String uri = "http://localhost/api/support/users/" + username;
 		final HttpGet httpGet = new HttpGet(uri);
 
 		try (final CloseableHttpResponse response = httpclient.execute(httpGet);) {
@@ -60,7 +59,7 @@ public class ApiSdk {
 
 	protected void removeUser(final String username, final CloseableHttpClient httpclient) throws IOException {
 
-		final String uri = "http://localhost/api/support/user/" + username;
+		final String uri = "http://localhost/api/support/users/" + username;
 		final HttpDelete httpDelete = new HttpDelete(uri);
 
 		try (final CloseableHttpResponse response = httpclient.execute(httpDelete);) {
@@ -71,20 +70,20 @@ public class ApiSdk {
 
 	public User createUser(final User user) throws IOException {
 
-		final String uri = "http://localhost/api/support/user";
+		final String uri = "http://localhost/api/support/users/" + user.username;
 		final String userJson = GSON.toJson(user);
 
 		try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
-			final HttpPost httpPost = new HttpPost(uri);
+			final HttpPut httpPut = new HttpPut(uri);
 			final HttpEntity userEntity = EntityBuilder.create().setText(userJson)
 					.setContentType(ContentType.APPLICATION_JSON).build();
-			httpPost.setEntity(userEntity);
+			httpPut.setEntity(userEntity);
 
-			try (final CloseableHttpResponse response = httpclient.execute(httpPost);) {
+			try (final CloseableHttpResponse response = httpclient.execute(httpPut);) {
 
-				System.out.println("POST " + uri + " response:" + response.getStatusLine());
+				System.out.println("PUT " + uri + " response:" + response.getStatusLine());
 
-				if (response.getStatusLine().getStatusCode() == HttpServletResponse.SC_CREATED) {
+				if (response.getStatusLine().getStatusCode() == HttpServletResponse.SC_OK) {
 					return this.getUser(user.username, httpclient);
 				}
 

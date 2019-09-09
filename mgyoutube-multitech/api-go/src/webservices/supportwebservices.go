@@ -6,7 +6,6 @@ import (
 	"log"
 	"modules"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -16,7 +15,7 @@ type SupportWebService struct {
 	userModule modules.UserModule
 }
 
-func (webService SupportWebService) supportCreateuser(responseWriter http.ResponseWriter, request *http.Request) {
+func (webService SupportWebService) createUpdateUser(responseWriter http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 	userJSONBytes, err := ioutil.ReadAll(request.Body)
 	userJSON := string(userJSONBytes)
@@ -44,19 +43,25 @@ func (webService SupportWebService) supportCreateuser(responseWriter http.Respon
 		return
 	}
 
-	location := "/users/" + strconv.FormatInt(createdUser.UserID, 10)
-	log.Println("supportCreateuser: userJson=", sanitizedUserJSON, " returning CREATED, location", location)
+	createdUser.Password = ""
+	responseJSONBytes, _ := json.Marshal(createdUser)
+	responseJSON := string(responseJSONBytes)
 
-	responseWriter.Header().Add("Location", location)
-	responseWriter.WriteHeader(http.StatusCreated)
+	log.Println("supportCreateuser: userJson=", sanitizedUserJSON, " returning OK and ", responseJSON)
+
+	responseWriter.Header().Set("Content-Type", "application/json")
+	responseWriter.WriteHeader(http.StatusOK)
+	responseWriter.Write(responseJSONBytes)
 }
 
-func (webService SupportWebService) getDeleteUserByUsername(responseWriter http.ResponseWriter, request *http.Request) {
+func (webService SupportWebService) getCreateUpdateDeleteUserByUsername(responseWriter http.ResponseWriter, request *http.Request) {
 
 	if request.Method == "DELETE" {
 		webService.removeUserByUsername(responseWriter, request)
 	} else if request.Method == "GET" {
 		webService.getUserByUsername(responseWriter, request)
+	} else if request.Method == "PUT" {
+		webService.createUpdateUser(responseWriter, request)
 	} else {
 		responseWriter.WriteHeader(http.StatusBadRequest)
 	}
@@ -114,8 +119,7 @@ func NewSupportWebService(router *mux.Router, userModule modules.UserModule) *Su
 	supportWebService := SupportWebService{}
 	supportWebService.userModule = userModule
 
-	router.HandleFunc("/api/support/user", supportWebService.supportCreateuser).Methods("POST")
-	router.HandleFunc("/api/support/user/{username}", supportWebService.getDeleteUserByUsername).Methods("GET", "DELETE")
+	router.HandleFunc("/api/support/users/{username}", supportWebService.getCreateUpdateDeleteUserByUsername).Methods("GET", "DELETE", "PUT")
 
 	return &supportWebService
 }

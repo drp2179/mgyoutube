@@ -1,12 +1,11 @@
 package com.djpedesen.mgyoutube.api_java.webservices;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -28,29 +27,8 @@ public class SupportWebService {
 		this.userModule = ModuleRepoRegistry.getUserModule();
 	}
 
-	@POST
-	@Path("/user")
-	@Consumes(MediaType.APPLICATION_JSON)
-	// @Produces(MediaType.APPLICATION_JSON)
-	public Response createUser(final String userJson // , @Context UriInfo uriDetails
-	) throws URISyntaxException {
-		System.out.println("createUser: userJson=" + userJson);
-
-		// TODO: need to sanitize payload input before using
-		final String sanitizedUserJson = userJson;
-		final User user = Helpers.marshalUserFromJson(sanitizedUserJson);
-		System.out.println("createUser: user=" + user);
-
-		final User createdUser = userModule.createUser(user);
-
-		final URI location = new URI("/users/" + createdUser.userId);
-
-		System.out.println("createUser: userJson=" + userJson + " returning CREATED");
-		return Response.created(location).build();
-	}
-
 	@GET
-	@Path("/user/{username}")
+	@Path("/users/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserByUsername(@PathParam(value = "username") final String username) {
 		System.out.println("getUserByUsername: username=" + username);
@@ -73,8 +51,33 @@ public class SupportWebService {
 		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 
+	@PUT
+	@Path("/users/{username}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createUpdateUserByUsername(@PathParam(value = "username") final String username,
+			final String userJson) throws URISyntaxException {
+		System.out.println("createUpdateUserByUsername: username=" + username + " userJson=" + userJson);
+
+		// TODO: need to sanitize payload input before using
+		// final String sanitizedUsername = username;
+		final String sanitizedUserJson = userJson;
+		final User user = Helpers.marshalUserFromJson(sanitizedUserJson);
+		System.out.println("createUpdateUserByUsername: user=" + user);
+
+		final User createdUser = userModule.createUser(user);
+		createdUser.password = null;
+		final String createdUserJson = GSON.toJson(createdUser);
+
+		// final URI location = new URI("/users/" + createdUser.userId);
+
+		System.out
+				.println("createUpdateUserByUsername: userJson=" + userJson + " returning OK with " + createdUserJson);
+		return Response.ok(createdUserJson, MediaType.APPLICATION_JSON).build();
+	}
+
 	@DELETE
-	@Path("/user/{username}")
+	@Path("/users/{username}")
 	public Response deleteUserByUsername(@PathParam(value = "username") final String username) {
 		System.out.println("deleteUserByUsername: username=" + username);
 

@@ -10,6 +10,7 @@ namespace api_dotnet.repos
         private Dictionary<long, User> userIdMap = new Dictionary<long, User>();
         private Dictionary<long, List<long>> parentChildrenMap = new Dictionary<long, List<long>>();
         private long nextUserId = 1;
+        private readonly object mutationLock = new object();
 
         public User GetUserByUsername(string username)
         {
@@ -24,55 +25,67 @@ namespace api_dotnet.repos
 
         public User AddUser(User user)
         {
-            // cloning so that we can mutate userId without affecting the input object
-            User addedUser = new User(user);
-            addedUser.userId = nextUserId++;
+            lock (mutationLock)
+            {
+                // cloning so that we can mutate userId without affecting the input object
+                User addedUser = new User(user);
+                addedUser.userId = nextUserId++;
 
-            this.userIdMap[addedUser.userId] = addedUser;
-            this.usernameMap[addedUser.username] = addedUser;
+                this.userIdMap[addedUser.userId] = addedUser;
+                this.usernameMap[addedUser.username] = addedUser;
 
-            // cloning so that mods after return do not mutate maps
-            return new User(addedUser);
+                // cloning so that mods after return do not mutate maps
+                return new User(addedUser);
+            }
         }
 
         public void RemoveUser(User user)
         {
-            this.userIdMap.Remove(user.userId);
-            this.usernameMap.Remove(user.username);
+            lock (mutationLock)
+            {
+                this.userIdMap.Remove(user.userId);
+                this.usernameMap.Remove(user.username);
+            }
         }
 
         public User ReplaceUser(long userId, User user)
         {
-            User existingUser;
-
-            if (this.userIdMap.TryGetValue(userId, out existingUser))
+            lock (mutationLock)
             {
-                // cloning so that we can mutate userId without affecting the input object
-                User replacingUser = new User(user);
-                replacingUser.userId = userId;
+                User existingUser;
 
-                this.userIdMap[replacingUser.userId] = replacingUser;
-                this.usernameMap[replacingUser.username] = replacingUser;
+                if (this.userIdMap.TryGetValue(userId, out existingUser))
+                {
+                    // cloning so that we can mutate userId without affecting the input object
+                    User replacingUser = new User(user);
+                    replacingUser.userId = userId;
 
-                // cloning so that mods after return do not mutate maps
-                return new User(replacingUser);
+                    this.userIdMap[replacingUser.userId] = replacingUser;
+                    this.usernameMap[replacingUser.username] = replacingUser;
+
+                    // cloning so that mods after return do not mutate maps
+                    return new User(replacingUser);
+                }
+
+                return null;
             }
-
-            return null;
         }
 
         public void AddChildToParent(long parentUserId, long childUserId)
         {
-            if (!this.parentChildrenMap.ContainsKey(parentUserId))
+            lock (mutationLock)
             {
-                this.parentChildrenMap[parentUserId] = new List<long>();
-            }
+                if (!this.parentChildrenMap.ContainsKey(parentUserId))
+                {
+                    this.parentChildrenMap[parentUserId] = new List<long>();
+                }
 
-            List<long> childrenUserIds = this.parentChildrenMap[parentUserId];
+                List<long> childrenUserIds = this.parentChildrenMap[parentUserId];
 
-            if (!childrenUserIds.Contains(childUserId))
-            {
-                childrenUserIds.Add(childUserId);
+                if (!childrenUserIds.Contains(childUserId))
+                {
+                    childrenUserIds.Add(childUserId);
+                }
             }
         }
 
@@ -106,7 +119,5 @@ namespace api_dotnet.repos
         {
             return this.userIdMap[userId];
         }
-
-
     }
 }
