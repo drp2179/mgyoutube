@@ -30,23 +30,31 @@ public class VideosWebService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response videosSearch(@QueryParam("search") final String searchTerms) throws IOException {
-		System.out.println("videosSearch: searchTerms='" + searchTerms + "'");
+		try {
+			System.out.println("videosSearch: searchTerms='" + searchTerms + "'");
 
-		if (StringUtils.isBlank(searchTerms)) {
-			System.out.println("search term are blank failing as 400");
-			return Response.status(400).build();
+			if (StringUtils.isBlank(searchTerms)) {
+				System.out.println("search term are blank failing as 400");
+				return Response.status(400).build();
+			}
+
+			// TODO: need to sanitize payload input before using
+			final String sanitizedSearchTerms = searchTerms;
+
+			final List<Video> videos = videosModule.search(sanitizedSearchTerms);
+			// System.out.println("videosModule.search: videos=" + videos);
+
+			final String responseJson = GSON.toJson(videos);
+
+			// System.out.println("videosSearch: searchTerms=" + sanitizedSearchTerms + "
+			// returning OK, " + responseJson);
+			System.out.println("videosSearch: searchTerms=" + sanitizedSearchTerms + " returning OK");
+			return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
+		} catch (Throwable thrown) {
+			System.out.println("videosSearch top level exception handler");
+			thrown.printStackTrace(System.out);
+			return Response.serverError().build();
 		}
-
-		// TODO: need to sanitize payload input before using
-		final String sanitizedSearchTerms = searchTerms;
-
-		final List<Video> videos = videosModule.search(sanitizedSearchTerms);
-		System.out.println("videosModule.search: videos=" + videos);
-
-		final String responseJson = GSON.toJson(videos);
-
-		System.out.println("videosSearch: searchTerms=" + sanitizedSearchTerms + " returning OK, " + responseJson);
-		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 
 }

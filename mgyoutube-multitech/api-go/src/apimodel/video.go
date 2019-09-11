@@ -1,7 +1,14 @@
 package apimodel
 
-// Video - for doing authentication
+// Video - for encapsulating videos
 type Video struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	VideoID         string `json:"videoId"`
+	Title           string `json:"title"`
+	Description     string `json:"description"`
+	ChannelID       string `json:"channelId"`
+	ChannelTitle    string `json:"channelTitle"`
+	PublishedAt     string `json:"publishedAt"`
+	ThumbnailURL    string `json:"thumbnailUrl"`
+	ThumbnailHeight int64  `json:"thumbnailHeight"`
+	ThumbnailWidth  int64  `json:"thumbnailWidth"`
 }

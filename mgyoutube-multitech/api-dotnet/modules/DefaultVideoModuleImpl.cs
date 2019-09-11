@@ -65,19 +65,20 @@ namespace api_dotnet.modules
                 foreach (var searchResult in searchListResponse.Items)
                 {
                     Console.WriteLine("searchResult " + searchResult);
-                    // final ResourceId resourceId = searchResult.getId(); // id
+                    ResourceId resourceId = searchResult.Id;
                     SearchResultSnippet snippet = searchResult.Snippet;
-
-                    // final ThumbnailDetails thumbnails = snippet.getThumbnails(); // thumbnails
+                    ThumbnailDetails thumbnails = snippet.Thumbnails;
 
                     apimodel.Video video = new apimodel.Video();
-                    // video.setVideoId(resourceId.getVideoId());
+                    video.videoId = resourceId.VideoId;
                     video.title = snippet.Title;
                     video.description = snippet.Description;
-                    // video.setThumbnailUrl(thumbnails.getDefault().getUrl());
-                    // video.setChannelId(snippet.getChannelId());
-                    // video.setChannelTitle(snippet.getChannelTitle());
-                    // video.setPublishedAt(snippet.getPublishedAt());
+                    video.thumbnailUrl = thumbnails.Default__.Url;
+                    video.thumbnailHeight = thumbnails.Default__.Height;
+                    video.thumbnailWidth = thumbnails.Default__.Width;
+                    video.channelId = snippet.ChannelId;
+                    video.channelTitle = snippet.ChannelTitle;
+                    video.publishedAt = snippet.PublishedAtRaw;
 
                     videosToReturn.Add(video);
                 }

@@ -117,6 +117,36 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: Unauthorized
+  /api/videos:
+    post:
+      tags:
+        - parents
+      summary: get videos for the provided search terms
+      operationId: videosSearch
+      parameters:
+        - name: search
+          in: query
+          description: the search terms to search for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredential'
+      responses:
+        '200':
+          description: the list of videos for the search terms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Video'
+        '400':
+          description: bad request, something wrong with query string
+      
   /api/support/users/{username}:
     get:
       tags:
@@ -209,3 +239,24 @@ components:
         password:
           type: string
           example: aPassword
+    Video:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        videoId:
+          type: string
+        channelId:
+          type: string
+        channelTitle:
+          type: string
+        publishedAt:
+          type: string
+        thumbnailUrl:
+          type: string
+        thumbnailHeight:
+          type: integer
+        thumbnailWidth:
+          type: integer

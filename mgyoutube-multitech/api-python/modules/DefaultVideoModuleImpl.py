@@ -54,14 +54,29 @@ class DefaultVideoModuleImpl(VideoModule):
             if (responseItemKey == "items"):
                 # print("type(responseItem)", type(responseItem))
                 # print("len(responseItem)", len(responseItem))
-                #videoResult = responseItem[0]
+                videoResult = responseItem[0]
                 #print("type(videoResult)", type(videoResult))
+                #print("videoResult", videoResult)
                 for videoResult in responseItem:
+                    id = videoResult['id']
+                    #print("type(id)", type(id))
+                    #print("id", id)
                     snippet = videoResult['snippet']
                     #print("type(snippet)", type(snippet))
+                    thumbnails = snippet['thumbnails']
+                    #print("type(thumbnails)", type(thumbnails))
+                    #print("thumbnails", thumbnails)
                     video = Video.Video()
+                    video.videoId = id['videoId']
                     video.title = snippet['title']
                     video.description = snippet['description']
+                    video.channelId = snippet['channelId']
+                    video.channelTitle = snippet['channelTitle']
+                    video.thumbnailUrl = thumbnails['default']['url']
+                    video.thumbnailHeight = thumbnails['default']['height']
+                    video.thumbnailWidth = thumbnails['default']['width']
+                    video.publishedAt = snippet['publishedAt']
+
                     videos.append(video)
 
         return videos

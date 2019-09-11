@@ -30,12 +30,12 @@ def videosSearch(request: Request) -> Response:
     sanitizedSearchTerms = searchTerms
 
     videos = ModuleRepoRegistry.getVideoModule().search(sanitizedSearchTerms)
-    print("videosModule.search: videos=", videos)
+    #print("videosModule.search: videos=", videos)
 
     responseJson = json.dumps(videos, default=lambda x: x.__dict__)
 
     print("videosSearch: searchTerms=",
-          sanitizedSearchTerms, " returning OK, ", responseJson)
+          sanitizedSearchTerms, " returning OK")
     return Response(body=responseJson, content_type='application/json', charset="UTF-8")
 
 

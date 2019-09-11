@@ -45,15 +45,19 @@ export class DefaultVideoModuleImpl implements VideoModule {
                     var searchResult = searchResults.data.items[0];
                     var video = new Video();
                     if (searchResult.snippet) {
+                        if (searchResult.id) {
+                            video.videoId = searchResult.id.videoId
+                        }
                         video.title = searchResult.snippet.title;
                         video.description = searchResult.snippet.description;
-                        //video.videoId = searchResult.id.videoId
-                        //video.channelTitle = searchResult.snippet.channelTitle
-                        //video.channelId = searchResult.snippet.channelId
-                        //video.publishedAt = searchResult.snippet.publishedAt
-                        //video.thumbnailUrl = searchResult.snippet.thumbnails.default.url
-                        //video.thumbnailWidth: = searchResult.snippet.thumbnails.default.width
-                        //video.thumbnailHeight: = searchResult.snippet.thumbnails.default.height
+                        video.channelTitle = searchResult.snippet.channelTitle
+                        video.channelId = searchResult.snippet.channelId
+                        video.publishedAt = searchResult.snippet.publishedAt
+                        if (searchResult.snippet.thumbnails && searchResult.snippet.thumbnails.default) {
+                            video.thumbnailUrl = searchResult.snippet.thumbnails.default.url
+                            video.thumbnailWidth = searchResult.snippet.thumbnails.default.width
+                            video.thumbnailHeight = searchResult.snippet.thumbnails.default.height
+                        }
                     }
                     videos.push(video);
                 }

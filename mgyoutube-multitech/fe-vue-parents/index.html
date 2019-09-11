@@ -16,11 +16,31 @@
 	<script src="api.login.functions.js"></script>
 	<script src="api.parents.functions.js"></script>
 	<script src="api.video.functions.js"></script>
+	<script src="https://www.youtube.com/player_api"></script>
 	<script>
 
 		const globalState = {
 			loggedInUsername: null,
 		};
+
+		Vue.component("playerpanel", {
+			props: ['videoId'],
+			computed: {
+				theVideoUrl: function () {
+					return "https://www.youtube.com/embed/" + this.videoId + "?ref=0&amp;enablejsapi=1&amp;widgetid=1&amp;modestbranding=1";
+				},
+				showable: function () {
+					return (this.videoId);
+				}
+			},
+			template: '\
+			<div id="playerwrapper">\
+				<div style="display:none">{{videoId}}</div>\
+				<div style="display:none">{{theVideoUrl}}</div>\
+				<iframe v-if="showable" id="youtubeplayer" frameborder="0" allowfullscreen="1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" title="YouTube video player" width="640" height="360" v-bind:src="theVideoUrl"></iframe>\
+			</div>\
+			'
+		});
 
 		Vue.component('searchpanel', {
 
@@ -28,6 +48,8 @@
 				return {
 					theSearchTerms: null,
 					theVideos: [],
+					//thePlayer: null,
+					theVideoId: null
 				}
 			},
 			methods: {
@@ -35,7 +57,6 @@
 					api_getVideoSearchResults(this.theSearchTerms, this.searchSuccess, this.searchFailed);
 				},
 				searchSuccess: function (videos) {
-					//console.log("searching for '", this.theSearchTerms, "' returned ", videos);
 					this.theSearchTerms = null;
 					this.theVideos = videos;
 				},
@@ -43,22 +64,23 @@
 					alert("searching for  '" + this.theSearchTerms + "' failed");
 				},
 				watchVideo: function (event) {
-					console.log("watchVideo, " + event);
+					this.theVideoId = event;
 				}
 			},
 			template: '\
 			<div id="searchpanel">\
+				<playerpanel v-bind:videoId="theVideoId" />\
 				<div id="searchtermspanel">\
-					<h3>Search Terms</h3>\
+					<h3> Search Terms</h3>\
 					<label for="searchterms">Search for:</label>\
-					<input id="searchterms" type="text" v-model="theSearchTerms"/>\
+					<input id="searchterms" type="text" v-model="theSearchTerms" />\
 					<button id="submitSearchTermsButton" v-on:click="onSearchHandler">Search</button>\
 				</div>\
 				<div id="searchresultspanel">\
 					<div v-for="(video, index) in theVideos">\
 						<div v-bind:id="`search-result-` + index" >\
-							<div><a v-on:click="watchVideo(index)" href="#">{{video.title}}</a></div>\
-							<div>{{video.description}}</div>\
+							<div v-bind:id="`search-result-` + index + `-video-` + video.videoId"><a v-bind:id="`search-result-` + index + `-watch`" v-on:click="watchVideo(video.videoId)" href="#"><img v-bind:src="video.thumbnailUrl"/>{{ video.title }}</a></div>\
+							<div>{{ video.description }}</div>\
 						</div>\
 					</div>\
 				</div>\
@@ -76,17 +98,11 @@
 					theChildPassword: null
 				}
 			},
-			// validations: {
-			// 	form: {
-
-			// 	}
-			// },
 			methods: {
 				addNewChildClickHandler: function (event) {
 					api_addChildToParent(globalState.loggedInUsername, this.theChildUsername, this.theChildPassword, this.addNewChildSuccess, this.addNewChildFailed);
 				},
 				addNewChildSuccess: function (newChild) {
-					//console.log("addchildrenpanel.addNewChildSuccess", newChild);
 					this.$emit('on-child-added', newChild)
 					this.theChildUsername = null;
 					this.theChildPassword = null;
@@ -115,12 +131,9 @@
 			},
 			methods: {
 				childAddedHandler: function (event) {
-					//console.log("childrenpanel.childAddedHandler");
 					api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 				},
 				getAllChildrenSuccess: function (children) {
-					//console.log("getting all children for " + globalState.loggedInUsername + " was successful");
-					//console.log("children", children);
 					this.children = children;
 				},
 				getAllChildrenFailed: function () {
@@ -140,7 +153,6 @@
 			</div>\
 			',
 			created() {
-				//console.log("childrenpanel.created");
 				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 			}
 		});
@@ -165,8 +177,10 @@
 					alert("login failed");
 				}
 			},
-			template: '<div id="auth"><input name="username" type="text" v-model="theUsername"/><input name="password" type="password" v-model="thePassword"/><button id="loginButton" v-on:click="loginClickHandler">Login</button></div>'
+			template: '<div id="auth"><input name="username" type="text" v-model="theUsername"  autocomplete="your username"/><input name="password" type="password" v-model="thePassword" autocomplete="your password"/><button id="loginButton" v-on:click="loginClickHandler">Login</button></div>'
 		});
+		// TODO: adding the form breaks Basic Parent Operations stories...
+		//template: '<div id="auth"><form><input name="username" type="text" v-model="theUsername"  autocomplete="your username"/><input name="password" type="password" v-model="thePassword" autocomplete="your password"/><button id="loginButton" v-on:click="loginClickHandler">Login</button></form></div>'
 
 		Vue.component('logoutform', {
 			props: [],
@@ -201,7 +215,7 @@
 				<logoutform v-if="userIsAuthenticated" v-on:logged-out="logoutSuccessful"></logoutform>\
 				<loginform v-else-if="!userIsAuthenticated" v-on:logged-in="loginSuccessful"></loginform>\
 				<childrenpanel v-if="userIsAuthenticated"></childrenpanel>\
-				<searchpanel />\
+				<searchpanel v-if="userIsAuthenticated"/>\
 				</div>\
 			'
 		})

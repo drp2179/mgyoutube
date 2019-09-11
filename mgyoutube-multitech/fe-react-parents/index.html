@@ -15,7 +15,7 @@
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script src="login.functions.js"></script>
+    <script src="https://www.youtube.com/player_api"></script>
     <script src="api.login.functions.js"></script>
     <script src="api.parents.functions.js"></script>
     <script src="api.video.functions.js"></script>
@@ -23,12 +23,39 @@
 		const globalState = {
 			loggedInUsername: null,
 		};
+
+        class PlayerPanel extends React.Component {
+            constructor(props) {
+                super(props);
+
+                this.theVideoUrl = this.theVideoUrl.bind(this);
+            }
+
+            theVideoUrl() {
+                return "https://www.youtube.com/embed/" + this.props.videoId + "?ref=0&amp;enablejsapi=1&amp;widgetid=1&amp;modestbranding=1";
+            }
+
+            render() {
+                if (this.props.videoId) {
+                    return(
+                        <div id="playerwrapper">
+                            <div style={{display:'none'}}>{this.props.videoId}</div>
+                            <div style={{display:'none'}}>{this.theVideoUrl()}</div>
+                            <iframe id="youtubeplayer" frameBorder="0" allowFullScreen="1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" title="YouTube video player" width="640" height="360" src={this.theVideoUrl()}></iframe>
+        			    </div>
+                    )
+                }
+                else {
+                    return <div id="playerwrapper" />
+                }
+            }
+        }
         
         class SearchPanel extends React.Component {
             constructor(props) {
                 super(props);
 
-                this.state = {theSearchTerms: null, theVideos: []};
+                this.state = {theSearchTerms: null, theVideos: [], theVideoId: null };
 
                 this.onSearchHandler = this.onSearchHandler.bind(this);
                 this.searchTermsChangeHandler = this.searchTermsChangeHandler.bind(this);
@@ -42,9 +69,6 @@
             }
 
             searchTermsChangeHandler(event) {
-                //console.log('searchTermsChangeHandler event', event)
-                console.log('searchTermsChangeHandler this.state.theSearchTerms', this.state.theSearchTerms)
-                console.log('searchTermsChangeHandler event.target.value', event.target.value)
                 this.setState({theSearchTerms: event.target.value});
             }
 
@@ -59,11 +83,13 @@
 
             watchVideo(event) {
                 console.log("watchVideo, " + event);
+                this.setState( {theVideoId: event});
             }
             
             render() {
                 return(
                     <div id="searchpanel">
+                        <PlayerPanel videoId={this.state.theVideoId}/>
                         <div id="searchtermspanel">
                             <h3>Search Terms</h3>
                             <label htmlFor="searchterms">Search for:</label>
@@ -73,8 +99,10 @@
                         <div id="searchresultspanel">
                             {this.state.theVideos.map((video, index) => {
                                 var divId = 'search-result-' + index
+                                var videoDivId = 'search-result-' + index + "-video-" + video.videoId
+                                var watchDivId = 'search-result-' + index + '-watch' 
                                 return( <div key={index} id={divId}>
-                                            <div><a onClick={this.watchVideo({index})} href="#">{video.title}</a></div> 
+                                            <div id={videoDivId}><a id={watchDivId} onClick={this.watchVideo.bind(this, video.videoId)} href="#"><img src={video.thumbnailUrl}/>{video.title}</a></div> 
                                             <div>{video.description}</div>
                                         </div>
                                 );
