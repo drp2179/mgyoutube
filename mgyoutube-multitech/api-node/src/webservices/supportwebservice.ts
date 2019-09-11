@@ -1,4 +1,3 @@
-import { UserModule } from '../modules/usermodule';
 import { ModuleRepoRegistry } from './modulereporegistry';
 import { Helpers } from './helpers';
 import { Request, Response, Next, Server, createServer } from 'restify'

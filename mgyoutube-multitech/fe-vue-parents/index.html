@@ -15,11 +15,56 @@
 
 	<script src="api.login.functions.js"></script>
 	<script src="api.parents.functions.js"></script>
+	<script src="api.video.functions.js"></script>
 	<script>
 
 		const globalState = {
 			loggedInUsername: null,
 		};
+
+		Vue.component('searchpanel', {
+
+			data: function () {
+				return {
+					theSearchTerms: null,
+					theVideos: [],
+				}
+			},
+			methods: {
+				onSearchHandler: function (event) {
+					api_getVideoSearchResults(this.theSearchTerms, this.searchSuccess, this.searchFailed);
+				},
+				searchSuccess: function (videos) {
+					//console.log("searching for '", this.theSearchTerms, "' returned ", videos);
+					this.theSearchTerms = null;
+					this.theVideos = videos;
+				},
+				searchFailed: function () {
+					alert("searching for  '" + this.theSearchTerms + "' failed");
+				},
+				watchVideo: function (event) {
+					console.log("watchVideo, " + event);
+				}
+			},
+			template: '\
+			<div id="searchpanel">\
+				<div id="searchtermspanel">\
+					<h3>Search Terms</h3>\
+					<label for="searchterms">Search for:</label>\
+					<input id="searchterms" type="text" v-model="theSearchTerms"/>\
+					<button id="submitSearchTermsButton" v-on:click="onSearchHandler">Search</button>\
+				</div>\
+				<div id="searchresultspanel">\
+					<div v-for="(video, index) in theVideos">\
+						<div v-bind:id="`search-result-` + index" >\
+							<div><a v-on:click="watchVideo(index)" href="#">{{video.title}}</a></div>\
+							<div>{{video.description}}</div>\
+						</div>\
+					</div>\
+				</div>\
+			</div>\
+			'
+		});
 
 		Vue.component('addchildrenpanel', {
 			props: [
@@ -41,7 +86,7 @@
 					api_addChildToParent(globalState.loggedInUsername, this.theChildUsername, this.theChildPassword, this.addNewChildSuccess, this.addNewChildFailed);
 				},
 				addNewChildSuccess: function (newChild) {
-					console.log("addchildrenpanel.addNewChildSuccess", newChild);
+					//console.log("addchildrenpanel.addNewChildSuccess", newChild);
 					this.$emit('on-child-added', newChild)
 					this.theChildUsername = null;
 					this.theChildPassword = null;
@@ -70,12 +115,12 @@
 			},
 			methods: {
 				childAddedHandler: function (event) {
-					console.log("childrenpanel.childAddedHandler");
+					//console.log("childrenpanel.childAddedHandler");
 					api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 				},
 				getAllChildrenSuccess: function (children) {
-					console.log("getting all children for " + globalState.loggedInUsername + " was successful");
-					console.log("children", children);
+					//console.log("getting all children for " + globalState.loggedInUsername + " was successful");
+					//console.log("children", children);
 					this.children = children;
 				},
 				getAllChildrenFailed: function () {
@@ -95,7 +140,7 @@
 			</div>\
 			',
 			created() {
-				console.log("childrenpanel.created");
+				//console.log("childrenpanel.created");
 				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 			}
 		});
@@ -111,7 +156,6 @@
 			},
 			methods: {
 				loginClickHandler: function (event) {
-					//api_login(this.theUsername, this.thePassword, this.$parent.loginSuccessful, this.$parent.loginFailed);
 					api_login(this.theUsername, this.thePassword, this.loginSuccessful, this.loginFailed);
 				},
 				loginSuccessful: function (loggedInUser) {
@@ -142,18 +186,11 @@
 					console.log("parentsapp.loginSuccessful", loggedInUser);
 					this.userIsAuthenticated = true;
 					globalState.loggedInUsername = loggedInUser.username;
-					// console.log("parentsapp.loginSuccessful", globalState);
-					// console.log("parentsapp.loginSuccessful", globalState.loggedInUsername);
 				},
 				logoutSuccessful: function () {
 					console.log("parentsapp.logoutSuccessful");
 					this.userIsAuthenticated = false;
 					globalState.loggedInUsername = null;
-					// },
-					// loginFailed: function () {
-					// 	alert("login failed");
-					// 	this.userIsAuthenticated = false;
-					// 	globalState.loggedInUsername = null;
 				}
 			},
 			data: {
@@ -164,6 +201,7 @@
 				<logoutform v-if="userIsAuthenticated" v-on:logged-out="logoutSuccessful"></logoutform>\
 				<loginform v-else-if="!userIsAuthenticated" v-on:logged-in="loginSuccessful"></loginform>\
 				<childrenpanel v-if="userIsAuthenticated"></childrenpanel>\
+				<searchpanel />\
 				</div>\
 			'
 		})

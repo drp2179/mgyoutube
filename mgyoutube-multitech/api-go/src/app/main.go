@@ -20,6 +20,13 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	youTubeProperties, errReadYouTubeProperties := ReadYouTubeProperties()
+	if ( errReadYouTubeProperties != nil) {
+		log.Fatalln("Failed to read the youtube.json", errReadYouTubeProperties)
+	}
+	
+	videoModule := modules.NewDefaultVideoModuleImpl(youTubeProperties.APIKey, youTubeProperties.ApplicationName)
+
 	userDataRepo := repos.NewSimpleUserDataRepoImpl()
 	userModule := modules.NewDefaultUserModuleImpl(userDataRepo)
 
@@ -29,11 +36,13 @@ func main() {
 	parentsWebService := webservices.NewParentWebService(router, userModule)
 	childrenWebService := webservices.NewChildrenWebService(router, userModule)
 	supportWebService := webservices.NewSupportWebService(router, userModule)
+	videoWebService := webservices.NewVideoWebService(router, videoModule)
 
 	// gets rid of the "declared and not used" error
 	log.Println(supportWebService)
 	log.Println(childrenWebService)
 	log.Println(parentsWebService)
+	log.Println(videoWebService)
 
 	log.Println("api-go listening on port 10000")
 	log.Fatal(http.ListenAndServe(":10000", router))

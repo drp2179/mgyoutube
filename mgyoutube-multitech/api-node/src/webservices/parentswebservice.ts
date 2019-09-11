@@ -1,4 +1,3 @@
-import { UserModule } from '../modules/usermodule';
 import { UserNotFoundException } from '../modules/usernotfoundexception';
 import { ModuleRepoRegistry } from './modulereporegistry';
 import { Helpers } from './helpers';

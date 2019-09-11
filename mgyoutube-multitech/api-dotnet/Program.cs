@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using api_dotnet.repos;
-using api_dotnet.webservices;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace api_dotnet
 {
@@ -16,7 +7,6 @@ namespace api_dotnet
     {
         public static void Main(string[] args)
         {
-            ModuleRepoRegistry.SetUserDataRepo(new SimplisticUserDataRepoImpl());
             CreateWebHostBuilder(args).Build().Run();
         }
 

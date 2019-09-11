@@ -8,6 +8,8 @@ namespace api_dotnet.webservices
     {
         private static UserModule theUserModule = null;
         private static UserDataRepo theUserDataRepo = null;
+        private static VideoModule theVideoModule = null;
+
         public static UserModule GetUserModule()
         {
             if (theUserModule == null)
@@ -17,10 +19,19 @@ namespace api_dotnet.webservices
             return theUserModule;
         }
 
-
         public static void SetUserModule(UserModule userModule)
         {
             theUserModule = userModule;
+        }
+
+        public static VideoModule GetVideoModule()
+        {
+            return theVideoModule;
+        }
+
+        public static void SetVideoModule(VideoModule videoModule)
+        {
+            theVideoModule = videoModule;
         }
 
         public static UserDataRepo GetUserDataRepo()

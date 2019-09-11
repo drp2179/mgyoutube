@@ -35,6 +35,16 @@ namespace api_dotnet.aspnet
             return response.WriteAsync(payload);
         }
 
+        public static Task BadRequest(HttpResponse response)
+        {
+            response.StatusCode = 400;
+            return response.WriteAsync("");
+        }
+        public static Task BadRequest(HttpContext context)
+        {
+            return BadRequest(context.Response);
+        }
+
         public static Task Ok(HttpResponse response)
         {
             return Ok(response, "", null);

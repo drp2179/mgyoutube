@@ -1,10 +1,12 @@
 import { UserDataRepo } from '../repos/userdatarepo';
 import { UserModule } from '../modules/usermodule';
 import { DefaultUserModuleImpl } from '../modules/defaultusermoduleimpl';
+import { VideoModule } from '../modules/videomodule';
 
 
 export class ModuleRepoRegistry {
     private static theUserModule: UserModule | null = null;
+    private static theVideoModule: VideoModule;
     private static theUserDataRepo: UserDataRepo | null = null;
 
     public static getUserModule(): UserModule {
@@ -29,6 +31,14 @@ export class ModuleRepoRegistry {
         if (ModuleRepoRegistry.theUserModule != null) {
             ModuleRepoRegistry.theUserModule.setUserDataRepo(userDataRepo);
         }
+    }
+
+    public static setVideosModule(videoModule: VideoModule) {
+        ModuleRepoRegistry.theVideoModule = videoModule;
+    }
+
+    public static getVideosModule(): VideoModule {
+        return ModuleRepoRegistry.theVideoModule;
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 
+import com.djpedersen.mgyoutube.api_tests.apimodel.User;
 import com.google.gson.Gson;
 
 import io.restassured.RestAssured;

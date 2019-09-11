@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.djpedersen.mgyoutube.api_tests.apimodel.User;
 import com.google.gson.Gson;
 
 import io.restassured.RestAssured;

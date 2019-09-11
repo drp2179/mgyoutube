@@ -1,4 +1,4 @@
-package com.djpedersen.mgyoutube.api_tests;
+package com.djpedersen.mgyoutube.api_tests.apimodel;
 
 public class User {
 	public long userId;

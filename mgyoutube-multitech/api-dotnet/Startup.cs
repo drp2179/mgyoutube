@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using api_dotnet.modules;
+using api_dotnet.repos;
 using api_dotnet.webservices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace api_dotnet
 {
@@ -20,6 +15,7 @@ namespace api_dotnet
     {
         private SupportWebService supportWebService = null;
         private ChildrenWebService childrenWebService = null;
+        private VideoWebService videoWebService = null;
         private ParentsWebService parentsWebService = null;
 
         public Startup(IConfiguration configuration)
@@ -34,9 +30,19 @@ namespace api_dotnet
         public void ConfigureServices(IServiceCollection services)
         {
             Console.WriteLine("Startup.ConfigureServices");
+
+            YouTubeProperties youTubeProperties = new YouTubeProperties(Configuration);
+            Console.WriteLine("youTubeProperties.ApiKey: " + youTubeProperties.ApiKey);
+            Console.WriteLine("youTubeProperties.ApplicationName: " + youTubeProperties.ApplicationName);
+            ModuleRepoRegistry.SetVideoModule(new DefaultVideoModuleImpl(youTubeProperties.ApiKey, youTubeProperties.ApplicationName));
+
+            ModuleRepoRegistry.SetUserDataRepo(new SimplisticUserDataRepoImpl());
+
+
             supportWebService = new SupportWebService();
             parentsWebService = new ParentsWebService();
             childrenWebService = new ChildrenWebService();
+            videoWebService = new VideoWebService();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -60,16 +66,9 @@ namespace api_dotnet
             supportWebService.SetupRoutes(routeBuilder);
             childrenWebService.SetupRoutes(routeBuilder);
             parentsWebService.SetupRoutes(routeBuilder);
+            videoWebService.SetupRoutes(routeBuilder);
 
             app.UseRouter(routeBuilder.Build());
-        }
-
-        private Task handler(HttpContext context)
-        {
-            Console.WriteLine("In handler" + ", Method: " + context.Request.Method + " " + context.Request.Path);
-            context.Response.Headers.Add("Content-Type", "application/json");
-            context.Response.StatusCode = 200;
-            return context.Response.WriteAsync("{'hello':'out there'}");
         }
     }
 }

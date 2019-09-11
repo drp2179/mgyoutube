@@ -2,22 +2,33 @@ package com.djpedesen.mgyoutube.api_java;
 
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import com.djpedesen.mgyoutube.api_java.modules.DefaultVideoModuleImpl;
+import com.djpedesen.mgyoutube.api_java.modules.VideoModule;
 import com.djpedesen.mgyoutube.api_java.repos.SimplisticUserDataRepoImpl;
+import com.djpedesen.mgyoutube.api_java.repos.UserDataRepo;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyServerWrapper;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyShutdownRunnable;
 import com.djpedesen.mgyoutube.api_java.webservices.ModuleRepoRegistry;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 public class Main {
 
 	public static void main(final String[] args) throws Exception {
 
-		ModuleRepoRegistry.setUserDataRepo(new SimplisticUserDataRepoImpl());
+		final YouTubeProperties youTubeProperties = new YouTubeProperties();
 
-		// final H2ServerWrapper h2ServerWrapper = new H2ServerWrapper();
-		// final Runnable h2ShutdownRunner = new H2ShutdownRunnable(h2ServerWrapper);
-		// final Thread h2ShutdownThread = new Thread(h2ShutdownRunner);
-		// Runtime.getRuntime().addShutdownHook(h2ShutdownThread);
-		//
+		final HttpTransport httpTransport = new ApacheHttpTransport();
+		final JsonFactory jsonFactory = new JacksonFactory();
+		final VideoModule videoModule = new DefaultVideoModuleImpl(youTubeProperties.apiKey,
+				youTubeProperties.applicationName, httpTransport, jsonFactory);
+		ModuleRepoRegistry.setVideoModule(videoModule);
+
+		final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+		ModuleRepoRegistry.setUserDataRepo(userDataRepo);
+
 		final JettyServerWrapper jettyServerWrapper = new JettyServerWrapper();
 		final Runnable jettyShutdownRunner = new JettyShutdownRunnable(jettyServerWrapper);
 		final Thread jettyShutdownThread = new Thread(jettyShutdownRunner);
@@ -29,7 +40,6 @@ public class Main {
 		servletHolder.setInitParameter("jersey.config.server.provider.packages",
 				"com.djpedesen.mgyoutube.api_java.webservices");
 
-		// h2ServerWrapper.start();
 		jettyServerWrapper.start();
 		jettyServerWrapper.join();
 	}

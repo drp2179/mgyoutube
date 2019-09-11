@@ -18,10 +18,72 @@
     <script src="login.functions.js"></script>
     <script src="api.login.functions.js"></script>
     <script src="api.parents.functions.js"></script>
+    <script src="api.video.functions.js"></script>
     <script type="text/babel">
 		const globalState = {
 			loggedInUsername: null,
 		};
+        
+        class SearchPanel extends React.Component {
+            constructor(props) {
+                super(props);
+
+                this.state = {theSearchTerms: null, theVideos: []};
+
+                this.onSearchHandler = this.onSearchHandler.bind(this);
+                this.searchTermsChangeHandler = this.searchTermsChangeHandler.bind(this);
+                this.searchSuccess = this.searchSuccess.bind(this);
+                this.searchFailed = this.searchFailed.bind(this);
+                this.watchVideo = this.watchVideo.bind(this);
+            }
+
+            onSearchHandler(event) {
+                api_getVideoSearchResults(this.state.theSearchTerms, this.searchSuccess, this.searchFailed);
+            }
+
+            searchTermsChangeHandler(event) {
+                //console.log('searchTermsChangeHandler event', event)
+                console.log('searchTermsChangeHandler this.state.theSearchTerms', this.state.theSearchTerms)
+                console.log('searchTermsChangeHandler event.target.value', event.target.value)
+                this.setState({theSearchTerms: event.target.value});
+            }
+
+            searchSuccess(videos) {
+                this.setState({theSearchTerms: null});
+                this.setState({theVideos: videos});
+            }
+            
+            searchFailed() {
+                alert("searching for  '" + this.state.theSearchTerms + "' failed");
+            }
+
+            watchVideo(event) {
+                console.log("watchVideo, " + event);
+            }
+            
+            render() {
+                return(
+                    <div id="searchpanel">
+                        <div id="searchtermspanel">
+                            <h3>Search Terms</h3>
+                            <label htmlFor="searchterms">Search for:</label>
+                            <input id="searchterms" type="text" onChange={this.searchTermsChangeHandler}/>
+                            <button id="submitSearchTermsButton" onClick={this.onSearchHandler}>Search</button>
+                        </div>
+                        <div id="searchresultspanel">
+                            {this.state.theVideos.map((video, index) => {
+                                var divId = 'search-result-' + index
+                                return( <div key={index} id={divId}>
+                                            <div><a onClick={this.watchVideo({index})} href="#">{video.title}</a></div> 
+                                            <div>{video.description}</div>
+                                        </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )
+            }
+        }
 
         class AddChildrenPanel extends React.Component {
             constructor(props) {
@@ -221,10 +283,11 @@
                         <div>
                         <LogoutForm onLogoutClicked={this.logoutClickedHandler} />
                         <ChildrenPanel />
+                        <SearchPanel />
                         </div>
                     );
                 }
-                return <LoginForm onLoginClicked={this.loginClickedHandler}/>;
+                return <div><LoginForm onLoginClicked={this.loginClickedHandler}/><SearchPanel /></div>;
             }
         }
 
