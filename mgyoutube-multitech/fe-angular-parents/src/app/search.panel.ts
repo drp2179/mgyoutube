@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
 declare var api_getVideoSearchResults: any;
 
 @Component({
