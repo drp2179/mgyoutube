@@ -38,6 +38,6 @@ export class LoginPanel {
     }
 
     loginClickHandler() {
-        api_login(this.theUsername, this.thePassword, (loggedInUser) => { this.loginSuccessful(loggedInUser) }, this.loginFailed);
+        api_login(this.theUsername, this.thePassword, (loggedInUser: any) => this.loginSuccessful(loggedInUser), this.loginFailed);
     }
 }

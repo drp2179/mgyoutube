@@ -7,6 +7,7 @@ import { LogoutPanel } from './logout.panel';
 import { ChildrenPanel } from './children.panel';
 import { AddChildrenPanel } from './add.children.panel';
 import { SearchPanel } from './search.panel';
+import { PlayerPanel } from './player.panel';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { SearchPanel } from './search.panel';
     LogoutPanel,
     ChildrenPanel,
     AddChildrenPanel,
-    SearchPanel
+    SearchPanel,
+    PlayerPanel
   ],
   imports: [
     BrowserModule
