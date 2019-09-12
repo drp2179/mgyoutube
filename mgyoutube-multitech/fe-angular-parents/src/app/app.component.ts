@@ -6,6 +6,8 @@ import { globalState } from './globalstate'
   template: `
     <login-panel *ngIf="!this.userIsAuthenticated" (loggedIn)="loginSuccessful($event)"></login-panel>
     <logout-panel *ngIf="this.userIsAuthenticated" (loggedOut)="logoutSuccessful()"></logout-panel>
+    <children-panel *ngIf="this.userIsAuthenticated"></children-panel>
+    <search-panel *ngIf="this.userIsAuthenticated"></search-panel>
   `
 })
 export class AppComponent {

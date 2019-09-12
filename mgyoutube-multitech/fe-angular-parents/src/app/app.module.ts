@@ -4,12 +4,18 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { LoginPanel } from './login.panel';
 import { LogoutPanel } from './logout.panel';
+import { ChildrenPanel } from './children.panel';
+import { AddChildrenPanel } from './add.children.panel';
+import { SearchPanel } from './search.panel';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginPanel,
-    LogoutPanel
+    LogoutPanel,
+    ChildrenPanel,
+    AddChildrenPanel,
+    SearchPanel
   ],
   imports: [
     BrowserModule
