@@ -17,4 +17,12 @@ public class User {
 		this.isParent = isParent;
 	}
 
+	public static User createChildUser(final String username, final String password) {
+		return new User(username, password, false);
+	}
+
+	public static User createParentUser(final String username, final String password) {
+		return new User(username, password, true);
+	}
+
 }

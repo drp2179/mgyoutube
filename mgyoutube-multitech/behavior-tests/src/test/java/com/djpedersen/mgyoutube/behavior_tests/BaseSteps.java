@@ -1,5 +1,8 @@
 package com.djpedersen.mgyoutube.behavior_tests;
 
+import java.io.IOException;
+
+import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 
 import com.djpedersen.mgyoutube.behavior_tests.apisdk.ApiSdk;
@@ -26,6 +29,33 @@ public class BaseSteps {
 
 	public ApiSdk getApiSdk() {
 		return ScenarioContext.get(ScenarioKeys.API_SDK_KEY, ApiSdk.class);
+	}
+
+	public User ensureUserExists(final User user) throws IOException {
+		final User existingUser = getApiSdk().getUser(user.username);
+		if (existingUser == null) {
+			final User createdUser = getApiSdk().createUser(user);
+
+			Assert.assertNotNull("created user " + user.username + " should not be null", createdUser);
+
+			return createdUser;
+		}
+
+		return existingUser;
+	}
+
+	public User verifyParentUserIsInScenario(final String parentUsername) {
+		final User parentUser = getAUserFromScenario(parentUsername);
+		Assert.assertNotNull("unable to find user '" + parentUsername + "' in the scenario context", parentUser);
+		Assert.assertTrue("User " + parentUsername + " is not a parent user", parentUser.isParent);
+		return parentUser;
+	}
+
+	public User verifyChildUserIsInScenario(final String childUsername) {
+		final User childUser = getAUserFromScenario(childUsername);
+		Assert.assertNotNull("unable to find user '" + childUsername + "' in the scenario context", childUsername);
+		Assert.assertFalse("User " + childUsername + " is not a child user", childUser.isParent);
+		return childUser;
 	}
 
 }

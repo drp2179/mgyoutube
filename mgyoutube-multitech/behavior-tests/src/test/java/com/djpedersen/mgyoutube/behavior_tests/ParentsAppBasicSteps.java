@@ -22,23 +22,9 @@ import cucumber.api.java.en.When;
 
 public class ParentsAppBasicSteps extends BaseSteps {
 
-	private User ensureUserExists(final User user) throws IOException {
-		final User existingUser = getApiSdk().getUser(user.username);
-		if (existingUser == null) {
-			final User createdUser = getApiSdk().createUser(user);
-
-			Assert.assertNotNull("created user " + user.username + " should not be null", createdUser);
-
-			return createdUser;
-		}
-
-		return existingUser;
-	}
-
-	@Given("a parent user (.*) with password (.*)")
+	@Given("a parent user (.*) with password (.*)$")
 	public void givenAParentUserAndPassword(final String username, final String password) throws IOException {
-
-		final User user = new User(username, password, true);
+		final User user = User.createParentUser(username, password);
 		final User parentUser = ensureUserExists(user);
 		parentUser.password = password;
 		addAUserToScenario(user);
@@ -68,15 +54,16 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		}
 	}
 
-	@Given("a user (.*) with password (.*)")
-	public void givenAUserAndPassword(final String username, final String password) throws IOException {
-
-		final User user = new User(username, password);
-		final User finalUser = ensureUserExists(user);
-		finalUser.password = password;
-
-		addAUserToScenario(finalUser);
-	}
+	// @Given("a user (.*) with password (.*)")
+	// public void givenAUserAndPassword(final String username, final String
+	// password) throws IOException {
+	//
+	// final User user = new User(username, password);
+	// final User finalUser = ensureUserExists(user);
+	// finalUser.password = password;
+	//
+	// addAUserToScenario(finalUser);
+	// }
 
 	@Given("the parent user (.*) has logged into the parents page")
 	public void givenUserLogsIntoParentsApp(final String username) {
@@ -100,27 +87,69 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		}
 	}
 
-	@When("the user (.*) logs into the parents app")
-	public void whenUserLogsIntoParentsApp(final String username) {
-		final User user = getAUserFromScenario(username);
-		Assert.assertNotNull("unable to find user '" + username + "' in the scenario context", user);
+	// @When("the user (.*) logs into the parents app")
+	// public void whenUserLogsIntoParentsApp(final String username) {
+	// final User user = getAUserFromScenario(username);
+	// Assert.assertNotNull("unable to find user '" + username + "' in the scenario
+	// context", user);
+	//
+	// final WebElement usernameField =
+	// getWebDriver().findElement(By.name("username"));
+	// final WebElement passwordField =
+	// getWebDriver().findElement(By.name("password"));
+	// final WebElement loginButton =
+	// getWebDriver().findElement(By.id("loginButton"));
+	//
+	// usernameField.sendKeys(user.username);
+	// passwordField.sendKeys(user.password);
+	// loginButton.click();
+	//
+	// if (!wasLoginSuccess(getWebDriver())) {
+	// System.out.println("parent app login for " + username + " failed");
+	// getWebDriver().switchTo().alert().dismiss();
+	// // should probably save this info in the scenario context
+	// }
+	// }
+	//
+	@When("the parent user (.*) logs into the parents app")
+	public void whenParentUserLogsIntoParentsApp(final String parentUsername) {
+		final User parentUser = this.verifyParentUserIsInScenario(parentUsername);
 
 		final WebElement usernameField = getWebDriver().findElement(By.name("username"));
 		final WebElement passwordField = getWebDriver().findElement(By.name("password"));
 		final WebElement loginButton = getWebDriver().findElement(By.id("loginButton"));
 
-		usernameField.sendKeys(user.username);
-		passwordField.sendKeys(user.password);
+		usernameField.sendKeys(parentUser.username);
+		passwordField.sendKeys(parentUser.password);
 		loginButton.click();
 
 		if (!wasLoginSuccess(getWebDriver())) {
-			System.out.println("parent app login for " + username + " failed");
+			System.out.println("parent app login for " + parentUsername + " failed");
 			getWebDriver().switchTo().alert().dismiss();
 			// should probably save this info in the scenario context
 		}
 	}
 
-	@When("the user (.*) adds child user (.*) with password (.*)")
+	@When("the child user (.*) logs into the parents app")
+	public void whenChildUserLogsIntoParentsApp(final String childUsername) {
+		final User childUser = this.verifyChildUserIsInScenario(childUsername);
+
+		final WebElement usernameField = getWebDriver().findElement(By.name("username"));
+		final WebElement passwordField = getWebDriver().findElement(By.name("password"));
+		final WebElement loginButton = getWebDriver().findElement(By.id("loginButton"));
+
+		usernameField.sendKeys(childUser.username);
+		passwordField.sendKeys(childUser.password);
+		loginButton.click();
+
+		if (!wasLoginSuccess(getWebDriver())) {
+			System.out.println("parent app login for " + childUsername + " failed");
+			getWebDriver().switchTo().alert().dismiss();
+			// should probably save this info in the scenario context
+		}
+	}
+
+	@When("the parent user (.*) adds child user (.*) with password (.*)")
 	public void whenParentUserAddsChild(final String parentUsername, final String childUsername,
 			final String childPassword) throws IOException {
 
@@ -157,7 +186,7 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		Assert.fail();
 	}
 
-	@Then("the user (.*) can see (.*) listed in their children section")
+	@Then("the parent user (.*) can see (.*) listed in their children section")
 	public void thenUserCanSeeChildInChildSection(final String parentUsername, final String childUsername) {
 		final WebElement childrenPanel = this.getWebDriver().findElement(By.id("childrenpanel"));
 
@@ -168,7 +197,7 @@ public class ParentsAppBasicSteps extends BaseSteps {
 				foundText);
 	}
 
-	@Then("the user (.*) cannot see (.*) listed in their children section")
+	@Then("the parent user (.*) cannot see (.*) listed in their children section")
 	public void thenUserCannotSeeChildInChildSection(final String parentUsername, final String childUsername) {
 		final WebElement childrenPanel = this.getWebDriver().findElement(By.id("childrenpanel"));
 

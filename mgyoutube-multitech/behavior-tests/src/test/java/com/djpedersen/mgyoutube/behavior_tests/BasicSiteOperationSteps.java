@@ -33,6 +33,20 @@ public class BasicSiteOperationSteps extends BaseSteps {
 		getWebDriver().get("http://localhost/parents/");
 	}
 
+	@When("the parent user (.*) accesses the parents page")
+	public void whenParentUserAccessesParentsPage(final String username) {
+		verifyParentUserIsInScenario(username);
+
+		getWebDriver().get("http://localhost/parents/");
+	}
+
+	@When("the child user (.*) accesses the parents page")
+	public void whenChildUserAccessesParentsPage(final String username) {
+		verifyChildUserIsInScenario(username);
+
+		getWebDriver().get("http://localhost/parents/");
+	}
+
 	@Then("the user none can see a link to the childrens page")
 	public void thenUserCanSeeChildrensPageLink() {
 		final WebElement element = getWebDriver().findElement(By.id("children"));
@@ -51,6 +65,22 @@ public class BasicSiteOperationSteps extends BaseSteps {
 		Assert.assertEquals("parents page title is wrong", "MG YouTube - Parents", title.getText());
 	}
 
+	@Then("the parent user (.*) can see the parents page")
+	public void thenParentsUserCanSeeParentsPage(final String username) {
+		this.verifyParentUserIsInScenario(username);
+
+		final WebElement title = getWebDriver().findElement(By.tagName("h1"));
+		Assert.assertEquals("parents page title is wrong", "MG YouTube - Parents", title.getText());
+	}
+
+	@Then("the child user (.*) can see the parents page")
+	public void thenChildUserCanSeeParentsPage(final String username) {
+		this.verifyChildUserIsInScenario(username);
+
+		final WebElement title = getWebDriver().findElement(By.tagName("h1"));
+		Assert.assertEquals("parents page title is wrong", "MG YouTube - Parents", title.getText());
+	}
+
 	@Then("the user none can see a link to the parents page")
 	public void thenUserCanSeeParentsPageLink() {
 		final WebElement element = getWebDriver().findElement(By.id("parents"));
@@ -63,8 +93,29 @@ public class BasicSiteOperationSteps extends BaseSteps {
 		Assert.assertEquals("auth element doesn't indicate a need to login", "Login", element.getText());
 	}
 
+	@Then("the child user (.*) should be able to login")
+	public void thenChildUserShouldNeedToLogin(final String username) {
+		this.verifyChildUserIsInScenario(username);
+		final WebElement element = getWebDriver().findElement(By.id("auth"));
+		Assert.assertEquals("auth element doesn't indicate a need to login", "Login", element.getText());
+	}
+
 	@Then("the user (.*) should be able to logout")
 	public void thenUserShouldNotNeedToLogin(final String username) {
+		final WebElement element = getWebDriver().findElement(By.id("auth"));
+		Assert.assertEquals("auth element doesn't indicate a need to logout", "Logout", element.getText());
+	}
+
+	@Then("the parent user (.*) should be able to logout")
+	public void thenParentUserShouldNotNeedToLogin(final String username) {
+		this.verifyParentUserIsInScenario(username);
+		final WebElement element = getWebDriver().findElement(By.id("auth"));
+		Assert.assertEquals("auth element doesn't indicate a need to logout", "Logout", element.getText());
+	}
+
+	@Then("the child user (.*) should be able to logout")
+	public void thenChildUserShouldNotNeedToLogin(final String username) {
+		this.verifyChildUserIsInScenario(username);
 		final WebElement element = getWebDriver().findElement(By.id("auth"));
 		Assert.assertEquals("auth element doesn't indicate a need to logout", "Logout", element.getText());
 	}

@@ -10,6 +10,7 @@ import com.djpedersen.mgyoutube.behavior_tests.apisdk.model.User;
 import com.djpedersen.mgyoutube.behavior_tests.cucumber.ScenarioContext;
 import com.djpedersen.mgyoutube.behavior_tests.selenium.ByIdStartsWith;
 
+import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -35,6 +36,11 @@ public class ParentsAppVideoSteps extends BaseSteps {
 
 		final WebElement searchResult0 = this.getWebDriver().findElement(By.id("search-result-0"));
 		Assert.assertNotNull("no search result #0", searchResult0);
+	}
+
+	@Given("the parent user (.*) has previously saved a search for \"(.*)\"")
+	public void theParentUserDadBHasPreviouslySavedASearchFor(int arg1, String arg2) throws Throwable {
+		throw new PendingException();
 	}
 
 	@When("the parent user (.*) submits \"(.*)\" as search words")
@@ -72,6 +78,12 @@ public class ParentsAppVideoSteps extends BaseSteps {
 		searchResultWatchLink.click();
 	}
 
+	@When("the parent user (.*) saves the \"(.*)\" search")
+	public void theParentUserDadASavesTheSearch(final String parentUsername, final String searchTerms)
+			throws Throwable {
+		throw new PendingException();
+	}
+
 	@Then("the parent user (.*) can see the youtube player with video (.*)")
 	public void thenParentCanSeeYouTubePlayerWithVideo(final String parentUsername, final int searchResultIndex) {
 		final User parentUser = getAUserFromScenario(parentUsername);
@@ -98,4 +110,11 @@ public class ParentsAppVideoSteps extends BaseSteps {
 		final WebElement searchResult2 = this.getWebDriver().findElement(By.id("search-result-2"));
 		Assert.assertNotNull("no search result #2", searchResult2);
 	}
+
+	@Then("the parent user (.*) can see \"(.*)\" in the saved search list")
+	public void theParentUserDadACanSeeInTheSavedSearchList(final String parentUsername, final String searchTerms)
+			throws Throwable {
+		throw new PendingException();
+	}
+
 }
