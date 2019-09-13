@@ -1,6 +1,9 @@
 package com.djpedersen.mgyoutube.api_tests;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,9 +64,41 @@ public class TestSavedSearches {
 	}
 
 	@Test
-	public void canSaveASearchTerms() {
-		final String parentUsername = "saveSearchParent";
+	public void canSaveAMoreComplexSearchTerm() throws UnsupportedEncodingException {
+		final String parentUsername = "saveComplexSearchParent";
 		final String searchPhrase = "learn trombone";
+		final String encodedSearchPhrase = URLEncoder.encode(searchPhrase, StandardCharsets.UTF_8.toString());
+
+		Helpers.ensureParentUserExists(parentUsername, "parentPassword");
+
+		final RequestSpecification requestSpecPut = RestAssured.given();
+
+		final String putUrl = "/" + parentUsername + "/searches/" + encodedSearchPhrase;
+
+		final Response responsePut = requestSpecPut.put(putUrl);
+		Assert.assertEquals("saving a search should return status code 201", HttpStatus.SC_CREATED,
+				responsePut.getStatusCode());
+
+		final RequestSpecification requestSpecGet = RestAssured.given();
+		final String getUrl = "/" + parentUsername + "/searches";
+		final Response responseGet = requestSpecGet.get(getUrl);
+		Assert.assertEquals("getting the saved searches should return status code 201", HttpStatus.SC_CREATED,
+				responsePut.getStatusCode());
+
+		final String bodyJson = responseGet.getBody().asString();
+
+		final Type listType = new TypeToken<ArrayList<String>>() {
+		}.getType();
+		final List<User> searches = new Gson().fromJson(bodyJson, listType);
+
+		Assert.assertEquals("the number of searches is wrong", 1, searches.size());
+		Assert.assertEquals("the returned search phrase is wrong", searchPhrase, searches.get(0));
+	}
+
+	@Test
+	public void canSaveASimpleSearchTerm() {
+		final String parentUsername = "saveSimpleSearchParent";
+		final String searchPhrase = "Hawaii";
 		Helpers.ensureParentUserExists(parentUsername, "parentPassword");
 
 		final RequestSpecification requestSpecPut = RestAssured.given();
