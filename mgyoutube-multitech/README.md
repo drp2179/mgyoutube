@@ -30,6 +30,7 @@ Features are added using the following steps (more or less in order):
 - re-implement the UI in Angular 8
 - ensure the behavior tests are green
 
+[Active and Completed Stories](Stories.md)
 
 The idea is that we should be able to demonstate substitutable REST implementations against a specific API spect.  Further, that API should be able to support multiple systems that all demonstate the same UI behaviors.
 

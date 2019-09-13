@@ -69,6 +69,6 @@ Acceptance Criteria
 - authenticated parent can see the saved search in a saved search list after saving
 - authenticated parent can see the previous saved searches immediately after login
 - API supports getting saved searches
--- GET /parent/{parent}/searches
+  - GET /parent/{parent}/searches
 - API support adding to saved searches
--- PUT /parent{parent/searches/{search phrase}
+  - PUT /parent{parent/searches/{search phrase}
