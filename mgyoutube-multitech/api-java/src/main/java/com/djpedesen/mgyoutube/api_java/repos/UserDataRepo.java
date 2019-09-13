@@ -6,7 +6,7 @@ import com.djpedesen.mgyoutube.api_java.apimodel.User;
 
 public interface UserDataRepo {
 
-	User getUserByUsername(String username) throws Exception;
+	User getUserByUsername(String username);
 
 	User addUser(User user);
 

@@ -15,7 +15,7 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	private long nextUserId = 1;
 
 	@Override
-	public User getUserByUsername(final String username) throws Exception {
+	public User getUserByUsername(final String username) {
 		final User user = this.usernameMap.get(username);
 		if (user != null) {
 			// cloning so modds after return do not affect maps

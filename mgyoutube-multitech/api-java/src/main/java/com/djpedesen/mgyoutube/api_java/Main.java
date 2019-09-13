@@ -2,8 +2,12 @@ package com.djpedesen.mgyoutube.api_java;
 
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import com.djpedesen.mgyoutube.api_java.modules.DefaultSearchesModuleImpl;
 import com.djpedesen.mgyoutube.api_java.modules.DefaultVideoModuleImpl;
+import com.djpedesen.mgyoutube.api_java.modules.SearchesModule;
 import com.djpedesen.mgyoutube.api_java.modules.VideoModule;
+import com.djpedesen.mgyoutube.api_java.repos.SearchesDataRepo;
+import com.djpedesen.mgyoutube.api_java.repos.SimplisticSearchesDataRepoImpl;
 import com.djpedesen.mgyoutube.api_java.repos.SimplisticUserDataRepoImpl;
 import com.djpedesen.mgyoutube.api_java.repos.UserDataRepo;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyServerWrapper;
@@ -28,6 +32,10 @@ public class Main {
 
 		final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
 		ModuleRepoRegistry.setUserDataRepo(userDataRepo);
+
+		final SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+		final SearchesModule searchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);
+		ModuleRepoRegistry.setSearchesModule(searchesModule);
 
 		final JettyServerWrapper jettyServerWrapper = new JettyServerWrapper();
 		final Runnable jettyShutdownRunner = new JettyShutdownRunnable(jettyServerWrapper);

@@ -44,7 +44,7 @@ paths:
     get:
       tags:
         - parents
-      summary: get the children who are assocatited with the named parent
+      summary: get the children who are associated with the named parent
       operationId: getParentsChildren
       parameters:
         - name: parentusername
@@ -95,6 +95,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '404':
+          description: Unable to find parentusername
+  /api/parents/{parentusername}/searches:
+    get:
+      tags:
+        - parents
+      summary: get the saved searches associated with the named parent
+      operationId: getSavedSearches
+      parameters:
+        - name: parentusername
+          in: path
+          description: the parentusername to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the list of searches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: Unable to find parentusername
+  /api/parents/{parentusername}/searches/{searchphrase}:
+    put:
+      tags:
+        - parents
+      summary: save search phrase
+      operationId: saveSearch
+      parameters:
+        - name: parentusername
+          in: path
+          description: the parentusername to add to
+          required: true
+          schema:
+            type: string
+        - name: searchphrase
+          in: path
+          description: the search phrase to add
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: created
         '404':
           description: Unable to find parentusername
   /api/children/auth/:

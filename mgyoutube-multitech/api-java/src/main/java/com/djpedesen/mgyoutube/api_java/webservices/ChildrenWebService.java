@@ -32,7 +32,7 @@ public class ChildrenWebService {
 
 		// TODO: need to sanitize payload input before using
 		final String sanitizedUserCredentialJson = userCredentialJson;
-		final UserCredential userCredential = marshalUserCredentialFromJson(sanitizedUserCredentialJson);
+		final UserCredential userCredential = Helpers.marshalUserCredentialFromJson(sanitizedUserCredentialJson);
 		System.out.println("authChildUser: userCredential=" + userCredential);
 
 		final User authedUser = userModule.authUser(userCredential);
@@ -54,20 +54,4 @@ public class ChildrenWebService {
 		System.out.println("authUser: userCredentialJson=" + userCredentialJson + " returning OK");
 		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
-
-	public static UserCredential marshalUserCredentialFromJson(final String userCredentialJson) {
-
-		final UserCredential userCredential = GSON.fromJson(userCredentialJson, UserCredential.class);
-
-		//
-		// post object create validation
-		//
-		if (userCredential.password == null || userCredential.username == null) {
-			System.out.println("userCredential username or password is null, returning null");
-			return null;
-		}
-
-		return userCredential;
-	}
-
 }

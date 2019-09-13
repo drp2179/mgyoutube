@@ -1,6 +1,7 @@
 package com.djpedesen.mgyoutube.api_java.webservices;
 
 import com.djpedesen.mgyoutube.api_java.modules.DefaultUserModuleImpl;
+import com.djpedesen.mgyoutube.api_java.modules.SearchesModule;
 import com.djpedesen.mgyoutube.api_java.modules.UserModule;
 import com.djpedesen.mgyoutube.api_java.modules.VideoModule;
 import com.djpedesen.mgyoutube.api_java.repos.UserDataRepo;
@@ -9,6 +10,7 @@ public class ModuleRepoRegistry {
 	private static UserModule theUserModule = null;
 	private static UserDataRepo theUserDataRepo = null;
 	private static VideoModule theVideoModule = null;
+	private static SearchesModule theSearchesModule = null;
 
 	public static UserModule getUserModule() {
 		if (theUserModule == null) {
@@ -35,5 +37,13 @@ public class ModuleRepoRegistry {
 
 	public static void setVideoModule(VideoModule videoModule) {
 		theVideoModule = videoModule;
+	}
+
+	public static SearchesModule getSearchesModule() {
+		return theSearchesModule;
+	}
+
+	public static void setSearchesModule(final SearchesModule searchesModule) {
+		theSearchesModule = searchesModule;
 	}
 }
