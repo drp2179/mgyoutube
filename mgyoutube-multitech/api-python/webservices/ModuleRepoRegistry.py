@@ -1,4 +1,4 @@
-from modules import UserModule, DefaultUserModuleImpl, VideoModule
+from modules import UserModule, DefaultUserModuleImpl, VideoModule, SearchesModule
 from repos import UserDataRepo
 
 
@@ -7,6 +7,7 @@ class ModuleRepoRegistry(object):
     theUserModule: UserModule = None
     theUserDataRepo: UserDataRepo = None
     theVideoModule: VideoModule = None
+    theSearchesModule: SearchesModule = None
 
     def __init__(self):
         pass
@@ -37,3 +38,11 @@ class ModuleRepoRegistry(object):
     @classmethod
     def setVideoModule(cls, videoModule: VideoModule):
         cls.theVideoModule = videoModule
+
+    @classmethod
+    def getSearchesModule(cls) -> SearchesModule:
+        return cls.theSearchesModule
+
+    @classmethod
+    def setSearchesModule(cls, searchesModule: SearchesModule):
+        cls.theSearchesModule = searchesModule

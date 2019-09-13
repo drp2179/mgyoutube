@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 from pyramid.response import Response
 from pyramid.request import Request
 from pyramid.view import view_config
@@ -100,9 +101,64 @@ def addUpdateChildToParent(request: Request) -> Response:
         raise HTTPNotFound()
 
 
+@view_config(route_name='parents-searches', request_method='GET')
+def getSavedSearches(request: Request) -> Response:
+
+    parentUsername = request.matchdict['parentusername']
+    print("getSavedSearches: parentUsername=", parentUsername)
+
+    # // TODO: need to sanitize payload input before using
+    sanitizedParentUsername = parentUsername
+
+    try:
+        searches = ModuleRepoRegistry.getSearchesModule().getSavedSearchesForParent(
+            sanitizedParentUsername)
+        print("getSavedSearches: getSavedSearchesForParent=", searches)
+
+        responseJson = json.dumps(searches, default=lambda x: x.__dict__)
+
+        print("getSavedSearches: parentUsername=", parentUsername,
+              " returning OK for size ", len(searches), " and json=", responseJson)
+        return Response(body=responseJson, content_type='application/json', charset="UTF-8")
+    except UserNotFoundException as unfe:
+        print("getSavedSearches: unable to find user ",
+              unfe.username, " returning NOT_FOUND")
+        raise HTTPNotFound()
+
+
+@view_config(route_name='parents-addsearchphrase', request_method='PUT')
+def saveSearch(request: Request) -> Response:
+    parentUsername = request.matchdict['parentusername']
+    searchPhrase = request.matchdict['searchphrase']
+    decodedSearchPhrase = urllib.parse.unquote_plus(searchPhrase)
+    print("saveSearch: parentUsername=", parentUsername, ", searchPhrase=",
+          searchPhrase, ", decodedSearchPhrase=", decodedSearchPhrase)
+
+    # // TODO: need to sanitize payload input before using
+    sanitizedParentUsername = parentUsername
+    sanitizedSearchPhrase = decodedSearchPhrase
+
+    try:
+        ModuleRepoRegistry.getSearchesModule().addSearchToParent(
+            sanitizedParentUsername, sanitizedSearchPhrase)
+
+        print("saveSearch: parentUsername=", sanitizedParentUsername,
+              ", searchPhrase=", sanitizedSearchPhrase, " returning CREATED")
+        location = "/parents/" + sanitizedParentUsername + "/searches"
+        return Response(status=201, location=location)
+    except UserNotFoundException as unfe:
+        print("saveSearch: unable to find user ",
+              unfe.username, " returning NOT_FOUND")
+        return HTTPNotFound()
+
+
 def setupParentsWebService(config: Configurator):
     config.add_route('parents-auth',        '/api/parents/auth')
     config.add_route('parents-children',
                      '/api/parents/{parentusername}/children')
     config.add_route('parents-addupdatechildren',
                      '/api/parents/{parentusername}/children/{childusername}')
+    config.add_route('parents-searches',
+                     '/api/parents/{parentusername}/searches')
+    config.add_route('parents-addsearchphrase',
+                     '/api/parents/{parentusername}/searches/{searchphrase}')

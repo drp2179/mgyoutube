@@ -1,8 +1,8 @@
 import json
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
-from modules import DefaultUserModuleImpl, DefaultVideoModuleImpl
-from repos import SimplisticUserDataRepoImpl
+from modules import DefaultUserModuleImpl, DefaultVideoModuleImpl, DefaultSearchesModuleImpl
+from repos import SimplisticUserDataRepoImpl, SimplisticSearchesDataRepoImpl
 from webservices import ParentsWebService, ChildrenWebService, SupportWebService, VideoWebService
 from webservices.ModuleRepoRegistry import ModuleRepoRegistry
 import YouTubeProperties
@@ -13,8 +13,14 @@ if __name__ == '__main__':
     ModuleRepoRegistry.setVideoModule(
         DefaultVideoModuleImpl.DefaultVideoModuleImpl(youTubeProperties.apiKey, youTubeProperties.applicationName))
 
-    ModuleRepoRegistry.setUserDataRepo(
-        SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl())
+    userDataRepo = SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl()
+    ModuleRepoRegistry.setUserDataRepo(userDataRepo)
+
+    serchesRepo = SimplisticSearchesDataRepoImpl.SimplisticSearchesDataRepoImpl()
+    searchesModule = DefaultSearchesModuleImpl.DefaultSearchesModuleImpl(
+        userDataRepo, serchesRepo)
+    ModuleRepoRegistry.setSearchesModule(searchesModule)
+
     config = Configurator()
 
     ParentsWebService.setupParentsWebService(config)
