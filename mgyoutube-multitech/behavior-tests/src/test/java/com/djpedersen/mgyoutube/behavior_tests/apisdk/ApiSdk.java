@@ -1,6 +1,8 @@
 package com.djpedersen.mgyoutube.behavior_tests.apisdk;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -140,6 +142,27 @@ public class ApiSdk {
 				}
 
 				return null;
+			}
+		}
+	}
+
+	public boolean saveSearchForParent(final User parentUser, final String searchPhrase) throws IOException {
+
+		final String encodedSearchPhrase = URLEncoder.encode(searchPhrase, StandardCharsets.UTF_8.toString());
+		final String uri = "http://localhost/api/parents/" + parentUser.username + "/searches/" + encodedSearchPhrase;
+
+		try (final CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			final HttpPut httpPut = new HttpPut(uri);
+
+			try (final CloseableHttpResponse response = httpclient.execute(httpPut);) {
+
+				System.out.println("PUT " + uri + " response:" + response.getStatusLine());
+
+				if (response.getStatusLine().getStatusCode() == HttpServletResponse.SC_CREATED) {
+					return true;
+				}
+
+				return false;
 			}
 		}
 	}

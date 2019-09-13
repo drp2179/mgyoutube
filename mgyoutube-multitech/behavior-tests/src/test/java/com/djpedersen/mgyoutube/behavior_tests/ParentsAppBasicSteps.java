@@ -153,8 +153,7 @@ public class ParentsAppBasicSteps extends BaseSteps {
 	public void whenParentUserAddsChild(final String parentUsername, final String childUsername,
 			final String childPassword) throws IOException {
 
-		final User parentUser = this.getAUserFromScenario(parentUsername);
-		Assert.assertNotNull("parent user " + parentUsername + " does not exist", parentUser);
+		this.verifyParentUserIsInScenario(parentUsername);
 
 		final WebElement newChildUserField = this.getWebDriver().findElement(By.id("newchildnamefield"));
 		newChildUserField.sendKeys(childUsername);
@@ -188,7 +187,11 @@ public class ParentsAppBasicSteps extends BaseSteps {
 
 	@Then("the parent user (.*) can see (.*) listed in their children section")
 	public void thenUserCanSeeChildInChildSection(final String parentUsername, final String childUsername) {
-		final WebElement childrenPanel = this.getWebDriver().findElement(By.id("childrenpanel"));
+		final WebElement childrenPanel = (new WebDriverWait(this.getWebDriver(), 4))
+				.until(ExpectedConditions.presenceOfElementLocated(By.id("childrenpanel")));
+
+		// final WebElement childrenPanel =
+		// this.getWebDriver().findElement(By.id("childrenpanel"));
 
 		final boolean foundText = (new WebDriverWait(this.getWebDriver(), 4))
 				.until(ExpectedConditions.textToBePresentInElement(childrenPanel, childUsername));
