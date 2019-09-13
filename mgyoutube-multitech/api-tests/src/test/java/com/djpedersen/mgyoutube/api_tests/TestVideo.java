@@ -63,5 +63,4 @@ public class TestVideo {
 		Assert.assertNotNull("video0 title should not be null", video0.title);
 		Assert.assertNotNull("video0 videoId should not be null", video0.videoId);
 	}
-
 }
