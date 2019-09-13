@@ -48,20 +48,39 @@
 				return {
 					theSearchTerms: null,
 					theVideos: [],
-					//thePlayer: null,
-					theVideoId: null
+					theVideoId: null,
+					theSavedSearches: []
 				}
 			},
 			methods: {
+				onSaveSearchHandler: function () {
+					if (this.theSearchTerms) {
+						api_saveSearch(globalState.loggedInUsername, this.theSearchTerms, () => this.saveSearchSuccess(), () => this.saveSearchFailed());
+					}
+					else {
+						alert("no search phrase to save")
+					}
+				},
 				onSearchHandler: function (event) {
-					api_getVideoSearchResults(this.theSearchTerms, this.searchSuccess, this.searchFailed);
+					api_getVideoSearchResults(this.theSearchTerms, (videos) => this.searchSuccess(videos), () => this.searchFailed());
 				},
 				searchSuccess: function (videos) {
-					this.theSearchTerms = null;
 					this.theVideos = videos;
 				},
 				searchFailed: function () {
 					alert("searching for  '" + this.theSearchTerms + "' failed");
+				},
+				saveSearchSuccess: function () {
+					api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+				},
+				saveSearchFailed: function () {
+					alert("saving search for  '" + this.theSearchTerms + "' failed");
+				},
+				getSavedSearchesSuccess: function (savedSearches) {
+					this.theSavedSearches = savedSearches;
+				},
+				getSavedSearchFailed: function () {
+					alert("retrieving saved searches failed");
 				},
 				watchVideo: function (event) {
 					this.theVideoId = event;
@@ -69,6 +88,11 @@
 			},
 			template: '\
 			<div id="searchpanel">\
+				<div id="savedsearchespanel">\
+					<div v-for="(phrase, index) in theSavedSearches">\
+						<div>{{phrase}}</div>\
+					</div>\
+				</div>\
 				<playerpanel v-bind:videoId="theVideoId" />\
 				<div id="searchtermspanel">\
 					<h3> Search Terms</h3>\
@@ -77,6 +101,7 @@
 					<button id="submitSearchTermsButton" v-on:click="onSearchHandler">Search</button>\
 				</div>\
 				<div id="searchresultspanel">\
+					<div><button id="submitSaveSearchButton" v-on:click="onSaveSearchHandler">Save Search</button></div>\
 					<div v-for="(video, index) in theVideos">\
 						<div v-bind:id="`search-result-` + index" >\
 							<div v-bind:id="`search-result-` + index + `-video-` + video.videoId"><a v-bind:id="`search-result-` + index + `-watch`" v-on:click="watchVideo(video.videoId)" href="#"><img v-bind:src="video.thumbnailUrl"/>{{ video.title }}</a></div>\
@@ -85,7 +110,10 @@
 					</div>\
 				</div>\
 			</div>\
-			'
+			',
+			created() {
+				api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchFailed());
+			}
 		});
 
 		Vue.component('addchildrenpanel', {
@@ -153,7 +181,8 @@
 			</div>\
 			',
 			created() {
-				api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
+				this.childAddedHandler();
+				// api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 			}
 		});
 
@@ -214,7 +243,7 @@
 				<div>\
 				<logoutform v-if="userIsAuthenticated" v-on:logged-out="logoutSuccessful"></logoutform>\
 				<loginform v-else-if="!userIsAuthenticated" v-on:logged-in="loginSuccessful"></loginform>\
-				<childrenpanel v-if="userIsAuthenticated"></childrenpanel>\
+				<childrenpanel v-if="userIsAuthenticated" />\
 				<searchpanel v-if="userIsAuthenticated"/>\
 				</div>\
 			'
