@@ -2,12 +2,14 @@ import { UserDataRepo } from '../repos/userdatarepo';
 import { UserModule } from '../modules/usermodule';
 import { DefaultUserModuleImpl } from '../modules/defaultusermoduleimpl';
 import { VideoModule } from '../modules/videomodule';
+import { SearchesModule } from '../modules/searchesmodule';
 
 
 export class ModuleRepoRegistry {
     private static theUserModule: UserModule | null = null;
-    private static theVideoModule: VideoModule;
     private static theUserDataRepo: UserDataRepo | null = null;
+    private static theVideoModule: VideoModule;
+    private static theSearchesModule: SearchesModule;
 
     public static getUserModule(): UserModule {
         if (ModuleRepoRegistry.theUserModule == null) {
@@ -40,5 +42,14 @@ export class ModuleRepoRegistry {
     public static getVideosModule(): VideoModule {
         return ModuleRepoRegistry.theVideoModule;
     }
+
+    public static setSearchesModule(searchesModule: SearchesModule) {
+        ModuleRepoRegistry.theSearchesModule = searchesModule;
+    }
+
+    public static getSearchesModule(): SearchesModule {
+        return ModuleRepoRegistry.theSearchesModule;
+    }
+
 
 }
