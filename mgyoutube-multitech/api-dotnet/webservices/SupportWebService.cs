@@ -17,7 +17,7 @@ namespace api_dotnet.webservices
         public SupportWebService()
         {
             Console.WriteLine("Creating SupportWebService");
-            this.userModule = ModuleRepoRegistry.GetUserModule();
+            this.userModule = ModuleRepoRegistry.TheUserModule;
         }
 
         public void SetupRoutes(IRouteBuilder routeBuilder)

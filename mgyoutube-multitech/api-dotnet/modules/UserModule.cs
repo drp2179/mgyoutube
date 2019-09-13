@@ -4,7 +4,7 @@ using api_dotnet.apimodel;
 namespace api_dotnet.modules
 {
 
-    interface UserModule
+    public interface UserModule
     {
         User GetUser(string username);
         User CreateUser(User user);

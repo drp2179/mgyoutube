@@ -7,12 +7,22 @@ namespace api_dotnet.aspnet
 
     public class ResponseHelper
     {
-        public static Task Created(HttpResponse response, string location, object data, string contentType)
+        public static Task Created(HttpResponse response, string location = null, object data = null, string contentType = null)
         {
-            response.Headers.Add("Content-Type", contentType);
-            response.Headers.Add("Location", location);
+            if (contentType != null)
+            {
+                response.Headers.Add("Content-Type", contentType);
+            }
+            if (location != null)
+            {
+                response.Headers.Add("Location", location);
+            }
             response.StatusCode = 201;
-            return response.WriteAsync(data.ToString());
+            return response.WriteAsync(data == null ? "" : data.ToString());
+        }
+        public static Task Created(HttpContext context, string location = null, object data = null, string contentType = null)
+        {
+            return Created(context.Response, location, data, contentType);
         }
 
         public static Task NotFound(HttpResponse response)

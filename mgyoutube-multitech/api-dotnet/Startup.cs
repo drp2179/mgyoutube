@@ -32,11 +32,15 @@ namespace api_dotnet
             Console.WriteLine("Startup.ConfigureServices");
 
             YouTubeProperties youTubeProperties = new YouTubeProperties(Configuration);
-            Console.WriteLine("youTubeProperties.ApiKey: " + youTubeProperties.ApiKey);
-            Console.WriteLine("youTubeProperties.ApplicationName: " + youTubeProperties.ApplicationName);
-            ModuleRepoRegistry.SetVideoModule(new DefaultVideoModuleImpl(youTubeProperties.ApiKey, youTubeProperties.ApplicationName));
+            // Console.WriteLine("youTubeProperties.ApiKey: " + youTubeProperties.ApiKey);
+            // Console.WriteLine("youTubeProperties.ApplicationName: " + youTubeProperties.ApplicationName);
+            ModuleRepoRegistry.TheVideoModule = new DefaultVideoModuleImpl(youTubeProperties.ApiKey, youTubeProperties.ApplicationName);
 
-            ModuleRepoRegistry.SetUserDataRepo(new SimplisticUserDataRepoImpl());
+            UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+            SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+
+            ModuleRepoRegistry.TheUserModule = new DefaultUserModuleImpl(userDataRepo);
+            ModuleRepoRegistry.TheSearchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);
 
 
             supportWebService = new SupportWebService();

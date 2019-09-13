@@ -16,7 +16,7 @@ namespace api_dotnet.webservices
         public ChildrenWebService()
         {
             Console.WriteLine("Creating ChildrenWebService");
-            this.userModule = ModuleRepoRegistry.GetUserModule();
+            this.userModule = ModuleRepoRegistry.TheUserModule;
         }
 
         public void SetupRoutes(IRouteBuilder routeBuilder)

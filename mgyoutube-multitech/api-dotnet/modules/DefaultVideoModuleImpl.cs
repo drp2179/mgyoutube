@@ -64,7 +64,7 @@ namespace api_dotnet.modules
             {
                 foreach (var searchResult in searchListResponse.Items)
                 {
-                    Console.WriteLine("searchResult " + searchResult);
+                    //Console.WriteLine("searchResult " + searchResult);
                     ResourceId resourceId = searchResult.Id;
                     SearchResultSnippet snippet = searchResult.Snippet;
                     ThumbnailDetails thumbnails = snippet.Thumbnails;

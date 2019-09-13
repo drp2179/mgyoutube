@@ -4,7 +4,7 @@ using api_dotnet.apimodel;
 namespace api_dotnet.modules
 {
 
-    interface VideoModule
+    public interface VideoModule
     {
         List<Video> search(string searchTerms);
     }

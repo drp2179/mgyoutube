@@ -17,7 +17,7 @@ namespace api_dotnet.webservices
         public VideoWebService()
         {
             Console.WriteLine("Creating VideoWebService");
-            this.videosModule = ModuleRepoRegistry.GetVideoModule();
+            this.videosModule = ModuleRepoRegistry.TheVideoModule;
         }
 
         public void SetupRoutes(IRouteBuilder routeBuilder)
@@ -42,11 +42,12 @@ namespace api_dotnet.webservices
             string sanitizedSearchTerms = searchTerms;
 
             List<Video> videos = videosModule.search(sanitizedSearchTerms);
-            Console.WriteLine("videosModule.search: videos=" + videos);
+            //Console.WriteLine("videosModule.search: videos=" + videos);
 
             String responseJson = JsonConvert.SerializeObject(videos);
 
-            Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK, " + responseJson);
+            //Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK, " + responseJson);
+            Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK");
             return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
         }
     }
