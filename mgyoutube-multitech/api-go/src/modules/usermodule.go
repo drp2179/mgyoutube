@@ -6,7 +6,7 @@ import "apimodel"
 type UserModule interface {
 	AuthUser(userCredential *apimodel.UserCredential) *apimodel.User
 
-	GetUser(username string) *apimodel.User
+	GetUserByUsername(username string) *apimodel.User
 
 	CreateUser(user *apimodel.User) *apimodel.User
 	UpdateUser(userID int64, user *apimodel.User) *apimodel.User

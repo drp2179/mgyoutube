@@ -74,7 +74,7 @@ func (webService SupportWebService) getUserByUsername(responseWriter http.Respon
 	log.Println("getUserByUsername: username=", username)
 
 	santizedUsername := username
-	user := webService.userModule.GetUser(santizedUsername)
+	user := webService.userModule.GetUserByUsername(santizedUsername)
 	log.Println("getUserByUsername: user=", user)
 
 	if user == nil {

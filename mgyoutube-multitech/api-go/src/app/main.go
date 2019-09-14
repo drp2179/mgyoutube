@@ -21,19 +21,21 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	youTubeProperties, errReadYouTubeProperties := ReadYouTubeProperties()
-	if ( errReadYouTubeProperties != nil) {
+	if errReadYouTubeProperties != nil {
 		log.Fatalln("Failed to read the youtube.json", errReadYouTubeProperties)
 	}
-	
+
 	videoModule := modules.NewDefaultVideoModuleImpl(youTubeProperties.APIKey, youTubeProperties.ApplicationName)
 
+	searchesDataRepo := repos.NewSimplisticSearchesDataRepoImpl()
 	userDataRepo := repos.NewSimpleUserDataRepoImpl()
 	userModule := modules.NewDefaultUserModuleImpl(userDataRepo)
+	searchesModule := modules.NewDefaultSearchesModuleImpl(userDataRepo, searchesDataRepo)
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(loggingMiddleware)
 
-	parentsWebService := webservices.NewParentWebService(router, userModule)
+	parentsWebService := webservices.NewParentWebService(router, userModule, searchesModule)
 	childrenWebService := webservices.NewChildrenWebService(router, userModule)
 	supportWebService := webservices.NewSupportWebService(router, userModule)
 	videoWebService := webservices.NewVideoWebService(router, videoModule)

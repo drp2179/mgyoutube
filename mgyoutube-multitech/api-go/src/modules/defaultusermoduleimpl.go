@@ -37,8 +37,8 @@ func (userModule DefaultUserModuleImpl) AuthUser(userCredential *apimodel.UserCr
 	return user
 }
 
-// GetUser - returns the user for the username
-func (userModule DefaultUserModuleImpl) GetUser(username string) *apimodel.User {
+// GetUserByUsername - returns the user for the username
+func (userModule DefaultUserModuleImpl) GetUserByUsername(username string) *apimodel.User {
 	return userModule.userDataRepo.GetUserByUsername(username)
 }
 
@@ -61,7 +61,7 @@ func (userModule DefaultUserModuleImpl) UpdateUser(userID int64, user *apimodel.
 
 // RemoveUser - removes the identified user
 func (userModule DefaultUserModuleImpl) RemoveUser(username string) *apimodel.User {
-	user := userModule.GetUser(username)
+	user := userModule.GetUserByUsername(username)
 
 	if user != nil && user.UserID > 0 {
 		userModule.userDataRepo.RemoveUser(user)
@@ -72,7 +72,7 @@ func (userModule DefaultUserModuleImpl) RemoveUser(username string) *apimodel.Us
 
 // GetChildrenForParent - returns the children for the provided parent
 func (userModule DefaultUserModuleImpl) GetChildrenForParent(parentUsername string) ([]*apimodel.User, error) {
-	parentUser := userModule.GetUser(parentUsername)
+	parentUser := userModule.GetUserByUsername(parentUsername)
 	if parentUser == nil {
 		return nil, errors.New("unable to find parent")
 	}
@@ -83,12 +83,12 @@ func (userModule DefaultUserModuleImpl) GetChildrenForParent(parentUsername stri
 
 // AddUpdateChildToParent -
 func (userModule DefaultUserModuleImpl) AddUpdateChildToParent(parentUsername string, childUser *apimodel.User) (*apimodel.User, error) {
-	parentUser := userModule.GetUser(parentUsername)
+	parentUser := userModule.GetUserByUsername(parentUsername)
 	if parentUser == nil {
 		return nil, errors.New("unable to find parent")
 	}
 
-	existingChildUser := userModule.GetUser(childUser.Username)
+	existingChildUser := userModule.GetUserByUsername(childUser.Username)
 	if existingChildUser == nil {
 		log.Println("creating child ", childUser)
 

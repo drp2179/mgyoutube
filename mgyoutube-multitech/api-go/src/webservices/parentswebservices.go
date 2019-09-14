@@ -6,13 +6,15 @@ import (
 	"log"
 	"modules"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 )
 
 // ParentsWebService - a parents web service data structure
 type ParentsWebService struct {
-	userModule modules.UserModule
+	userModule     modules.UserModule
+	searchesModule modules.SearchesModule
 }
 
 func (webService ParentsWebService) authParentUser(responseWriter http.ResponseWriter, request *http.Request) {
@@ -155,15 +157,93 @@ func (webService ParentsWebService) addUpdateChildToParent(responseWriter http.R
 	}
 }
 
+func (webService ParentsWebService) getSavedSearches(responseWriter http.ResponseWriter, request *http.Request) {
+
+	httpParams := mux.Vars(request)
+
+	parentUsername := httpParams["parentusername"]
+	log.Println("getSavedSearches: parentUsername=", parentUsername)
+
+	// TODO: need to sanitize payload input before using
+	sanitizedParentUsername := parentUsername
+
+	searches, err := webService.searchesModule.GetSavedSearchesForParent(sanitizedParentUsername)
+	if err == nil {
+		log.Println("getSavedSearches: GetSavedSearchesForParent=", searches)
+
+		var responseJSON string
+		var responseJSONBytes []byte
+		var marshalErr error
+
+		if len(searches) > 0 {
+			//log.Println("pre marshal responseJSON", responseJSON, "responseJSONBytes", responseJSONBytes)
+			responseJSONBytes, marshalErr = json.Marshal(searches)
+			//log.Println("post marshal responseJSON", responseJSON, "responseJSONBytes", responseJSONBytes, "marshalErr", marshalErr)
+			if marshalErr != nil {
+				log.Println("getSavedSearches, error marshalling children", marshalErr)
+			}
+			responseJSON = string(responseJSONBytes)
+			//log.Println("post post marshal responseJSON", responseJSON, "responseJSONBytes", responseJSONBytes, "marshalErr", marshalErr)
+		} else {
+			//log.Println("pre children count <=0 responseJSON", responseJSON, "responseJSONBytes", responseJSONBytes)
+			responseJSON = "[]"
+			responseJSONBytes = []byte(responseJSON)
+			//log.Println("post children count <=0 responseJSON", responseJSON, "responseJSONBytes", responseJSONBytes)
+		}
+
+		log.Println("getSavedSearches: parentUsername=", sanitizedParentUsername, " returning OK for size ", len(searches), " and json=", responseJSON, " and bytes ", responseJSONBytes)
+
+		responseWriter.Header().Set("Content-Type", "application/json")
+		responseWriter.WriteHeader(http.StatusOK)
+		responseWriter.Write(responseJSONBytes)
+	} else {
+		log.Println("getSavedSearches: unable to find user ", sanitizedParentUsername, " returning NOT_FOUND ", err)
+		responseWriter.WriteHeader(http.StatusNotFound)
+	}
+}
+
+func (webService ParentsWebService) saveSearch(responseWriter http.ResponseWriter, request *http.Request) {
+	httpParams := mux.Vars(request)
+
+	parentUsername := httpParams["parentusername"]
+	searchPhrase := httpParams["searchphrase"]
+	decodedSearchPhrase, decodingError := url.QueryUnescape(searchPhrase)
+
+	log.Println("saveSearch: parentUsername=", parentUsername, ", searchPhrase=", searchPhrase, ", decodedSearchPhrase=", decodedSearchPhrase, ", decodingError=", decodingError)
+
+	if decodingError != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: need to sanitize payload input before using
+	sanitizedParentUsername := parentUsername
+	sanitizedSearchPhrase := decodedSearchPhrase
+
+	addErr := webService.searchesModule.AddSearchToParent(sanitizedParentUsername, sanitizedSearchPhrase)
+
+	if addErr != nil {
+		log.Println("searchesModule.AddSearchToParent for ", sanitizedParentUsername, " and ", sanitizedSearchPhrase, " failed ", addErr)
+		responseWriter.WriteHeader(http.StatusNotFound)
+	} else {
+		log.Println("saveSearch: parentUsername=", sanitizedParentUsername, ", searchPhrase=", sanitizedSearchPhrase, " returning CREATED")
+		responseWriter.WriteHeader(http.StatusCreated)
+		responseWriter.Write([]byte(""))
+	}
+}
+
 // NewParentWebService - creates and returns a new ParentsWebService
-func NewParentWebService(router *mux.Router, userModule modules.UserModule) *ParentsWebService {
+func NewParentWebService(router *mux.Router, userModule modules.UserModule, searchesModule modules.SearchesModule) *ParentsWebService {
 
 	webService := ParentsWebService{}
 	webService.userModule = userModule
+	webService.searchesModule = searchesModule
 
 	router.HandleFunc("/api/parents/auth", webService.authParentUser).Methods("POST")
 	router.HandleFunc("/api/parents/{parentusername}/children", webService.getChildrenForParent).Methods("GET")
 	router.HandleFunc("/api/parents/{parentusername}/children/{childusername}", webService.addUpdateChildToParent).Methods("PUT")
+	router.HandleFunc("/api/parents/{parentusername}/searches", webService.getSavedSearches).Methods("GET")
+	router.HandleFunc("/api/parents/{parentusername}/searches/{searchphrase}", webService.saveSearch).Methods("PUT")
 
 	return &webService
 }
