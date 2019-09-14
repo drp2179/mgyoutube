@@ -52,11 +52,11 @@ public class ParentsWebService {
 		final User authedUser = userModule.authUser(userCredential);
 
 		if (authedUser == null) {
-			System.out.println("authParentUser: userCredentialJson=" + userCredentialJson
+			System.out.println("authParentUser: userCredentialJson=" + sanitizedUserCredentialJson
 					+ " failed auth, returning UNAUTHORIZED");
 			return Response.status(Status.UNAUTHORIZED).build();
 		} else if (!authedUser.isParent) {
-			System.out.println("authParentUser: userCredentialJson=" + userCredentialJson
+			System.out.println("authParentUser: userCredentialJson=" + sanitizedUserCredentialJson
 					+ " is not a parent, returning UNAUTHORIZED");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
@@ -65,7 +65,7 @@ public class ParentsWebService {
 
 		final String responseJson = GSON.toJson(authedUser);
 
-		System.out.println("authParentUser: userCredentialJson=" + userCredentialJson + " returning OK");
+		System.out.println("authParentUser: userCredentialJson=" + sanitizedUserCredentialJson + " returning OK");
 		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 
@@ -88,8 +88,8 @@ public class ParentsWebService {
 
 			final String responseJson = GSON.toJson(children);
 
-			System.out.println("getChildrenForParent: parentUsername=" + parentUsername + " returning OK for size "
-					+ children.size() + " and json=" + responseJson);
+			System.out.println("getChildrenForParent: parentUsername=" + sanitizedParentUsername
+					+ " returning OK for size " + children.size() + " and json=" + responseJson);
 			return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 		} catch (UserNotFoundException unfe) {
 			System.out.println("getChildrenForParent: unable to find user " + unfe.username + " returning NOT_FOUND");
@@ -108,7 +108,7 @@ public class ParentsWebService {
 
 		// TODO: need to sanitize payload input before using
 		final String sanitizedParentUsername = parentUsername;
-		// final String sanitizedChildUsername = childUsername;
+		final String sanitizedChildUsername = childUsername;
 		final String sanitizedChildUserJson = childUserJson;
 
 		final User childUser = Helpers.marshalUserFromJson(sanitizedChildUserJson);
@@ -121,8 +121,8 @@ public class ParentsWebService {
 
 			final String responseJson = GSON.toJson(addedUpdatedUser);
 
-			System.out.println("addUpdateChildToParent: parentUsername=" + parentUsername + ", childUsername="
-					+ childUsername + " returning OK");
+			System.out.println("addUpdateChildToParent: parentUsername=" + sanitizedParentUsername + ", childUsername="
+					+ sanitizedChildUsername + " returning OK");
 			return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 		} catch (UserNotFoundException unfe) {
 			System.out.println("addUpdateChildToParent: unable to find user " + unfe.username + " returning NOT_FOUND");
@@ -145,7 +145,7 @@ public class ParentsWebService {
 
 			final String responseJson = GSON.toJson(searches);
 
-			System.out.println("getSavedSearches: parentUsername=" + parentUsername + " returning OK for size "
+			System.out.println("getSavedSearches: parentUsername=" + sanitizedParentUsername + " returning OK for size "
 					+ searches.size() + " and json=" + responseJson);
 			return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 		} catch (UserNotFoundException unfe) {
@@ -169,8 +169,8 @@ public class ParentsWebService {
 		try {
 			searchesModule.addSearchToParent(sanitizedParentUsername, sanitizedSearchPhrase);
 
-			System.out.println("saveSearch: parentUsername=" + parentUsername + ", searchPhrase=" + searchPhrase
-					+ " returning CREATED");
+			System.out.println("saveSearch: parentUsername=" + sanitizedParentUsername + ", searchPhrase="
+					+ sanitizedSearchPhrase + " returning CREATED");
 			final URI location = new URI("/parents/" + sanitizedParentUsername + "/searches");
 			return Response.created(location).build();
 		} catch (UserNotFoundException unfe) {

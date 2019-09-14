@@ -39,7 +39,7 @@ public class SupportWebService {
 		System.out.println("getUserByUsername: user=" + user);
 
 		if (user == null) {
-			System.out.println("getUserByUsername: username=" + username + " returning NOT_FOUND");
+			System.out.println("getUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
 			return Response.status(Status.NOT_FOUND).build();
 		}
 
@@ -47,7 +47,7 @@ public class SupportWebService {
 
 		final String responseJson = GSON.toJson(user);
 
-		System.out.println("getUserByUsername: username=" + username + " returning OK");
+		System.out.println("getUserByUsername: username=" + santizedUsername + " returning OK");
 		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 
@@ -71,8 +71,8 @@ public class SupportWebService {
 
 		// final URI location = new URI("/users/" + createdUser.userId);
 
-		System.out
-				.println("createUpdateUserByUsername: userJson=" + userJson + " returning OK with " + createdUserJson);
+		System.out.println(
+				"createUpdateUserByUsername: userJson=" + sanitizedUserJson + " returning OK with " + createdUserJson);
 		return Response.ok(createdUserJson, MediaType.APPLICATION_JSON).build();
 	}
 
@@ -86,7 +86,7 @@ public class SupportWebService {
 		final User oldUser = userModule.removeUser(santizedUsername);
 
 		if (oldUser == null) {
-			System.out.println("deleteUserByUsername: username=" + username + " returning NOT_FOUND");
+			System.out.println("deleteUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
 			return Response.status(Status.NOT_FOUND).build();
 		}
 

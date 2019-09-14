@@ -38,12 +38,12 @@ public class ChildrenWebService {
 		final User authedUser = userModule.authUser(userCredential);
 
 		if (authedUser == null) {
-			System.out.println(
-					"authChildUser: userCredentialJson=" + userCredentialJson + " failed auth, returning UNAUTHORIZED");
+			System.out.println("authChildUser: userCredentialJson=" + sanitizedUserCredentialJson
+					+ " failed auth, returning UNAUTHORIZED");
 			return Response.status(Status.UNAUTHORIZED).build();
 		} else if (authedUser.isParent) {
-			System.out.println(
-					"authChildUser: userCredentialJson=" + userCredentialJson + " is a parent, returning UNAUTHORIZED");
+			System.out.println("authChildUser: userCredentialJson=" + sanitizedUserCredentialJson
+					+ " is a parent, returning UNAUTHORIZED");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -51,7 +51,7 @@ public class ChildrenWebService {
 
 		final String responseJson = GSON.toJson(authedUser);
 
-		System.out.println("authUser: userCredentialJson=" + userCredentialJson + " returning OK");
+		System.out.println("authUser: userCredentialJson=" + sanitizedUserCredentialJson + " returning OK");
 		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 }

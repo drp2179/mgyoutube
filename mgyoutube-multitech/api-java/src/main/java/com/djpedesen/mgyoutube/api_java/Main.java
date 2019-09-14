@@ -34,6 +34,7 @@ public class Main {
 		ModuleRepoRegistry.setUserDataRepo(userDataRepo);
 
 		final SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+
 		final SearchesModule searchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);
 		ModuleRepoRegistry.setSearchesModule(searchesModule);
 
