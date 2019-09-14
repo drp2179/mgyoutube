@@ -55,17 +55,41 @@
             constructor(props) {
                 super(props);
 
-                this.state = {theSearchTerms: null, theVideos: [], theVideoId: null };
+                this.state = {theSearchTerms: null, theVideos: [], theVideoId: null, theSavedSearches: [] };
 
+                this.onSaveSearchHandler = this.onSaveSearchHandler.bind(this);
+                this.saveSearchSuccess = this.saveSearchSuccess.bind(this);
+                this.saveSearchFailed = this.saveSearchFailed.bind(this);
+
+                this.searchTermsChangeHandler = this.searchTermsChangeHandler.bind(this);                
                 this.onSearchHandler = this.onSearchHandler.bind(this);
-                this.searchTermsChangeHandler = this.searchTermsChangeHandler.bind(this);
                 this.searchSuccess = this.searchSuccess.bind(this);
                 this.searchFailed = this.searchFailed.bind(this);
+                
                 this.watchVideo = this.watchVideo.bind(this);
+
+                this.getSavedSearchesSuccess = this.getSavedSearchesSuccess.bind(this);
+                this.getSavedSearchesFailed = this.getSavedSearchesFailed.bind(this);
+            }
+
+            onSaveSearchHandler (event) {
+                console.log("globalState:", globalState)
+                if (this.state.theSearchTerms) {
+                    api_saveSearch(globalState.loggedInUsername, this.state.theSearchTerms, () => this.saveSearchSuccess(), () => this.saveSearchFailed());
+                }
+                else {
+                    alert("no search phrase to save")
+                }
             }
 
             onSearchHandler(event) {
                 api_getVideoSearchResults(this.state.theSearchTerms, this.searchSuccess, this.searchFailed);
+            }
+            saveSearchSuccess (event) {
+                api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+            }
+            saveSearchFailed (event) {
+                alert("saving search for  '" + this.state.theSearchTerms + "' failed");
             }
 
             searchTermsChangeHandler(event) {
@@ -73,7 +97,6 @@
             }
 
             searchSuccess(videos) {
-                this.setState({theSearchTerms: null});
                 this.setState({theVideos: videos});
             }
             
@@ -81,14 +104,37 @@
                 alert("searching for  '" + this.state.theSearchTerms + "' failed");
             }
 
+            getSavedSearchesSuccess(savedSearches) {
+                this.setState({theSavedSearches : savedSearches});
+            }
+
+            getSavedSearchesFailed(event) {
+                alert("retrieving saved searches failed");
+            }
+
             watchVideo(event) {
                 console.log("watchVideo, " + event);
                 this.setState( {theVideoId: event});
             }
             
+            componentDidMount() {
+				console.log("searchpanel.componentDidMount");
+				api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+            }
+
             render() {
                 return(
                     <div id="searchpanel">
+                        <div id="savedsearchespanel">
+                            <div>
+                            {this.state.theSavedSearches.map((phrase, index) => {
+                                return(
+                                    <div key={index}>{phrase}</div>
+                                );
+                            })}
+                            </div>
+                        </div>
+
                         <PlayerPanel videoId={this.state.theVideoId}/>
                         <div id="searchtermspanel">
                             <h3>Search Terms</h3>
@@ -97,6 +143,7 @@
                             <button id="submitSearchTermsButton" onClick={this.onSearchHandler}>Search</button>
                         </div>
                         <div id="searchresultspanel">
+                            <div><button id="submitSaveSearchButton" onClick={this.onSaveSearchHandler}>Save Search</button></div>
                             {this.state.theVideos.map((video, index) => {
                                 var divId = 'search-result-' + index
                                 var videoDivId = 'search-result-' + index + "-video-" + video.videoId
@@ -243,13 +290,9 @@
                 );
             }
         }
-        // function LogoutForm(props) {
-        //     return <div id="auth"><button id="logoutButton" onClick={logoutClickHandler}>Logout</button></div>;
-        // };
         class LogoutForm extends React.Component {
             constructor(props) {
                 super(props);
-                //this.state = {theUsername: '', thePassword: ''};
 
                 this.logoutClickHandler = this.logoutClickHandler.bind(this);
             }
@@ -307,6 +350,7 @@
 
             render() {
                 if (this.state.userIsAuthenticated) {
+                    console.log("parentsapp, user is auth'd")
                     return (
                         <div>
                         <LogoutForm onLogoutClicked={this.logoutClickedHandler} />
@@ -315,7 +359,8 @@
                         </div>
                     );
                 }
-                return <div><LoginForm onLoginClicked={this.loginClickedHandler}/><SearchPanel /></div>;
+                console.log("parentsapp, user NOT is auth'd")
+                return <div><LoginForm onLoginClicked={this.loginClickedHandler}/></div>;
             }
         }
 
