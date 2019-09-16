@@ -21,7 +21,7 @@ class UserModule(ABC):
         pass
 
     @abstractmethod
-    def updateUser(self, userId: int, user: User) -> User:
+    def updateUser(self, userId: str, user: User) -> User:
         pass
 
     @abstractmethod

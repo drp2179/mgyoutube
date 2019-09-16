@@ -17,13 +17,13 @@ class UserDataRepo(ABC):
         pass
 
     @abstractmethod
-    def replaceUser(self, userId: int, user: User) -> User:
+    def replaceUser(self, userId: str, user: User) -> User:
         pass
 
     @abstractmethod
-    def addChildToParent(self, parentUserId: int, childUserId: int):
+    def addChildToParent(self, parentUserId: str, childUserId: str):
         pass
 
     @abstractmethod
-    def getChildrenForParent(self, userId) -> list:
+    def getChildrenForParent(self, userId: str) -> list:
         pass

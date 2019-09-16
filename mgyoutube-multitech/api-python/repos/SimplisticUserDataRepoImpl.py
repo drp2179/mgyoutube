@@ -20,8 +20,11 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
     def addUser(self, user: User) -> User:
         # cloning so that we can mutate userId without affecting the input object
         addedUser = cloneUser(user)
-        addedUser.userId = self.nextUserId
+        addedUser.userId = str(self.nextUserId)
         self.nextUserId = self.nextUserId + 1
+
+        print("SimplisticUserDataRepoImpl.addUser, user being added",
+              addedUser, "nextUserId", self.nextUserId)
 
         self.userIdMap[addedUser.userId] = addedUser
         self.usernameMap[addedUser.username] = addedUser
@@ -33,7 +36,7 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
         del self.userIdMap[user.userId]
         del self.usernameMap[user.username]
 
-    def replaceUser(self, userId: int, user: User) -> User:
+    def replaceUser(self, userId: str, user: User) -> User:
         existingUser = self.userIdMap[userId]
 
         if existingUser is not None:
@@ -49,7 +52,7 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
 
         return None
 
-    def addChildToParent(self, parentUserId: int, childUserId: int):
+    def addChildToParent(self, parentUserId: str, childUserId: int):
         childList = self.parentChildrenMap.get(parentUserId)
         if childList is None:
             self.parentChildrenMap[parentUserId] = list()
@@ -61,7 +64,7 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
         except ValueError:
             childrenUserIds.append(childUserId)
 
-    def getChildrenForParent(self, parentUserId: int) -> list:
+    def getChildrenForParent(self, parentUserId: str) -> list:
         children = list()
 
         childrenUserIds = self.parentChildrenMap.get(parentUserId)
@@ -75,5 +78,5 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
 
         return children
 
-    def getUserById(self, userId: int) -> User:
+    def getUserById(self, userId: str) -> User:
         return self.userIdMap.get(userId)

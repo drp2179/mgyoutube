@@ -39,9 +39,9 @@ class DefaultUserModuleImpl(UserModule):
         return user
 
     def createUser(self, user: User) -> User:
-        if (user.userId == 0):
+        if (user.userId is None):
             createdUser = self.userDataRepo.addUser(user)
-            if (createdUser != None):
+            if (createdUser is not None):
                 return createdUser
         return None
 
@@ -58,7 +58,7 @@ class DefaultUserModuleImpl(UserModule):
             self.userDataRepo.removeUser(user)
         return user
 
-    def updateUser(self, userId: int,  user: User) -> User:
+    def updateUser(self, userId: str,  user: User) -> User:
         return self.userDataRepo.replaceUser(userId, user)
 
     def getChildrenForParent(self, parentUsername: str) -> list:
