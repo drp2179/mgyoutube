@@ -3,14 +3,20 @@ package repos
 import (
 	"apimodel"
 	"log"
+	"strconv"
 )
 
 // SimpleUserDataRepoImpl - data for SimpleUserDataRepoImpl
 type SimpleUserDataRepoImpl struct {
 	usernameMap       map[string]*apimodel.User
-	userIDMap         map[int64]*apimodel.User
-	parentChildrenMap map[int64][]int64
-	nextUserID        int64
+	userIDMap         map[string]*apimodel.User
+	parentChildrenMap map[string][]string
+	nextUserID        int
+}
+
+// RepositoryStartup - to initialize the repo
+func (userDataRepo *SimpleUserDataRepoImpl) RepositoryStartup() {
+	// nothing to do here
 }
 
 // GetUserByUsername - get a user by username
@@ -28,7 +34,7 @@ func (userDataRepo SimpleUserDataRepoImpl) GetUserByUsername(username string) *a
 func (userDataRepo *SimpleUserDataRepoImpl) AddUser(user *apimodel.User) *apimodel.User {
 	// cloning so that we can mutate userId without affecting the input object
 	addedUser := apimodel.CloneUser(user)
-	addedUser.UserID = userDataRepo.nextUserID
+	addedUser.UserID = strconv.Itoa(userDataRepo.nextUserID)
 	userDataRepo.nextUserID++
 
 	userDataRepo.userIDMap[addedUser.UserID] = addedUser
@@ -45,7 +51,7 @@ func (userDataRepo SimpleUserDataRepoImpl) RemoveUser(user *apimodel.User) {
 }
 
 // ReplaceUser - replace the user
-func (userDataRepo SimpleUserDataRepoImpl) ReplaceUser(userID int64, user *apimodel.User) *apimodel.User {
+func (userDataRepo SimpleUserDataRepoImpl) ReplaceUser(userID string, user *apimodel.User) *apimodel.User {
 	_, existing := userDataRepo.userIDMap[userID]
 
 	if existing {
@@ -65,15 +71,15 @@ func (userDataRepo SimpleUserDataRepoImpl) ReplaceUser(userID int64, user *apimo
 }
 
 // AddChildToParent - add a child to a parent
-func (userDataRepo SimpleUserDataRepoImpl) AddChildToParent(parentUserID int64, childUserID int64) {
+func (userDataRepo SimpleUserDataRepoImpl) AddChildToParent(parentUserID string, childUserID string) {
 	_, existingParent := userDataRepo.parentChildrenMap[parentUserID]
 	if !existingParent {
-		userDataRepo.parentChildrenMap[parentUserID] = make([]int64, 0)
+		userDataRepo.parentChildrenMap[parentUserID] = make([]string, 0)
 	}
 
 	childrenUserIds := userDataRepo.parentChildrenMap[parentUserID]
 
-	hasChildID := checkArrayInt64ForValue(childrenUserIds, childUserID)
+	hasChildID := checkArrayStringForValue(childrenUserIds, childUserID)
 	if !hasChildID {
 		childrenUserIds = append(childrenUserIds, childUserID)
 		userDataRepo.parentChildrenMap[parentUserID] = childrenUserIds
@@ -81,7 +87,7 @@ func (userDataRepo SimpleUserDataRepoImpl) AddChildToParent(parentUserID int64, 
 }
 
 // GetChildrenForParent - get all of the children for a parent
-func (userDataRepo SimpleUserDataRepoImpl) GetChildrenForParent(parentUserID int64) []*apimodel.User {
+func (userDataRepo SimpleUserDataRepoImpl) GetChildrenForParent(parentUserID string) []*apimodel.User {
 	var children []*apimodel.User
 	childrenUserIds, exists := userDataRepo.parentChildrenMap[parentUserID]
 
@@ -100,11 +106,21 @@ func (userDataRepo SimpleUserDataRepoImpl) GetChildrenForParent(parentUserID int
 	return children
 }
 
-func (userDataRepo SimpleUserDataRepoImpl) getUserByID(userID int64) *apimodel.User {
+func (userDataRepo SimpleUserDataRepoImpl) getUserByID(userID string) *apimodel.User {
 	return userDataRepo.userIDMap[userID]
 }
 
 func checkArrayInt64ForValue(slice []int64, value int64) bool {
+	for _, n := range slice {
+		if n == value {
+			return true
+		}
+	}
+
+	return false
+}
+
+func checkArrayStringForValue(slice []string, value string) bool {
 	for _, n := range slice {
 		if n == value {
 			return true
@@ -119,9 +135,9 @@ func NewSimpleUserDataRepoImpl() *SimpleUserDataRepoImpl {
 	userDataRepo := SimpleUserDataRepoImpl{}
 
 	userDataRepo.nextUserID = 1
-	userDataRepo.userIDMap = make(map[int64]*apimodel.User)
+	userDataRepo.userIDMap = make(map[string]*apimodel.User)
 	userDataRepo.usernameMap = make(map[string]*apimodel.User)
-	userDataRepo.parentChildrenMap = make(map[int64][]int64)
+	userDataRepo.parentChildrenMap = make(map[string][]string)
 
 	return &userDataRepo
 }

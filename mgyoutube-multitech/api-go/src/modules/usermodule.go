@@ -8,8 +8,9 @@ type UserModule interface {
 
 	GetUserByUsername(username string) *apimodel.User
 
+	CreateUpdateUser(user *apimodel.User) *apimodel.User
 	CreateUser(user *apimodel.User) *apimodel.User
-	UpdateUser(userID int64, user *apimodel.User) *apimodel.User
+	UpdateUser(userID string, user *apimodel.User) *apimodel.User
 	RemoveUser(username string) *apimodel.User
 
 	GetChildrenForParent(parentUsername string) ([]*apimodel.User, error)

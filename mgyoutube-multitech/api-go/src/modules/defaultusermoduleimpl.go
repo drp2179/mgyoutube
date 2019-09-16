@@ -42,9 +42,25 @@ func (userModule DefaultUserModuleImpl) GetUserByUsername(username string) *apim
 	return userModule.userDataRepo.GetUserByUsername(username)
 }
 
+// CreateUpdateUser - create or update based on if the username already exists
+func (userModule *DefaultUserModuleImpl) CreateUpdateUser(user *apimodel.User) *apimodel.User {
+	existingUser := userModule.userDataRepo.GetUserByUsername(user.Username)
+	if existingUser != nil {
+		if len(user.UserID) == 0 {
+			user.UserID = existingUser.UserID
+		}
+
+		log.Println("createUpdateUser is updating existing user ", existingUser, " to be ", user)
+		return userModule.UpdateUser(existingUser.UserID, user)
+	}
+
+	log.Println("createUpdateUser is creating new user ", user)
+	return userModule.CreateUser(user)
+}
+
 // CreateUser - creates a user based on the provided model
 func (userModule DefaultUserModuleImpl) CreateUser(user *apimodel.User) *apimodel.User {
-	if user.UserID == 0 {
+	if len(user.UserID) == 0 {
 		//log.Println("CreateUser, user", user)
 		createdUser := userModule.userDataRepo.AddUser(user)
 		//log.Println("CreateUser, createdUser", createdUser)
@@ -55,7 +71,8 @@ func (userModule DefaultUserModuleImpl) CreateUser(user *apimodel.User) *apimode
 }
 
 // UpdateUser - updates the associated user with the provided data
-func (userModule DefaultUserModuleImpl) UpdateUser(userID int64, user *apimodel.User) *apimodel.User {
+func (userModule DefaultUserModuleImpl) UpdateUser(userID string, user *apimodel.User) *apimodel.User {
+	log.Println("DefaultUserModuleImpl.UpdateUser, userID", userID, "as user ", user)
 	return userModule.userDataRepo.ReplaceUser(userID, user)
 }
 
@@ -63,7 +80,7 @@ func (userModule DefaultUserModuleImpl) UpdateUser(userID int64, user *apimodel.
 func (userModule DefaultUserModuleImpl) RemoveUser(username string) *apimodel.User {
 	user := userModule.GetUserByUsername(username)
 
-	if user != nil && user.UserID > 0 {
+	if user != nil && len(user.UserID) != 0 {
 		userModule.userDataRepo.RemoveUser(user)
 	}
 
@@ -83,6 +100,7 @@ func (userModule DefaultUserModuleImpl) GetChildrenForParent(parentUsername stri
 
 // AddUpdateChildToParent -
 func (userModule DefaultUserModuleImpl) AddUpdateChildToParent(parentUsername string, childUser *apimodel.User) (*apimodel.User, error) {
+	log.Println("DefaultUserModuleImpl.AddUpdateChildToParent, parentUsername", parentUsername, " childUser ", childUser)
 	parentUser := userModule.GetUserByUsername(parentUsername)
 	if parentUser == nil {
 		return nil, errors.New("unable to find parent")
@@ -90,11 +108,11 @@ func (userModule DefaultUserModuleImpl) AddUpdateChildToParent(parentUsername st
 
 	existingChildUser := userModule.GetUserByUsername(childUser.Username)
 	if existingChildUser == nil {
-		log.Println("creating child ", childUser)
+		log.Println("DefaultUserModuleImpl.AddUpdateChildToParent, creating child ", childUser)
 
 		createdChildUser := userModule.CreateUser(childUser)
 		if createdChildUser == nil {
-			log.Println("creating child ", childUser, " failed ")
+			log.Println("DefaultUserModuleImpl.AddUpdateChildToParent, creating child ", childUser, " failed ")
 			return nil, errors.New("Creating child failed")
 		}
 
@@ -102,7 +120,7 @@ func (userModule DefaultUserModuleImpl) AddUpdateChildToParent(parentUsername st
 		return createdChildUser, nil
 	}
 
-	log.Println("updating child ", childUser, " as ", existingChildUser.UserID)
+	log.Println("DefaultUserModuleImpl.AddUpdateChildToParent, updating child ", childUser, " as ", existingChildUser.UserID)
 	userModule.userDataRepo.AddChildToParent(parentUser.UserID, existingChildUser.UserID)
 	updatedUser := userModule.UpdateUser(existingChildUser.UserID, childUser)
 	return updatedUser, nil

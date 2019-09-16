@@ -27,8 +27,14 @@ func main() {
 
 	videoModule := modules.NewDefaultVideoModuleImpl(youTubeProperties.APIKey, youTubeProperties.ApplicationName)
 
-	searchesDataRepo := repos.NewSimplisticSearchesDataRepoImpl()
-	userDataRepo := repos.NewSimpleUserDataRepoImpl()
+	const mongoConnectionString = "mongodb://localhost:27017"
+	const mongoDatabaseName = "mgyoutube"
+	//searchesDataRepo := repos.NewSimplisticSearchesDataRepoImpl()
+	searchesDataRepo := repos.NewMongoSearchesDataRepoImpl(mongoConnectionString, mongoDatabaseName)
+	searchesDataRepo.RepositoryStartup()
+	//userDataRepo := repos.NewSimpleUserDataRepoImpl()
+	userDataRepo := repos.NewMongoUserDataRepoImpl(mongoConnectionString, mongoDatabaseName)
+	userDataRepo.RepositoryStartup()
 	userModule := modules.NewDefaultUserModuleImpl(userDataRepo)
 	searchesModule := modules.NewDefaultSearchesModuleImpl(userDataRepo, searchesDataRepo)
 

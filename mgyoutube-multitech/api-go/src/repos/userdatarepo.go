@@ -4,15 +4,17 @@ import "apimodel"
 
 // UserDataRepo - interface definition for a UserDataRepo
 type UserDataRepo interface {
+	RepositoryStartup()
+
 	GetUserByUsername(username string) *apimodel.User
 
 	AddUser(user *apimodel.User) *apimodel.User
 
 	RemoveUser(user *apimodel.User)
 
-	ReplaceUser(userID int64, user *apimodel.User) *apimodel.User
+	ReplaceUser(userID string, user *apimodel.User) *apimodel.User
 
-	AddChildToParent(parentUserID int64, childUserID int64)
+	AddChildToParent(parentUserID string, childUserID string)
 
-	GetChildrenForParent(parentUserID int64) []*apimodel.User
+	GetChildrenForParent(parentUserID string) []*apimodel.User
 }

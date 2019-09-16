@@ -34,8 +34,8 @@ func (webService SupportWebService) createUpdateUser(responseWriter http.Respons
 	marsheledUser := MarshalUserFromJSON(sanitizedUserJSONBytes)
 	log.Println("supportCreateuser: marsheledUser=", marsheledUser)
 
-	createdUser := webService.userModule.CreateUser(marsheledUser)
-	log.Println("supportCreateuser: createdUser=", createdUser)
+	createdUser := webService.userModule.CreateUpdateUser(marsheledUser)
+	log.Println("supportCreateuser: CreateUpdateUser=", createdUser)
 
 	if createdUser == nil {
 		log.Println("createUser failed for ", sanitizedUserJSON)

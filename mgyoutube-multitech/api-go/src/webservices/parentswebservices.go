@@ -123,12 +123,12 @@ func (webService ParentsWebService) addUpdateChildToParent(responseWriter http.R
 	childUserJSON := string(childUserJSONBytes)
 
 	if err != nil {
-		log.Println("addUpdateChildToParent for ", parentUsername, " and ", childUsername, " failed to extract message body ", err)
+		log.Println("ParentsWebService.addUpdateChildToParent for ", parentUsername, " and ", childUsername, " failed to extract message body ", err)
 		responseWriter.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	log.Println("addUpdateChildToParent: parentUsername=", parentUsername, ", childUsername=", childUsername, ", childUserJson=", childUserJSON)
+	log.Println("ParentsWebService.addUpdateChildToParent: parentUsername=", parentUsername, ", childUsername=", childUsername, ", childUserJson=", childUserJSON)
 
 	// TODO: need to sanitize payload input before using
 	sanitizedParentUsername := parentUsername
@@ -137,20 +137,23 @@ func (webService ParentsWebService) addUpdateChildToParent(responseWriter http.R
 	//sanitizedChildUserJSON := childUserJSON
 
 	childUser := MarshalUserFromJSON(sanitizedChildUserJSONBytes)
-	log.Println("addUpdateChildToParent: childUser=", childUser)
+	log.Println("ParentsWebService.addUpdateChildToParent: childUser=", childUser)
 
 	addedUpdatedUser, err := webService.userModule.AddUpdateChildToParent(sanitizedParentUsername, childUser)
 
 	if err != nil {
-		log.Println("userModule.addUpdateChildToParent for ", sanitizedParentUsername, " and ", childUser, " failed ", err)
+		log.Println("ParentsWebService.userModule.addUpdateChildToParent for ", sanitizedParentUsername, " and ", childUser, " failed ", err)
 		responseWriter.WriteHeader(http.StatusNotFound)
+	} else if addedUpdatedUser == nil {
+		log.Println("ParentsWebService.userModule.addUpdateChildToParent for ", sanitizedParentUsername, " and ", childUser, " failed and return nil for addedUpdatedUser")
+		responseWriter.WriteHeader(http.StatusInternalServerError)
 	} else {
 		addedUpdatedUser.Password = ""
 
 		responseJSONBytes, _ := json.Marshal(addedUpdatedUser)
 		responseJSON := string(responseJSONBytes)
 
-		log.Println("addUpdateChildToParent: parentUsername=", parentUsername, ", childUsername=", childUsername, " returning OK", responseJSON)
+		log.Println("ParentsWebService.addUpdateChildToParent: parentUsername=", parentUsername, ", childUsername=", childUsername, " returning OK", responseJSON)
 		responseWriter.Header().Set("Content-Type", "application/json")
 		responseWriter.WriteHeader(http.StatusOK)
 		responseWriter.Write(responseJSONBytes)
