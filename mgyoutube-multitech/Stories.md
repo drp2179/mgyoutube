@@ -72,3 +72,12 @@ Acceptance Criteria
   - GET /parent/{parent}/searches
 - API support adding to saved searches
   - PUT /parent{parent/searches/{search phrase}
+
+## Story 11: Parent can delete search terms
+As an authenticated parent user, I would like to be able to delete search phrases from the allowed list if I determine they are no longer appropriate for my children
+
+Acceptance Criteria:
+- DELETE /api/parents/{parentusername}/searches/{searchphrase} remotes the searchphrase from the list of saved searches for the parent
+- GET /api/parents/{parentusername}/searches after a DELETE does not list the previously named searchphrase
+- an authenticated parent can affect a delete operation on any of the listed search phrases
+- the deleted search phrase does not re-appear after logging out and logging back in
