@@ -80,7 +80,7 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		passwordField.sendKeys(user.password);
 		loginButton.click();
 
-		if (!wasLoginSuccess(getWebDriver())) {
+		if (!wasLoginSuccess(getWebDriver(), 4)) {
 			System.out.println("parent app login for " + username + " failed");
 			getWebDriver().switchTo().alert().dismiss();
 			// should probably save this info in the scenario context
@@ -123,7 +123,7 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		passwordField.sendKeys(parentUser.password);
 		loginButton.click();
 
-		if (!wasLoginSuccess(getWebDriver())) {
+		if (!wasLoginSuccess(getWebDriver(), 4)) {
 			System.out.println("parent app login for " + parentUsername + " failed");
 			getWebDriver().switchTo().alert().dismiss();
 			// should probably save this info in the scenario context
@@ -142,11 +142,11 @@ public class ParentsAppBasicSteps extends BaseSteps {
 		passwordField.sendKeys(childUser.password);
 		loginButton.click();
 
-		if (!wasLoginSuccess(getWebDriver())) {
-			System.out.println("parent app login for " + childUsername + " failed");
-			getWebDriver().switchTo().alert().dismiss();
-			// should probably save this info in the scenario context
-		}
+		Assert.assertFalse("parent app login for child " + childUsername + " should not be successful",
+				wasLoginSuccess(getWebDriver(), 4));
+
+		System.out.println("parent app login for child " + childUsername + " correctly failed");
+		getWebDriver().switchTo().alert().dismiss();
 	}
 
 	@When("the parent user (.*) adds child user (.*) with password (.*)")
@@ -211,8 +211,8 @@ public class ParentsAppBasicSteps extends BaseSteps {
 				foundText);
 	}
 
-	private boolean wasLoginSuccess(final WebDriver driver) {
-		final WebDriverWait wait = new WebDriverWait(driver, 2 /* timeout in seconds */);
+	private boolean wasLoginSuccess(final WebDriver driver, final int waitSeconds) {
+		final WebDriverWait wait = new WebDriverWait(driver, waitSeconds);
 		try {
 			final Alert alertPresent = wait.until(ExpectedConditions.alertIsPresent());
 			// System.out.println("wasLoginSuccess: alertPresent: " + alertPresent);
