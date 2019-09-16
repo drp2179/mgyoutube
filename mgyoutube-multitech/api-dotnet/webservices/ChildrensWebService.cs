@@ -26,33 +26,41 @@ namespace api_dotnet.webservices
 
         public Task AuthChildUser(HttpContext context)
         {
-            string userCredentialJson = RequestHelper.GetRequestBody(context.Request);
-            Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson);
-
-            // TODO: need to sanitize payload input before using
-            String sanitizedUserCredentialJson = userCredentialJson;
-            UserCredential userCredential = Helpers.MarshalUserCredentialFromJson(sanitizedUserCredentialJson);
-            Console.WriteLine("authChildUser: userCredential=" + userCredential);
-
-            User authedUser = userModule.AuthUser(userCredential);
-
-            if (authedUser == null)
+            try
             {
-                Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson + " failed auth, returning UNAUTHORIZED");
-                return ResponseHelper.Unauthorized(context);
+                string userCredentialJson = RequestHelper.GetRequestBody(context.Request);
+                Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson);
+
+                // TODO: need to sanitize payload input before using
+                String sanitizedUserCredentialJson = userCredentialJson;
+                UserCredential userCredential = Helpers.MarshalUserCredentialFromJson(sanitizedUserCredentialJson);
+                Console.WriteLine("authChildUser: userCredential=" + userCredential);
+
+                User authedUser = userModule.AuthUser(userCredential).GetAwaiter().GetResult();
+
+                if (authedUser == null)
+                {
+                    Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson + " failed auth, returning UNAUTHORIZED");
+                    return ResponseHelper.Unauthorized(context);
+                }
+                else if (authedUser.isParent)
+                {
+                    Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson + " is a parent, returning UNAUTHORIZED");
+                    return ResponseHelper.Unauthorized(context);
+                }
+
+                authedUser.password = null;
+
+                String responseJson = JsonConvert.SerializeObject(authedUser);
+
+                Console.WriteLine("authUser: userCredentialJson=" + userCredentialJson + " returning OK and " + responseJson);
+                return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
             }
-            else if (authedUser.isParent)
+            catch (Exception e)
             {
-                Console.WriteLine("authChildUser: userCredentialJson=" + userCredentialJson + " is a parent, returning UNAUTHORIZED");
-                return ResponseHelper.Unauthorized(context);
+                Console.WriteLine("AuthChildUser, unhandled exception", e);
+                return ResponseHelper.InternalServerError(context);
             }
-
-            authedUser.password = null;
-
-            String responseJson = JsonConvert.SerializeObject(authedUser);
-
-            Console.WriteLine("authUser: userCredentialJson=" + userCredentialJson + " returning OK and " + responseJson);
-            return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
         }
     }
 }

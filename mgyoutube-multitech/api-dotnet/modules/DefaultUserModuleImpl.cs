@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using api_dotnet.apimodel;
 using api_dotnet.repos;
 
@@ -18,12 +19,12 @@ namespace api_dotnet.modules
             this.userDataRepo = userDataRepo;
         }
 
-        public User AuthUser(UserCredential userCredential)
+        public async Task<User> AuthUser(UserCredential userCredential)
         {
             User user = null;
             try
             {
-                user = userDataRepo.GetUserByUsername(userCredential.username);
+                user = await userDataRepo.GetUserByUsername(userCredential.username);
 
                 if (user != null)
                 {
@@ -64,9 +65,9 @@ namespace api_dotnet.modules
             return user;
         }
 
-        public User CreateUpdateUser(User user)
+        public async Task<User> CreateUpdateUser(User user)
         {
-            User existingUser = this.userDataRepo.GetUserByUsername(user.username);
+            User existingUser = await this.userDataRepo.GetUserByUsername(user.username);
             if (existingUser != null)
             {
                 if (user.userId == null)
@@ -74,18 +75,18 @@ namespace api_dotnet.modules
                     user.userId = existingUser.userId;
                 }
                 Console.WriteLine("createUpdateUser is updating existing user " + existingUser + " to be " + user);
-                return this.UpdateUser(existingUser.userId, user);
+                return await this.UpdateUser(existingUser.userId, user);
             }
             Console.WriteLine("createUpdateUser is creating new user " + user);
-            return this.CreateUser(user);
+            return await this.CreateUser(user);
         }
 
 
-        public User CreateUser(User user)
+        public async Task<User> CreateUser(User user)
         {
             if (user.userId == null)
             {
-                User createdUser = this.userDataRepo.AddUser(user);
+                User createdUser = await this.userDataRepo.AddUser(user);
 
                 if (createdUser != null)
                 {
@@ -96,7 +97,7 @@ namespace api_dotnet.modules
             return null;
         }
 
-        private User UpdateUser(string userId, User user)
+        private async Task<User> UpdateUser(string userId, User user)
         {
             if (userId == null)
             {
@@ -116,51 +117,51 @@ namespace api_dotnet.modules
                 user.userId = userId;
             }
 
-            return this.userDataRepo.ReplaceUser(userId, user);
+            return await this.userDataRepo.ReplaceUser(userId, user);
         }
 
-        public User AddUpdateChildToParent(string parentUsername, User childUser)
+        public async Task<User> AddUpdateChildToParent(string parentUsername, User childUser)
         {
-            User parentUser = this.GetUser(parentUsername);
+            User parentUser = await this.GetUser(parentUsername);
             if (parentUser == null)
             {
                 throw new UserNotFoundException(parentUsername);
             }
 
-            User existingChildUser = this.GetUser(childUser.username);
+            User existingChildUser = await this.GetUser(childUser.username);
             if (existingChildUser == null)
             {
                 Console.WriteLine("creating child " + childUser);
-                User createdChildUser = this.CreateUser(childUser);
-                userDataRepo.AddChildToParent(parentUser.userId, createdChildUser.userId);
+                User createdChildUser = await this.CreateUser(childUser);
+                await userDataRepo.AddChildToParent(parentUser.userId, createdChildUser.userId);
                 return createdChildUser;
             }
             else
             {
                 Console.WriteLine("updating child " + childUser + " as " + existingChildUser.userId);
-                userDataRepo.AddChildToParent(parentUser.userId, existingChildUser.userId);
-                return this.UpdateUser(existingChildUser.userId, childUser);
+                await userDataRepo.AddChildToParent(parentUser.userId, existingChildUser.userId);
+                return await this.UpdateUser(existingChildUser.userId, childUser);
             }
         }
 
-        public List<User> GetChildrenForParent(string parentUsername)
+        public async Task<List<User>> GetChildrenForParent(string parentUsername)
         {
-            User parentUser = this.GetUser(parentUsername);
+            User parentUser = await this.GetUser(parentUsername);
             if (parentUser == null)
             {
                 throw new UserNotFoundException(parentUsername);
             }
 
-            List<User> children = userDataRepo.GetChildrenForParent(parentUser.userId);
+            List<User> children = await userDataRepo.GetChildrenForParent(parentUser.userId);
 
             return children;
         }
 
-        public User GetUser(string username)
+        public async Task<User> GetUser(string username)
         {
             try
             {
-                return this.userDataRepo.GetUserByUsername(username);
+                return await this.userDataRepo.GetUserByUsername(username);
             }
             catch (Exception e)
             {
@@ -169,13 +170,13 @@ namespace api_dotnet.modules
             }
         }
 
-        public User RemoveUser(string username)
+        public async Task<User> RemoveUser(string username)
         {
-            User user = this.GetUser(username);
+            User user = await this.GetUser(username);
 
             if (user != null)
             {
-                this.userDataRepo.RemoveUser(user);
+                await this.userDataRepo.RemoveUser(user);
             }
 
             return user;

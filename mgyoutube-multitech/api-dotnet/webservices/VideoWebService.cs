@@ -27,28 +27,34 @@ namespace api_dotnet.webservices
 
         public Task VideosSearch(HttpContext context)
         {
-            string searchTerms = RequestHelper.GetQueryStringField(context, "search");
-            searchTerms = searchTerms == null ? searchTerms : searchTerms.Trim();
-
-            Console.WriteLine("videosSearch: searchTerms='" + searchTerms + "'");
-
-            if (string.IsNullOrEmpty(searchTerms))
+            try
             {
-                Console.WriteLine("search term are blank failing as 400");
-                return ResponseHelper.BadRequest(context);
+                string searchTerms = RequestHelper.GetQueryStringField(context, "search");
+                searchTerms = searchTerms == null ? searchTerms : searchTerms.Trim();
+
+                Console.WriteLine("videosSearch: searchTerms='" + searchTerms + "'");
+
+                if (string.IsNullOrEmpty(searchTerms))
+                {
+                    Console.WriteLine("search term are blank failing as 400");
+                    return ResponseHelper.BadRequest(context);
+                }
+
+                // TODO: need to sanitize payload input before using
+                string sanitizedSearchTerms = searchTerms;
+
+                List<Video> videos = videosModule.search(sanitizedSearchTerms);
+
+                String responseJson = JsonConvert.SerializeObject(videos);
+
+                Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK");
+                return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
             }
-
-            // TODO: need to sanitize payload input before using
-            string sanitizedSearchTerms = searchTerms;
-
-            List<Video> videos = videosModule.search(sanitizedSearchTerms);
-            //Console.WriteLine("videosModule.search: videos=" + videos);
-
-            String responseJson = JsonConvert.SerializeObject(videos);
-
-            //Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK, " + responseJson);
-            Console.WriteLine("videosSearch: searchTerms=" + searchTerms + " returning OK");
-            return ResponseHelper.Ok(context.Response, responseJson, MediaType.APPLICATION_JSON);
+            catch (Exception e)
+            {
+                Console.WriteLine("VideosSearch, unhandled exception", e);
+                return ResponseHelper.InternalServerError(context);
+            }
         }
     }
 }

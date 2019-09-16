@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -23,7 +24,7 @@ namespace api_dotnet.repos
             this.database.DropCollection(SEARCHES_COLLECTION_NAME);
         }
 
-        public void AddSearchToParentUser(string parentUserId, string searchPhrase)
+        public async Task AddSearchToParentUser(string parentUserId, string searchPhrase)
         {
             Dictionary<string, object> documentFields = new Dictionary<string, object>();
             documentFields[SEARCHES_COLLECTION_PARENT_FIELDNAME] = parentUserId;
@@ -31,15 +32,17 @@ namespace api_dotnet.repos
             BsonDocument document = new BsonDocument(documentFields);
 
             IMongoCollection<BsonDocument> searchesCollection = this.database.GetCollection<BsonDocument>(SEARCHES_COLLECTION_NAME);
-            searchesCollection.InsertOne(document);
+            await searchesCollection.InsertOneAsync(document);
         }
 
-        public List<string> GetSearchesForParentUser(string parentUserId)
+        public async Task<List<string>> GetSearchesForParentUser(string parentUserId)
         {
             List<string> searches = new List<string>();
 
             IMongoCollection<BsonDocument> searchesCollection = this.database.GetCollection<BsonDocument>(SEARCHES_COLLECTION_NAME);
-            searchesCollection.Find(new BsonDocument(SEARCHES_COLLECTION_PARENT_FIELDNAME, parentUserId)).ToList().ForEach(d =>
+            var cursor = await searchesCollection.FindAsync(new BsonDocument(SEARCHES_COLLECTION_PARENT_FIELDNAME, parentUserId));
+
+            await cursor.ForEachAsync(d =>
             {
                 var x = d[SEARCHES_COLLECTION_SEARCH_PHRASE_FIELDNAME];
                 searches.Add(x.ToString());

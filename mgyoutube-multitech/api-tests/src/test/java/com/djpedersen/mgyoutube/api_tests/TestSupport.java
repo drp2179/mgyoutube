@@ -39,7 +39,7 @@ public class TestSupport {
 
 		final User createdUser = (new Gson()).fromJson(body, User.class);
 
-		Assert.assertTrue("created userid should be > 0: " + createdUser.userId, createdUser.userId > 0);
+		Assert.assertNotNull("created userid should be not null", createdUser.userId);
 		Assert.assertEquals("username is wrong", username, createdUser.username);
 		Assert.assertFalse("should not be a parent", createdUser.isParent);
 		Assert.assertNull("password should be null", createdUser.password);
@@ -47,7 +47,7 @@ public class TestSupport {
 
 	@Test
 	public void changeChildIntoParent() {
-		final String username = "another-user";
+		final String username = "child-to-parent-user";
 		final String password = "another-password";
 		final String userPayload = ("{'username':'" + username + "', 'password' : '" + password + "'}").replace('\'',
 				'"');
@@ -62,7 +62,7 @@ public class TestSupport {
 		final String body = putResponse.body().asString();
 		final User createdUser = (new Gson()).fromJson(body, User.class);
 
-		Assert.assertTrue("created userid should be > 0: " + createdUser.userId, createdUser.userId > 0);
+		Assert.assertNotNull("created userid should be not null", createdUser.userId);
 		Assert.assertEquals("username is wrong", username, createdUser.username);
 		Assert.assertFalse("should not be a parent", createdUser.isParent);
 		Assert.assertNull("password should be null", createdUser.password);
@@ -79,9 +79,9 @@ public class TestSupport {
 		final String body2 = put2Response.body().asString();
 		final User updatedUser = (new Gson()).fromJson(body2, User.class);
 
-		Assert.assertTrue("created userid should be > 0: " + updatedUser.userId, updatedUser.userId > 0);
+		Assert.assertNotNull("created userid should be not null", updatedUser.userId);
 		Assert.assertEquals("username is wrong", username, updatedUser.username);
-		Assert.assertTrue("should not be a parent", updatedUser.isParent);
+		Assert.assertTrue("should be a parent", updatedUser.isParent);
 		Assert.assertNull("password should be null", updatedUser.password);
 	}
 

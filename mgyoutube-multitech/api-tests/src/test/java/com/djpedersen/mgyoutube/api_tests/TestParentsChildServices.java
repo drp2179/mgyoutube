@@ -83,7 +83,7 @@ public class TestParentsChildServices {
 		Assert.assertEquals("num children is wrong", 1, childrenList.size());
 		final User childUser = childrenList.get(0);
 		Assert.assertEquals("child username is wrong", childUsername, childUser.username);
-		Assert.assertTrue("child userid is wrong: " + childUser.userId, childUser.userId > 0);
+		Assert.assertNotNull("child userid is wrong", childUser.userId);
 		Assert.assertFalse("child should not be a parent", childUser.isParent);
 	}
 

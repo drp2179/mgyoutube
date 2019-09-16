@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace api_dotnet.modules
 {
     public interface SearchesModule
     {
-        List<string> GetSavedSearchesForParent(string parentUsername);
+        Task<List<string>> GetSavedSearchesForParent(string parentUsername);
 
-        void AddSearchToParent(string parentUsername, string searchPhrase);
+        Task AddSearchToParent(string parentUsername, string searchPhrase);
 
     }
 }

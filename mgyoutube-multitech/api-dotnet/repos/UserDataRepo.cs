@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using api_dotnet.apimodel;
 
 namespace api_dotnet.repos
@@ -7,11 +8,11 @@ namespace api_dotnet.repos
     {
         void RepositoryStartup();
 
-        User GetUserByUsername(string username);
-        User AddUser(User user);
-        void RemoveUser(User user);
-        void AddChildToParent(string parentUserId, string childUserId);
-        User ReplaceUser(string userId, User user);
-        List<User> GetChildrenForParent(string userId);
+        Task<User> GetUserByUsername(string username);
+        Task<User> AddUser(User user);
+        Task RemoveUser(User user);
+        Task AddChildToParent(string parentUserId, string childUserId);
+        Task<User> ReplaceUser(string userId, User user);
+        Task<List<User>> GetChildrenForParent(string userId);
     }
 }

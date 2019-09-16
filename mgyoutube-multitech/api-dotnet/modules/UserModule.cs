@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using api_dotnet.apimodel;
 
 namespace api_dotnet.modules
@@ -6,12 +7,12 @@ namespace api_dotnet.modules
 
     public interface UserModule
     {
-        User GetUser(string username);
-        User CreateUpdateUser(User user);
-        User CreateUser(User user);
-        User RemoveUser(string username);
-        User AuthUser(UserCredential userCredential);
-        User AddUpdateChildToParent(string parentUsername, User childUser);
-        List<User> GetChildrenForParent(string sanitizedParentUsername);
+        Task<User> GetUser(string username);
+        Task<User> CreateUpdateUser(User user);
+        Task<User> CreateUser(User user);
+        Task<User> RemoveUser(string username);
+        Task<User> AuthUser(UserCredential userCredential);
+        Task<User> AddUpdateChildToParent(string parentUsername, User childUser);
+        Task<List<User>> GetChildrenForParent(string sanitizedParentUsername);
     }
 }

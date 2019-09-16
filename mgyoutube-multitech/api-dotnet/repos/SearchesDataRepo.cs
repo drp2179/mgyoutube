@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace api_dotnet.repos
 {
@@ -6,8 +7,8 @@ namespace api_dotnet.repos
     {
         void RepositoryStartup();
 
-        List<string> GetSearchesForParentUser(string userId);
+        Task<List<string>> GetSearchesForParentUser(string userId);
 
-        void AddSearchToParentUser(string parentUserId, string searchPhrase);
+        Task AddSearchToParentUser(string parentUserId, string searchPhrase);
     }
 }

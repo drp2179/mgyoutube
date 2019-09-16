@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using api_dotnet.apimodel;
 using api_dotnet.repos;
 
@@ -15,28 +16,32 @@ namespace api_dotnet.modules
             SearchesDataRepo = searchesDataRepo;
         }
 
-        public void AddSearchToParent(string parentUsername, string searchPhrase)
+        public async Task AddSearchToParent(string parentUsername, string searchPhrase)
         {
-            User parentUser = this.UserDataRepo.GetUserByUsername(parentUsername);
+            Console.WriteLine("AddSearchToParent, parentUsername=" + parentUsername + ", searchPhrase=" + searchPhrase);
+            User parentUser = await this.UserDataRepo.GetUserByUsername(parentUsername);
 
             if (parentUser == null)
             {
+                Console.WriteLine("AddSearchToParent, parentUsername=" + parentUsername + " parentUser is null so throwing UserNotFoundException");
                 throw new UserNotFoundException(parentUsername);
             }
 
-            this.SearchesDataRepo.AddSearchToParentUser(parentUser.userId, searchPhrase);
+            Console.WriteLine("AddSearchToParent, parentUsername=" + parentUsername + ", found parent=" + parentUser);
+
+            await this.SearchesDataRepo.AddSearchToParentUser(parentUser.userId, searchPhrase);
         }
 
-        public List<string> GetSavedSearchesForParent(string parentUsername)
+        public async Task<List<string>> GetSavedSearchesForParent(string parentUsername)
         {
-            User parentUser = this.UserDataRepo.GetUserByUsername(parentUsername);
+            User parentUser = await this.UserDataRepo.GetUserByUsername(parentUsername);
 
             if (parentUser == null)
             {
                 throw new UserNotFoundException(parentUsername);
             }
 
-            List<string> searches = this.SearchesDataRepo.GetSearchesForParentUser(parentUser.userId);
+            List<string> searches = await this.SearchesDataRepo.GetSearchesForParentUser(parentUser.userId);
 
             Console.WriteLine("getSavedSearchesForParent for " + parentUsername + " returning searches.size " + searches.Count);
 

@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace api_dotnet.apimodel
 {
     public class User
@@ -14,6 +16,11 @@ namespace api_dotnet.apimodel
             this.username = user.username;
             this.password = user.password;
             this.isParent = user.isParent;
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

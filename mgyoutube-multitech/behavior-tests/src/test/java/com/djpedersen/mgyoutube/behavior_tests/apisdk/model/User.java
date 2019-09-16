@@ -2,7 +2,7 @@ package com.djpedersen.mgyoutube.behavior_tests.apisdk.model;
 
 public class User {
 
-	public long userId;
+	public String userId;
 	public String username;
 	public String password;
 	public boolean isParent;
