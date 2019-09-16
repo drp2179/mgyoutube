@@ -64,9 +64,26 @@ namespace api_dotnet.modules
             return user;
         }
 
+        public User CreateUpdateUser(User user)
+        {
+            User existingUser = this.userDataRepo.GetUserByUsername(user.username);
+            if (existingUser != null)
+            {
+                if (user.userId == null)
+                {
+                    user.userId = existingUser.userId;
+                }
+                Console.WriteLine("createUpdateUser is updating existing user " + existingUser + " to be " + user);
+                return this.UpdateUser(existingUser.userId, user);
+            }
+            Console.WriteLine("createUpdateUser is creating new user " + user);
+            return this.CreateUser(user);
+        }
+
+
         public User CreateUser(User user)
         {
-            if (user.userId == 0)
+            if (user.userId == null)
             {
                 User createdUser = this.userDataRepo.AddUser(user);
 
@@ -77,6 +94,29 @@ namespace api_dotnet.modules
             }
 
             return null;
+        }
+
+        private User UpdateUser(string userId, User user)
+        {
+            if (userId == null)
+            {
+                throw new Exception("parameter 'userId' must not be null");
+            }
+            if (user == null)
+            {
+                throw new Exception("parameter 'user' must not be null");
+            }
+            if (!userId.Equals(user.userId))
+            {
+                if (user.userId != null)
+                {
+                    throw new Exception("user.userId is not null AND userId (" + userId + ") and user.userId ("
+                            + user.userId + ") paremters do not match");
+                }
+                user.userId = userId;
+            }
+
+            return this.userDataRepo.ReplaceUser(userId, user);
         }
 
         public User AddUpdateChildToParent(string parentUsername, User childUser)
@@ -101,11 +141,6 @@ namespace api_dotnet.modules
                 userDataRepo.AddChildToParent(parentUser.userId, existingChildUser.userId);
                 return this.UpdateUser(existingChildUser.userId, childUser);
             }
-        }
-
-        private User UpdateUser(long userId, User user)
-        {
-            return this.userDataRepo.ReplaceUser(userId, user);
         }
 
         public List<User> GetChildrenForParent(string parentUsername)

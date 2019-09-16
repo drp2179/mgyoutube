@@ -7,10 +7,17 @@ namespace api_dotnet.repos
     public class SimplisticUserDataRepoImpl : UserDataRepo
     {
         private Dictionary<string, User> usernameMap = new Dictionary<string, User>();
-        private Dictionary<long, User> userIdMap = new Dictionary<long, User>();
-        private Dictionary<long, List<long>> parentChildrenMap = new Dictionary<long, List<long>>();
+        private Dictionary<string, User> userIdMap = new Dictionary<string, User>();
+        private Dictionary<string, List<string>> parentChildrenMap = new Dictionary<string, List<string>>();
         private long nextUserId = 1;
         private readonly object mutationLock = new object();
+
+        public SimplisticUserDataRepoImpl() { }
+
+        public void RepositoryStartup()
+        {
+            //nothing to do here
+        }
 
         public User GetUserByUsername(string username)
         {
@@ -29,7 +36,8 @@ namespace api_dotnet.repos
             {
                 // cloning so that we can mutate userId without affecting the input object
                 User addedUser = new User(user);
-                addedUser.userId = nextUserId++;
+                addedUser.userId = nextUserId.ToString();
+                nextUserId++;
 
                 this.userIdMap[addedUser.userId] = addedUser;
                 this.usernameMap[addedUser.username] = addedUser;
@@ -48,7 +56,7 @@ namespace api_dotnet.repos
             }
         }
 
-        public User ReplaceUser(long userId, User user)
+        public User ReplaceUser(string userId, User user)
         {
             lock (mutationLock)
             {
@@ -71,16 +79,16 @@ namespace api_dotnet.repos
             }
         }
 
-        public void AddChildToParent(long parentUserId, long childUserId)
+        public void AddChildToParent(string parentUserId, string childUserId)
         {
             lock (mutationLock)
             {
                 if (!this.parentChildrenMap.ContainsKey(parentUserId))
                 {
-                    this.parentChildrenMap[parentUserId] = new List<long>();
+                    this.parentChildrenMap[parentUserId] = new List<string>();
                 }
 
-                List<long> childrenUserIds = this.parentChildrenMap[parentUserId];
+                List<string> childrenUserIds = this.parentChildrenMap[parentUserId];
 
                 if (!childrenUserIds.Contains(childUserId))
                 {
@@ -89,15 +97,15 @@ namespace api_dotnet.repos
             }
         }
 
-        public List<User> GetChildrenForParent(long parentUserId)
+        public List<User> GetChildrenForParent(string parentUserId)
         {
             List<User> children = new List<User>();
 
             if (this.parentChildrenMap.ContainsKey(parentUserId))
             {
-                List<long> childrenUserIds = this.parentChildrenMap[parentUserId];
+                List<string> childrenUserIds = this.parentChildrenMap[parentUserId];
 
-                foreach (long childUserId in childrenUserIds)
+                foreach (string childUserId in childrenUserIds)
                 {
                     User user = this.GetUserById(childUserId);
                     if (user != null)
@@ -115,7 +123,7 @@ namespace api_dotnet.repos
         }
 
         // probably will be public eventually
-        private User GetUserById(long userId)
+        private User GetUserById(string userId)
         {
             return this.userIdMap[userId];
         }

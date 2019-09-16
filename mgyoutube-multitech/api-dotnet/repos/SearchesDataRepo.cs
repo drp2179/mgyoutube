@@ -4,8 +4,10 @@ namespace api_dotnet.repos
 {
     public interface SearchesDataRepo
     {
-        List<string> GetSearchesForParentUser(long userId);
+        void RepositoryStartup();
 
-        void AddSearchToParentUser(long parentUserId, string searchPhrase);
+        List<string> GetSearchesForParentUser(string userId);
+
+        void AddSearchToParentUser(string parentUserId, string searchPhrase);
     }
 }

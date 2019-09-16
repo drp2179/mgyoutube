@@ -32,12 +32,18 @@ namespace api_dotnet
             Console.WriteLine("Startup.ConfigureServices");
 
             YouTubeProperties youTubeProperties = new YouTubeProperties(Configuration);
-            // Console.WriteLine("youTubeProperties.ApiKey: " + youTubeProperties.ApiKey);
-            // Console.WriteLine("youTubeProperties.ApplicationName: " + youTubeProperties.ApplicationName);
             ModuleRepoRegistry.TheVideoModule = new DefaultVideoModuleImpl(youTubeProperties.ApiKey, youTubeProperties.ApplicationName);
 
-            UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
-            SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+            string connectionString = "mongodb://localhost:27017";
+            string databaseName = "mgyoutube";
+            
+            //UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+            UserDataRepo userDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName);
+            userDataRepo.RepositoryStartup();
+
+            //SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+            SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
+            searchesDataRepo.RepositoryStartup();
 
             ModuleRepoRegistry.TheUserModule = new DefaultUserModuleImpl(userDataRepo);
             ModuleRepoRegistry.TheSearchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);

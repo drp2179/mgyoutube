@@ -37,7 +37,7 @@ namespace api_dotnet.webservices
             User user = Helpers.MarshalUserFromJson(sanitizedUserJson);
             Console.WriteLine("createUser: user=" + user);
 
-            User createdUser = userModule.CreateUser(user);
+            User createdUser = userModule.CreateUpdateUser(user);
             createdUser.password = null;
 
             string responseJson = JsonConvert.SerializeObject(createdUser);

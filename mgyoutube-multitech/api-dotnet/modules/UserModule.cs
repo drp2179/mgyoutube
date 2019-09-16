@@ -7,6 +7,7 @@ namespace api_dotnet.modules
     public interface UserModule
     {
         User GetUser(string username);
+        User CreateUpdateUser(User user);
         User CreateUser(User user);
         User RemoveUser(string username);
         User AuthUser(UserCredential userCredential);

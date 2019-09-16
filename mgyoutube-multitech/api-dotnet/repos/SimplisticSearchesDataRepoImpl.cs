@@ -4,8 +4,14 @@ namespace api_dotnet.repos
 {
     public class SimplisticSearchesDataRepoImpl : SearchesDataRepo
     {
-        private readonly Dictionary<long, HashSet<string>> parentSearches = new Dictionary<long, HashSet<string>>();
-        public void AddSearchToParentUser(long parentUserId, string searchPhrase)
+        private readonly Dictionary<string, HashSet<string>> parentSearches = new Dictionary<string, HashSet<string>>();
+
+        public SimplisticSearchesDataRepoImpl() { }
+        public void RepositoryStartup()
+        {
+            // nothing to do here
+        }
+        public void AddSearchToParentUser(string parentUserId, string searchPhrase)
         {
             if (!this.parentSearches.ContainsKey(parentUserId))
             {
@@ -15,10 +21,10 @@ namespace api_dotnet.repos
             this.parentSearches[parentUserId].Add(searchPhrase);
         }
 
-        public List<string> GetSearchesForParentUser(long userId)
+        public List<string> GetSearchesForParentUser(string parentUserId)
         {
             HashSet<string> savedSearches;
-            if (this.parentSearches.TryGetValue(userId, out savedSearches))
+            if (this.parentSearches.TryGetValue(parentUserId, out savedSearches))
             {
                 return new List<string>(savedSearches);
             }
