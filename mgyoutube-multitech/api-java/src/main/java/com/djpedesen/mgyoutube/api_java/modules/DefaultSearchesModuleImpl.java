@@ -25,7 +25,7 @@ public class DefaultSearchesModuleImpl implements SearchesModule {
 	}
 
 	@Override
-	public List<String> getSavedSearchesForParent(final String parentUsername) throws UserNotFoundException {
+	public List<String> getSavedSearchesForParent(final String parentUsername) throws Exception {
 
 		final User parentUser = this.userDataRepo.getUserByUsername(parentUsername);
 
@@ -42,7 +42,7 @@ public class DefaultSearchesModuleImpl implements SearchesModule {
 	}
 
 	@Override
-	public void addSearchToParent(final String parentUsername, final String searchPhrase) throws UserNotFoundException {
+	public void addSearchToParent(final String parentUsername, final String searchPhrase) throws Exception {
 		final User parentUser = this.userDataRepo.getUserByUsername(parentUsername);
 
 		if (parentUser == null) {

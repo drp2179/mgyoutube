@@ -5,18 +5,18 @@ import java.util.List;
 import com.djpedesen.mgyoutube.api_java.apimodel.User;
 
 public interface UserDataRepo {
-	void repositoryStartup();
+	void repositoryStartup() throws Exception;
 
-	User getUserByUsername(String username);
+	User getUserByUsername(String username) throws Exception;
 
-	User addUser(User user);
+	User addUser(User user) throws Exception;
 
-	void removeUser(User user);
+	void removeUser(User user) throws Exception;
 
-	User replaceUser(String userId, User user);
+	User replaceUser(String userId, User user) throws Exception;
 
-	void addChildToParent(String parentUserId, String childUserId);
+	void addChildToParent(String parentUserId, String childUserId) throws Exception;
 
-	List<User> getChildrenForParent(String userId);
+	List<User> getChildrenForParent(String parentUserId) throws Exception;
 
 }

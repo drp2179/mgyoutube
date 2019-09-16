@@ -31,24 +31,30 @@ public class SupportWebService {
 	@Path("/users/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserByUsername(@PathParam(value = "username") final String username) {
-		System.out.println("getUserByUsername: username=" + username);
+		try {
+			System.out.println("getUserByUsername: username=" + username);
 
-		// TODO: need to sanitize payload input before using
-		final String santizedUsername = username;
-		final User user = userModule.getUser(santizedUsername);
-		System.out.println("getUserByUsername: user=" + user);
+			// TODO: need to sanitize payload input before using
+			final String santizedUsername = username;
+			final User user = userModule.getUser(santizedUsername);
+			System.out.println("getUserByUsername: user=" + user);
 
-		if (user == null) {
-			System.out.println("getUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
-			return Response.status(Status.NOT_FOUND).build();
+			if (user == null) {
+				System.out.println("getUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			user.password = null;
+
+			final String responseJson = GSON.toJson(user);
+
+			System.out.println("getUserByUsername: username=" + santizedUsername + " returning OK");
+			return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
+		} catch (Throwable thrown) {
+			System.out.println("getUserByUsername, unhandled exception:");
+			thrown.printStackTrace(System.out);
+			return Response.serverError().build();
 		}
-
-		user.password = null;
-
-		final String responseJson = GSON.toJson(user);
-
-		System.out.println("getUserByUsername: username=" + santizedUsername + " returning OK");
-		return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
 	}
 
 	@PUT
@@ -57,40 +63,52 @@ public class SupportWebService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createUpdateUserByUsername(@PathParam(value = "username") final String username,
 			final String userJson) throws URISyntaxException {
-		System.out.println("createUpdateUserByUsername: username=" + username + " userJson=" + userJson);
+		try {
+			System.out.println("createUpdateUserByUsername: username=" + username + " userJson=" + userJson);
 
-		// TODO: need to sanitize payload input before using
-		// final String sanitizedUsername = username;
-		final String sanitizedUserJson = userJson;
-		final User user = Helpers.marshalUserFromJson(sanitizedUserJson);
-		System.out.println("createUpdateUserByUsername: user=" + user);
+			// TODO: need to sanitize payload input before using
+			// final String sanitizedUsername = username;
+			final String sanitizedUserJson = userJson;
+			final User user = Helpers.marshalUserFromJson(sanitizedUserJson);
+			System.out.println("createUpdateUserByUsername: user=" + user);
 
-		final User createdUser = userModule.createUpdateUser(user);
-		createdUser.password = null;
-		final String createdUserJson = GSON.toJson(createdUser);
+			final User createdUser = userModule.createUpdateUser(user);
+			createdUser.password = null;
+			final String createdUserJson = GSON.toJson(createdUser);
 
-		// final URI location = new URI("/users/" + createdUser.userId);
+			// final URI location = new URI("/users/" + createdUser.userId);
 
-		System.out.println(
-				"createUpdateUserByUsername: userJson=" + sanitizedUserJson + " returning OK with " + createdUserJson);
-		return Response.ok(createdUserJson, MediaType.APPLICATION_JSON).build();
+			System.out.println("createUpdateUserByUsername: userJson=" + sanitizedUserJson + " returning OK with "
+					+ createdUserJson);
+			return Response.ok(createdUserJson, MediaType.APPLICATION_JSON).build();
+		} catch (Throwable thrown) {
+			System.out.println("createUpdateUserByUsername, unhandled exception:");
+			thrown.printStackTrace(System.out);
+			return Response.serverError().build();
+		}
 	}
 
 	@DELETE
 	@Path("/users/{username}")
 	public Response deleteUserByUsername(@PathParam(value = "username") final String username) {
-		System.out.println("deleteUserByUsername: username=" + username);
+		try {
+			System.out.println("deleteUserByUsername: username=" + username);
 
-		// TODO: need to sanitize payload input before using
-		final String santizedUsername = username;
-		final User oldUser = userModule.removeUser(santizedUsername);
+			// TODO: need to sanitize payload input before using
+			final String santizedUsername = username;
+			final User oldUser = userModule.removeUser(santizedUsername);
 
-		if (oldUser == null) {
-			System.out.println("deleteUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
-			return Response.status(Status.NOT_FOUND).build();
+			if (oldUser == null) {
+				System.out.println("deleteUserByUsername: username=" + santizedUsername + " returning NOT_FOUND");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+
+			return Response.ok().build();
+		} catch (Throwable thrown) {
+			System.out.println("deleteUserByUsername, unhandled exception:");
+			thrown.printStackTrace(System.out);
+			return Response.serverError().build();
 		}
-
-		return Response.ok().build();
 	}
 
 }

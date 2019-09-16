@@ -53,7 +53,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public User createUpdateUser(final User user) {
+	public User createUpdateUser(final User user) throws Exception {
 		final User existingUser = this.userDataRepo.getUserByUsername(user.username);
 		if (existingUser != null) {
 			if (user.userId == null) {
@@ -67,7 +67,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public User createUser(final User user) {
+	public User createUser(final User user) throws Exception {
 
 		if (user.userId == null) {
 			final User createdUser = this.userDataRepo.addUser(user);
@@ -81,7 +81,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public User updateUser(final String userId, final User user) {
+	public User updateUser(final String userId, final User user) throws Exception {
 		if (userId == null) {
 			throw new IllegalArgumentException("parameter 'userId' must not be null");
 		}
@@ -110,7 +110,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public User removeUser(final String username) {
+	public User removeUser(final String username) throws Exception {
 		final User user = this.getUser(username);
 
 		if (user != null) {
@@ -121,7 +121,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public User addUpdateChildToParent(final String parentUsername, final User childUser) throws UserNotFoundException {
+	public User addUpdateChildToParent(final String parentUsername, final User childUser) throws Exception {
 
 		final User parentUser = this.getUser(parentUsername);
 		if (parentUser == null) {
@@ -142,7 +142,7 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
-	public List<User> getChildrenForParent(final String parentUsername) throws UserNotFoundException {
+	public List<User> getChildrenForParent(final String parentUsername) throws Exception {
 		final User parentUser = this.getUser(parentUsername);
 		if (parentUser == null) {
 			throw new UserNotFoundException(parentUsername);

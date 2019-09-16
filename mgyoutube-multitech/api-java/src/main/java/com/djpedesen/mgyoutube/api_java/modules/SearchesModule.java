@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface SearchesModule {
 
-	List<String> getSavedSearchesForParent(String parentUsername) throws UserNotFoundException;
+	List<String> getSavedSearchesForParent(String parentUsername) throws Exception;
 
-	void addSearchToParent(String parentUsername, String searchPhrase) throws UserNotFoundException;
+	void addSearchToParent(String parentUsername, String searchPhrase) throws Exception;
 
 }

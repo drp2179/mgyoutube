@@ -4,10 +4,10 @@ import java.util.List;
 
 public interface SearchesDataRepo {
 
-	void repositoryStartup();
+	void repositoryStartup() throws Exception;
 
-	List<String> getSearchesForParentUser(String userId);
+	List<String> getSearchesForParentUser(String userId) throws Exception;
 
-	void addSearchToParentUser(String parentUserId, String searchPhrase);
+	void addSearchToParentUser(String parentUserId, String searchPhrase) throws Exception;
 
 }

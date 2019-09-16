@@ -9,18 +9,18 @@ public interface UserModule {
 
 	User authUser(UserCredential userCredential);
 
-	User createUpdateUser(User user);
+	User createUpdateUser(User user) throws Exception;
 
-	User createUser(User user);
+	User createUser(User user) throws Exception;
 
-	User updateUser(String userId, User user);
+	User updateUser(String userId, User user) throws Exception;
 
-	User getUser(String username);
+	User getUser(String username) throws Exception;
 
-	User removeUser(String username);
+	User removeUser(String username) throws Exception;
 
-	User addUpdateChildToParent(String parentUsername, User childUser) throws UserNotFoundException;
+	User addUpdateChildToParent(String parentUsername, User childUser) throws Exception;
 
-	List<User> getChildrenForParent(String parentUsername) throws UserNotFoundException;
+	List<User> getChildrenForParent(String parentUsername) throws Exception;
 
 }
