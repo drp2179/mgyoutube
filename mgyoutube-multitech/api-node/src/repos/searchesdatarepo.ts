@@ -2,7 +2,9 @@
 
 export interface SearchesDataRepo {
 
-    getSearchesForParentUser(parentUserId: number): string[];
+    repositoryStartup(): Promise<void>;
 
-    addSearchToParentUser(parentUserId: number, searchPhrase: string): void;
+    getSearchesForParentUser(parentUserId: string): Promise<string[]>;
+
+    addSearchToParentUser(parentUserId: string, searchPhrase: string): Promise<void>;
 }

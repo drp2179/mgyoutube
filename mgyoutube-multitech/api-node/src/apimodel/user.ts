@@ -1,7 +1,7 @@
 
 
 export class User {
-    userId: number;
+    userId: string;
     username: string;
     password: string | undefined;
     isParent: boolean = false;
@@ -10,10 +10,7 @@ export class User {
 export function cloneUser(userToClone: User): User {
     const clonedUser = new User()
 
-    if (userToClone.userId === undefined) {
-        clonedUser.userId = 0;
-    }
-    else {
+    if (userToClone.userId !== undefined) {
         clonedUser.userId = userToClone.userId
     }
 

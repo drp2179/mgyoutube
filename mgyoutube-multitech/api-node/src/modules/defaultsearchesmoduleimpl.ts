@@ -19,14 +19,14 @@ export class DefaultSearchesModuleImpl implements SearchesModule {
         this.searchesDataRepo = sdr;
     }
 
-    getSavedSearchesForParent(parentUsername: string): string[] {
-        var parentUser = this.userDataRepo.getUserByUsername(parentUsername);
+    async getSavedSearchesForParent(parentUsername: string): Promise<string[]> {
+        const parentUser = await this.userDataRepo.getUserByUsername(parentUsername);
 
         if (parentUser == null) {
             throw new UserNotFoundException(parentUsername);
         }
 
-        var searches = this.searchesDataRepo.getSearchesForParentUser(parentUser.userId);
+        const searches = await this.searchesDataRepo.getSearchesForParentUser(parentUser.userId);
 
         console.log(
             "getSavedSearchesForParent for ", parentUsername, " returning searches.size ", searches.length);
@@ -34,14 +34,14 @@ export class DefaultSearchesModuleImpl implements SearchesModule {
         return searches;
     }
 
-    addSearchToParent(parentUsername: string, searchPhrase: string): void {
-        var parentUser = this.userDataRepo.getUserByUsername(parentUsername);
+    async addSearchToParent(parentUsername: string, searchPhrase: string): Promise<void> {
+        const parentUser = await this.userDataRepo.getUserByUsername(parentUsername);
 
         if (parentUser == null) {
             throw new UserNotFoundException(parentUsername);
         }
 
-        this.searchesDataRepo.addSearchToParentUser(parentUser.userId, searchPhrase);
+        await this.searchesDataRepo.addSearchToParentUser(parentUser.userId, searchPhrase);
     }
 
 

@@ -3,23 +3,25 @@ import { User } from '../apimodel/user';
 
 export interface UserDataRepo {
 
-    getUserByUsername(username: string): User | undefined;
+    repositoryStartup(): Promise<void>;
 
-    addUser(user: User): User;
+    getUserByUsername(username: string): Promise<User | undefined>;
+
+    addUser(user: User): Promise<User | undefined>;
 
     // updateUser(userId, user) {
     //     return this.userDataRepo.replaceUser(userId, user);
     // }
 
 
-    removeUser(user: User): void;
+    removeUser(user: User): Promise<void>;
 
-    replaceUser(userId: number, user: User): User | undefined;
-
-
-    addChildToParent(parentUserId: number, childUserId: number): void;
+    replaceUser(userId: string, user: User): Promise<User | undefined>;
 
 
-    getChildrenForParent(parentUserId: number): Array<User>;
+    addChildToParent(parentUserId: string, childUserId: string): Promise<void>;
+
+
+    getChildrenForParent(parentUserId: string): Promise<Array<User>>;
 
 }

@@ -1,7 +1,7 @@
 
 
 export interface SearchesModule {
-    getSavedSearchesForParent(parentUsername: string): string[];
+    getSavedSearchesForParent(parentUsername: string): Promise<string[]>;
 
-    addSearchToParent(parentUsername: string, searchPhrase: string): void;
+    addSearchToParent(parentUsername: string, searchPhrase: string): Promise<void>;
 }

@@ -19,12 +19,12 @@ export class UseNext {
     }
 }
 
-export function handleAsyncRestifyCallExport(useNext: UseNext, next: Next): any {
-    if (useNext.nextParameters) {
-        return next(useNext.nextParameters);
-    } else {
-        return next();
-    }
+// export function handleAsyncRestifyCallExport(useNext: UseNext, next: Next): any {
+//     if (useNext.nextParameters) {
+//         return next(useNext.nextParameters);
+//     } else {
+//         return next();
+//     }
 
-}
+// }
 

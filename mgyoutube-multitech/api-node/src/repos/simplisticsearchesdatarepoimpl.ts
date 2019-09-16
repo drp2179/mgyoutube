@@ -3,12 +3,16 @@ import { SearchesDataRepo } from "./searchesdatarepo";
 
 export class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
 
-    private parentSearches: Map<number, Set<string>> = new Map()
+    private parentSearches: Map<string, Set<string>> = new Map()
 
     constructor() {
     }
 
-    getSearchesForParentUser(parentUserId: number): string[] {
+    async repositoryStartup(): Promise<void> {
+        // nothing to do here
+    }
+
+    async getSearchesForParentUser(parentUserId: string): Promise<string[]> {
         var returnArray: string[] = [];
         var existingSearches = this.parentSearches.get(parentUserId);
 
@@ -19,7 +23,7 @@ export class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
         return returnArray;
     }
 
-    addSearchToParentUser(parentUserId: number, searchPhrase: string): void {
+    async addSearchToParentUser(parentUserId: string, searchPhrase: string): Promise<void> {
         var existingSet = this.parentSearches.get(parentUserId)
         if (existingSet == null) {
             existingSet = new Set();
@@ -28,6 +32,4 @@ export class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
 
         existingSet.add(searchPhrase);
     }
-
-
 }

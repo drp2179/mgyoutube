@@ -16,11 +16,11 @@ export class DefaultUserModuleImpl implements UserModule {
         this.userDataRepo = udr;
     }
 
-    authUser(userCredential: UserCredential): User | undefined {
+    async authUser(userCredential: UserCredential): Promise<User | undefined> {
         var user: User | undefined;
 
         try {
-            user = this.userDataRepo.getUserByUsername(userCredential.username)
+            user = await this.userDataRepo.getUserByUsername(userCredential.username)
 
             if (user != null) {
                 if (user.password == null) {
@@ -53,21 +53,34 @@ export class DefaultUserModuleImpl implements UserModule {
         return user
     }
 
-    createUser(user: User): User | undefined {
-        if (user.userId === undefined || user.userId == 0) {
-            const createdUser = this.userDataRepo.addUser(user)
-            if (createdUser !== undefined) {
-                return createdUser
+    async createUpdateUser(user: User): Promise<User | undefined> {
+        const existingUser = await this.userDataRepo.getUserByUsername(user.username);
+        if (existingUser !== undefined) {
+            if (user.userId === undefined) {
+                user.userId = existingUser.userId;
             }
+            console.log("createUpdateUser is updating existing user ", existingUser, " to be ", user);
+            return this.updateUser(existingUser.userId, user);
+        }
+        console.log("createUpdateUser is creating new user ", user);
+        return this.createUser(user);
+    }
+
+    async createUser(user: User): Promise<User | undefined> {
+        if (user.userId === undefined) {
+            const createdUser = this.userDataRepo.addUser(user)
+            //if (createdUser !== undefined) {
+            return createdUser
+            //}
         }
         return undefined
     }
 
-    updateUser(userId: number, user: User): User | undefined {
+    async updateUser(userId: string, user: User): Promise<User | undefined> {
         return this.userDataRepo.replaceUser(userId, user);
     }
 
-    getUser(username: string): User | undefined {
+    async getUser(username: string): Promise<User | undefined> {
         try {
             return this.userDataRepo.getUserByUsername(username)
         }
@@ -77,46 +90,47 @@ export class DefaultUserModuleImpl implements UserModule {
         }
     }
 
-    removeUser(username: string): User | undefined {
-        const user = this.getUser(username);
+    async removeUser(username: string): Promise<User | undefined> {
+        const user = await this.getUser(username);
 
-        if (user && user.userId > 0) {
-            this.userDataRepo.removeUser(user);
+        if (user && user.userId) {
+            await this.userDataRepo.removeUser(user);
         }
 
         return user;
     }
 
-    addUpdateChildToParent(parentUsername: string, childUser: User): User | undefined {
+    async addUpdateChildToParent(parentUsername: string, childUser: User): Promise<User | undefined> {
 
-        const parentUser = this.getUser(parentUsername);
+        const parentUser = await this.getUser(parentUsername);
         if (parentUser === undefined) {
             throw new UserNotFoundException(parentUsername);
         }
 
-        const existingChildUser = this.getUser(childUser.username);
+        const existingChildUser = await this.getUser(childUser.username);
         if (existingChildUser === undefined) {
-            console.log("creating child ", childUser);
-            const createdChildUser = this.createUser(childUser);
+            console.log("addUpdateChildToParent, creating child ", childUser);
+            const createdChildUser = await this.createUser(childUser);
             if (createdChildUser === undefined) {
-                console.error("creating child ", childUser, " failed ");
+                console.error("addUpdateChildToParent, creating child ", childUser, " failed ");
             }
             else {
-                this.userDataRepo.addChildToParent(parentUser.userId, createdChildUser.userId);
+                await this.userDataRepo.addChildToParent(parentUser.userId, createdChildUser.userId);
             }
             return createdChildUser;
         } else {
-            console.log("updating child ", childUser, " as ", existingChildUser.userId);
+            console.log("addUpdateChildToParent, updating child ", childUser, " as ", existingChildUser.userId);
             this.userDataRepo.addChildToParent(parentUser.userId, existingChildUser.userId);
             return this.updateUser(existingChildUser.userId, childUser);
         }
     }
 
-    getChildrenForParent(parentUsername: string): Array<User> {
-        const parentUser = this.getUser(parentUsername);
+    async getChildrenForParent(parentUsername: string): Promise<Array<User>> {
+        const parentUser = await this.getUser(parentUsername);
         if (parentUser === undefined) {
             throw new UserNotFoundException(parentUsername);
         }
+        console.log("getChildrenForParent(" + parentUsername + "), using parent ", parentUser);
 
         const children = this.userDataRepo.getChildrenForParent(parentUser.userId);
         return children;

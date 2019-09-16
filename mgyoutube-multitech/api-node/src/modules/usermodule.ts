@@ -7,15 +7,15 @@ export interface UserModule {
 
     setUserDataRepo(udr: UserDataRepo): void;
 
-    authUser(userCredential: UserCredential): User | undefined;
+    authUser(userCredential: UserCredential): Promise<User | undefined>;
 
+    getUser(username: string): Promise<User | undefined>;
 
-    getUser(username: string): User | undefined;
-    createUser(user: User): User | undefined;
-    updateUser(userId: number, user: User): User | undefined;
-    removeUser(username: string): User | undefined;
+    createUpdateUser(user: User): Promise<User | undefined>
+    createUser(user: User): Promise<User | undefined>;
+    updateUser(userId: string, user: User): Promise<User | undefined>;
+    removeUser(username: string): Promise<User | undefined>;
 
-
-    getChildrenForParent(parentUsername: string): Array<User>;
-    addUpdateChildToParent(parentUsername: string, childUser: User): User | undefined;
+    getChildrenForParent(parentUsername: string): Promise<Array<User>>;
+    addUpdateChildToParent(parentUsername: string, childUser: User): Promise<User | undefined>;
 }

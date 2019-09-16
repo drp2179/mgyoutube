@@ -3,20 +3,31 @@ import { ModuleRepoRegistry } from './modulereporegistry';
 import { Helpers } from './helpers';
 import { Request, Response, Next, Server } from 'restify'
 import { NotFoundError, UnauthorizedError, InternalServerError } from 'restify-errors'
+import { UseNext } from './whatsnext';
 
 
 export class ParentsWebService {
 
     public static setupRouter(server: Server) {
         // DRP: restify can't seem to use class methods for handlers here... they lose the "this" pointer reference
-        server.post('/api/parents/auth', ParentsWebService.authParentUser);
-        server.get('/api/parents/:parentusername/children', ParentsWebService.getChildrenForParent);
-        server.put('/api/parents/:parentusername/children/:childusername', ParentsWebService.addUpdateChildToParent);
-        server.get('/api/parents/:parentusername/searches', ParentsWebService.getSavedSearches);
-        server.put('/api/parents/:parentusername/searches/:searchphrase', ParentsWebService.saveSearch);
+        server.post('/api/parents/auth', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.authParentUser(req, res), next)
+        });
+        server.get('/api/parents/:parentusername/children', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.getChildrenForParent(req, res), next);
+        });
+        server.put('/api/parents/:parentusername/children/:childusername', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.addUpdateChildToParent(req, res), next);
+        });
+        server.get('/api/parents/:parentusername/searches', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.getSavedSearches(req, res), next);
+        });
+        server.put('/api/parents/:parentusername/searches/:searchphrase', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.saveSearch(req, res), next);
+        });
     }
 
-    private static authParentUser(req: Request, res: Response, next: Next): any {
+    private static async authParentUser(req: Request, res: Response): Promise<UseNext> {
         const userCredentialJson = req.body
         console.log("authParentUser: userCredentialJson=", userCredentialJson)
 
@@ -25,17 +36,17 @@ export class ParentsWebService {
         const userCredential = Helpers.marshalUserCredentialFromJson(sanitizedUserCredentialJson)
         console.log("authParentUser: userCredential=", userCredential)
 
-        const authedUser = ModuleRepoRegistry.getUserModule().authUser(sanitizedUserCredentialJson)
+        const authedUser = await ModuleRepoRegistry.getUserModule().authUser(sanitizedUserCredentialJson)
 
         if (authedUser == null) {
             console.warn("authParentUser: userCredentialJson=", sanitizedUserCredentialJson, " failed auth, returning UNAUTHORIZED")
             const err401 = new UnauthorizedError();
-            return next(err401);
+            return new UseNext(err401);
         }
         else if (authedUser.isParent === undefined || !authedUser.isParent) {
             console.warn("authParentUser: userCredentialJson=", sanitizedUserCredentialJson, " is not a parent, returning UNAUTHORIZED")
             const err401 = new UnauthorizedError();
-            return next(err401);
+            return new UseNext(err401);
         }
 
         authedUser.password = undefined
@@ -44,10 +55,10 @@ export class ParentsWebService {
 
         res.setHeader("content-type", "application/json")
         res.send(authedUser)
-        return next();
+        return UseNext.Nothing;
     }
 
-    private static getChildrenForParent(req: Request, res: Response, next: Next): any {
+    private static async getChildrenForParent(req: Request, res: Response): Promise<UseNext> {
         const parentUsername = req.params.parentusername
         console.log("getChildrenForParent: parentUsername=", parentUsername);
 
@@ -55,7 +66,7 @@ export class ParentsWebService {
         const sanitizedParentUsername = parentUsername;
 
         try {
-            const children = ModuleRepoRegistry.getUserModule().getChildrenForParent(sanitizedParentUsername);
+            const children = await ModuleRepoRegistry.getUserModule().getChildrenForParent(sanitizedParentUsername);
             console.log("getChildrenForParent: getChildrenForParent=", children);
 
             children.forEach((c) => { c.password = undefined });
@@ -66,23 +77,23 @@ export class ParentsWebService {
                 , children.length + " and json=", responseJson);
             res.setHeader("content-type", "application/json")
             res.send(children)
-            return next();
+            return UseNext.Nothing;
         } catch (e) {
             if (e.name == UserNotFoundException.NAME) {
                 console.warn("getChildrenForParent: unable to find user ", e.username, " returning NOT_FOUND");
                 const err404 = new NotFoundError();
-                return next(err404);
+                return new UseNext(err404);
             }
             else {
                 console.error("getChildrenForParent exception", e);
                 const err500 = new InternalServerError();
-                return next(err500);
+                return new UseNext(err500);
             }
 
         }
     }
 
-    private static addUpdateChildToParent(req: Request, res: Response, next: Next): any {
+    private static async addUpdateChildToParent(req: Request, res: Response): Promise<UseNext> {
         const parentUsername = req.params.parentusername
         const childUsername = req.params.childusername
         const childUserJson = req.body
@@ -98,7 +109,7 @@ export class ParentsWebService {
         console.log("addUpdateChildToParent: childUser=", childUser);
 
         try {
-            const addedUpdatedUser = ModuleRepoRegistry.getUserModule().addUpdateChildToParent(sanitizedParentUsername, childUser);
+            const addedUpdatedUser = await ModuleRepoRegistry.getUserModule().addUpdateChildToParent(sanitizedParentUsername, childUser);
 
             if (addedUpdatedUser === undefined) {
                 throw new Error("userModule.addUpdateChildToParent for " + sanitizedParentUsername + " and " + JSON.stringify(childUser) + " failed")
@@ -112,23 +123,23 @@ export class ParentsWebService {
                     , sanitizedChildUsername, " returning OK");
                 res.setHeader("content-type", "application/json")
                 res.send(addedUpdatedUser)
-                return next()
+                return UseNext.Nothing;
             }
         } catch (e) {
             if (e.name == UserNotFoundException.NAME) {
                 console.warn("addUpdateChildToParent: unable to find user ", e.username, " returning NOT_FOUND");
                 const err404 = new NotFoundError();
-                return next(err404);
+                return new UseNext(err404);
             }
             else {
                 console.error("addUpdateChildToParent exception", e);
                 const err500 = new InternalServerError();
-                return next(err500);
+                return new UseNext(err500);
             }
         }
     }
 
-    private static getSavedSearches(req: Request, res: Response, next: Next): any {
+    private static async getSavedSearches(req: Request, res: Response): Promise<UseNext> {
         const parentUsername = req.params.parentusername
         console.log("getSavedSearches: parentUsername=", parentUsername);
 
@@ -136,7 +147,7 @@ export class ParentsWebService {
         const sanitizedParentUsername = parentUsername;
 
         try {
-            const searches = ModuleRepoRegistry.getSearchesModule().getSavedSearchesForParent(sanitizedParentUsername);
+            const searches = await ModuleRepoRegistry.getSearchesModule().getSavedSearchesForParent(sanitizedParentUsername);
             console.log("getSavedSearches: searches=", searches);
 
             const responseJson = JSON.stringify(searches);
@@ -145,22 +156,22 @@ export class ParentsWebService {
                 , searches.length + " and json=", responseJson);
             res.setHeader("content-type", "application/json")
             res.send(searches)
-            return next();
+            return UseNext.Nothing;
         } catch (e) {
             if (e.name == UserNotFoundException.NAME) {
                 console.warn("getSavedSearches: unable to find user ", e.username, " returning NOT_FOUND");
                 const err404 = new NotFoundError();
-                return next(err404);
+                return new UseNext(err404);
             }
             else {
                 console.error("getSavedSearches exception", e);
                 const err500 = new InternalServerError();
-                return next(err500);
+                return new UseNext(err500);
             }
         }
     }
 
-    private static saveSearch(req: Request, res: Response, next: Next): any {
+    private static async saveSearch(req: Request, res: Response): Promise<UseNext> {
         const parentUsername = req.params.parentusername;
         const searchPhrase = req.params.searchphrase;
         // Javascript can't URL Decode properly?  really?  Is it 1994 or 2019?!?!?
@@ -173,23 +184,23 @@ export class ParentsWebService {
         const sanitizedSearchPhrase = decodedSearchPhrase;
 
         try {
-            ModuleRepoRegistry.getSearchesModule().addSearchToParent(sanitizedParentUsername, sanitizedSearchPhrase);
+            await ModuleRepoRegistry.getSearchesModule().addSearchToParent(sanitizedParentUsername, sanitizedSearchPhrase);
 
             console.log("saveSearch: parentUsername=", sanitizedParentUsername, ", searchPhrase="
                 , sanitizedSearchPhrase, " returning CREATED");
             res.status(201);
             res.send();
-            return next()
+            return UseNext.Nothing
         } catch (e) {
             if (e.name == UserNotFoundException.NAME) {
                 console.warn("saveSearch: unable to find user ", e.username, " returning NOT_FOUND");
                 const err404 = new NotFoundError();
-                return next(err404);
+                return new UseNext(err404);
             }
             else {
                 console.error("saveSearch exception", e);
                 const err500 = new InternalServerError();
-                return next(err500);
+                return new UseNext(err500);
             }
         }
     }
