@@ -276,17 +276,17 @@ components:
         - isParent
       properties:
         userId:
-          type: integer
-          example: 44
+          type: string
+          example: "44"
         username:
           type: string
-          example: aUserName
+          example: "aUserName"
         isParent:
           type: boolean
           example: true
         password:
           type: string
-          example: aPassword
+          example: "aPassword"
     Video:
       type: object
       properties:
