@@ -4,8 +4,10 @@ import java.util.List;
 
 public interface SearchesDataRepo {
 
-	List<String> getSearchesForParentUser(long userId);
+	void repositoryStartup();
 
-	void addSearchToParentUser(long parentUserId, String searchPhrase);
+	List<String> getSearchesForParentUser(String userId);
+
+	void addSearchToParentUser(String parentUserId, String searchPhrase);
 
 }

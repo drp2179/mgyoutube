@@ -65,7 +65,7 @@ public class SupportWebService {
 		final User user = Helpers.marshalUserFromJson(sanitizedUserJson);
 		System.out.println("createUpdateUserByUsername: user=" + user);
 
-		final User createdUser = userModule.createUser(user);
+		final User createdUser = userModule.createUpdateUser(user);
 		createdUser.password = null;
 		final String createdUserJson = GSON.toJson(createdUser);
 

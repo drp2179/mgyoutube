@@ -3,7 +3,7 @@ package com.djpedesen.mgyoutube.api_java.apimodel;
 import com.google.gson.Gson;
 
 public class User {
-	public long userId;
+	public String userId;
 	public String username;
 	public String password;
 	public boolean isParent;

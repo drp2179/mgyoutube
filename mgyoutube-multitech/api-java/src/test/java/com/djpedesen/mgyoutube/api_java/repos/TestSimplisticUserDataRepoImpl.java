@@ -19,7 +19,7 @@ public class TestSimplisticUserDataRepoImpl {
 
 	@Test
 	public void unknownParentReturnsEmptyList() {
-		final long parentUserId = 999;
+		final String parentUserId = "999";
 		final List<User> childrenForParent = repo.getChildrenForParent(parentUserId);
 		Assert.assertEquals(0, childrenForParent.size());
 	}

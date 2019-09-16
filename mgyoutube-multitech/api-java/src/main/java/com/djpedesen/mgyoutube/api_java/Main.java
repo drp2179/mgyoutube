@@ -6,9 +6,9 @@ import com.djpedesen.mgyoutube.api_java.modules.DefaultSearchesModuleImpl;
 import com.djpedesen.mgyoutube.api_java.modules.DefaultVideoModuleImpl;
 import com.djpedesen.mgyoutube.api_java.modules.SearchesModule;
 import com.djpedesen.mgyoutube.api_java.modules.VideoModule;
+import com.djpedesen.mgyoutube.api_java.repos.MongoSearchesDataRepoImpl;
+import com.djpedesen.mgyoutube.api_java.repos.MongoUserDataRepoImpl;
 import com.djpedesen.mgyoutube.api_java.repos.SearchesDataRepo;
-import com.djpedesen.mgyoutube.api_java.repos.SimplisticSearchesDataRepoImpl;
-import com.djpedesen.mgyoutube.api_java.repos.SimplisticUserDataRepoImpl;
 import com.djpedesen.mgyoutube.api_java.repos.UserDataRepo;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyServerWrapper;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyShutdownRunnable;
@@ -30,10 +30,17 @@ public class Main {
 				youTubeProperties.applicationName, httpTransport, jsonFactory);
 		ModuleRepoRegistry.setVideoModule(videoModule);
 
-		final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+		// final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+		final String connectionString = "mongodb://localhost:27017";
+		final String databaseName = "mgyoutube";
+		final UserDataRepo userDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName);
+		userDataRepo.repositoryStartup();
 		ModuleRepoRegistry.setUserDataRepo(userDataRepo);
 
-		final SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+		// final SearchesDataRepo searchesDataRepo = new
+		// SimplisticSearchesDataRepoImpl();
+		final SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
+		searchesDataRepo.repositoryStartup();
 
 		final SearchesModule searchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);
 		ModuleRepoRegistry.setSearchesModule(searchesModule);

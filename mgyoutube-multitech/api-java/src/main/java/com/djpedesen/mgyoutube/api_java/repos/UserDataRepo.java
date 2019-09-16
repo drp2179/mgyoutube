@@ -5,6 +5,7 @@ import java.util.List;
 import com.djpedesen.mgyoutube.api_java.apimodel.User;
 
 public interface UserDataRepo {
+	void repositoryStartup();
 
 	User getUserByUsername(String username);
 
@@ -12,10 +13,10 @@ public interface UserDataRepo {
 
 	void removeUser(User user);
 
-	User replaceUser(long userId, User user);
+	User replaceUser(String userId, User user);
 
-	void addChildToParent(long parentUserId, long childUserId);
+	void addChildToParent(String parentUserId, String childUserId);
 
-	List<User> getChildrenForParent(long userId);
+	List<User> getChildrenForParent(String userId);
 
 }

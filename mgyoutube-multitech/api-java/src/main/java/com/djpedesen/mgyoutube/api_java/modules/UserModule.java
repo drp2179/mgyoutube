@@ -9,7 +9,11 @@ public interface UserModule {
 
 	User authUser(UserCredential userCredential);
 
+	User createUpdateUser(User user);
+
 	User createUser(User user);
+
+	User updateUser(String userId, User user);
 
 	User getUser(String username);
 

@@ -10,8 +10,8 @@ import com.djpedesen.mgyoutube.api_java.apimodel.User;
 public class SimplisticUserDataRepoImpl implements UserDataRepo {
 
 	private final Map<String, User> usernameMap = new HashMap<>();
-	private final Map<Long, User> userIdMap = new HashMap<>();
-	private final Map<Long, List<Long>> parentChildrenMap = new HashMap<>();
+	private final Map<String, User> userIdMap = new HashMap<>();
+	private final Map<String, List<String>> parentChildrenMap = new HashMap<>();
 	private long nextUserId = 1;
 
 	@Override
@@ -25,11 +25,16 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	}
 
 	@Override
+	public void repositoryStartup() {
+		// nothing to do here
+	}
+
+	@Override
 	public synchronized User addUser(final User user) {
 
 		// cloning so that we can mutate userId without affecting the input object
 		final User addedUser = new User(user);
-		addedUser.userId = nextUserId++;
+		addedUser.userId = Long.toString(nextUserId++);
 
 		this.userIdMap.put(addedUser.userId, addedUser);
 		this.usernameMap.put(addedUser.username, addedUser);
@@ -45,7 +50,7 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	}
 
 	@Override
-	public User replaceUser(final long userId, final User user) {
+	public User replaceUser(final String userId, final User user) {
 
 		final User existingUser = this.userIdMap.get(userId);
 
@@ -65,12 +70,12 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	}
 
 	@Override
-	public void addChildToParent(final long parentUserId, final long childUserId) {
+	public void addChildToParent(final String parentUserId, final String childUserId) {
 		if (!this.parentChildrenMap.containsKey(parentUserId)) {
 			this.parentChildrenMap.put(parentUserId, new ArrayList<>());
 		}
 
-		final List<Long> childrenUserIds = this.parentChildrenMap.get(parentUserId);
+		final List<String> childrenUserIds = this.parentChildrenMap.get(parentUserId);
 
 		if (!childrenUserIds.contains(childUserId)) {
 			childrenUserIds.add(childUserId);
@@ -78,13 +83,13 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	}
 
 	@Override
-	public List<User> getChildrenForParent(final long parentUserId) {
+	public List<User> getChildrenForParent(final String parentUserId) {
 		final List<User> children = new ArrayList<>();
 
 		if (this.parentChildrenMap.containsKey(parentUserId)) {
-			final List<Long> childrenUserIds = this.parentChildrenMap.get(parentUserId);
+			final List<String> childrenUserIds = this.parentChildrenMap.get(parentUserId);
 
-			for (Long childUserId : childrenUserIds) {
+			for (String childUserId : childrenUserIds) {
 				final User user = this.getUserById(childUserId);
 				if (user != null) {
 					children.add(user);
@@ -98,8 +103,7 @@ public class SimplisticUserDataRepoImpl implements UserDataRepo {
 	}
 
 	// probably will be public eventually
-	private User getUserById(final long userId) {
+	private User getUserById(final String userId) {
 		return this.userIdMap.get(userId);
 	}
-
 }

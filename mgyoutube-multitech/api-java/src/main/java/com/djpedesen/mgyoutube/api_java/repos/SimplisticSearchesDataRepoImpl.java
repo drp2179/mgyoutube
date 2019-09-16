@@ -9,10 +9,15 @@ import java.util.Set;
 
 public class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
 
-	private final Map<Long, Set<String>> parentSearches = new HashMap<>();
+	private final Map<String, Set<String>> parentSearches = new HashMap<>();
 
 	@Override
-	public List<String> getSearchesForParentUser(final long parentUserId) {
+	public void repositoryStartup() {
+		// nothing to do
+	}
+
+	@Override
+	public List<String> getSearchesForParentUser(final String parentUserId) {
 		if (parentSearches.containsKey(parentUserId)) {
 			return new ArrayList<>(parentSearches.get(parentUserId));
 		}
@@ -20,7 +25,7 @@ public class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
 	}
 
 	@Override
-	public void addSearchToParentUser(final long parentUserId, final String searchPhrase) {
+	public void addSearchToParentUser(final String parentUserId, final String searchPhrase) {
 		if (!parentSearches.containsKey(parentUserId)) {
 			parentSearches.put(parentUserId, new HashSet<>());
 		}

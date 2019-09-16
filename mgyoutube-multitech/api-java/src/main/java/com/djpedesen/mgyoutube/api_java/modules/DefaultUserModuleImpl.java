@@ -53,9 +53,23 @@ public class DefaultUserModuleImpl implements UserModule {
 	}
 
 	@Override
+	public User createUpdateUser(final User user) {
+		final User existingUser = this.userDataRepo.getUserByUsername(user.username);
+		if (existingUser != null) {
+			if (user.userId == null) {
+				user.userId = existingUser.userId;
+			}
+			System.out.println("createUpdateUser is updating existing user " + existingUser + " to be " + user);
+			return this.updateUser(existingUser.userId, user);
+		}
+		System.out.println("createUpdateUser is creating new user " + user);
+		return this.createUser(user);
+	}
+
+	@Override
 	public User createUser(final User user) {
 
-		if (user.userId == 0) {
+		if (user.userId == null) {
 			final User createdUser = this.userDataRepo.addUser(user);
 
 			if (createdUser != null) {
@@ -66,7 +80,21 @@ public class DefaultUserModuleImpl implements UserModule {
 		return null;
 	}
 
-	public User updateUser(final long userId, final User user) {
+	@Override
+	public User updateUser(final String userId, final User user) {
+		if (userId == null) {
+			throw new IllegalArgumentException("parameter 'userId' must not be null");
+		}
+		if (user == null) {
+			throw new IllegalArgumentException("parameter 'user' must not be null");
+		}
+		if (!userId.equals(user.userId)) {
+			if (user.userId != null) {
+				throw new IllegalStateException("user.userId is not null AND userId (" + userId + ") and user.userId ("
+						+ user.userId + ") paremters do not match");
+			}
+			user.userId = userId;
+		}
 
 		return this.userDataRepo.replaceUser(userId, user);
 	}
