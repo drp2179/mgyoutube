@@ -49,13 +49,15 @@
 					theSearchTerms: null,
 					theVideos: [],
 					theVideoId: null,
-					theSavedSearches: []
+					theSavedSearches: [],
+					showingSavedSearchResults: false
 				}
 			},
 			methods: {
 				onSaveSearchHandler: function () {
 					if (this.theSearchTerms) {
 						api_saveSearch(globalState.loggedInUsername, this.theSearchTerms, () => this.saveSearchSuccess(), () => this.saveSearchFailed());
+						this.showingSavedSearchResults = true;
 					}
 					else {
 						alert("no search phrase to save")
@@ -63,6 +65,7 @@
 				},
 				onSearchHandler: function (event) {
 					api_getVideoSearchResults(this.theSearchTerms, (videos) => this.searchSuccess(videos), () => this.searchFailed());
+					this.showingSavedSearchResults = false;
 				},
 				searchSuccess: function (videos) {
 					this.theVideos = videos;
@@ -72,25 +75,54 @@
 				},
 				saveSearchSuccess: function () {
 					api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+					this.showingSavedSearchResults = true;
 				},
 				saveSearchFailed: function () {
 					alert("saving search for  '" + this.theSearchTerms + "' failed");
+					this.showingSavedSearchResults = false;
 				},
 				getSavedSearchesSuccess: function (savedSearches) {
 					this.theSavedSearches = savedSearches;
+					// dont change showingSavedSearchResults here
 				},
 				getSavedSearchFailed: function () {
 					alert("retrieving saved searches failed");
+					this.showingSavedSearchResults = false;
 				},
 				watchVideo: function (event) {
 					this.theVideoId = event;
+				},
+				onSavedSearchClicked: function (event) {
+					var index = event;
+					var searchPhrase = this.theSavedSearches[index];
+					api_getVideoSearchResults(searchPhrase, (videos) => this.searchSuccess(videos), () => this.searchFailed());
+					this.theSearchTerms = searchPhrase;
+					this.showingSavedSearchResults = true;
+				},
+				onDeleteSavedSearchHandler: function (event) {
+					if (this.theSearchTerms) {
+						api_deleteSavedSearch(globalState.loggedInUsername, this.theSearchTerms, () => this.deleteSavedSearchSuccess(), () => this.deleteSavedSearchFailed());
+					}
+					else {
+						alert("no search phrase to delete")
+					}
+				},
+				deleteSavedSearchSuccess: function () {
+					api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+					this.showingSavedSearchResults = false;
+					this.theSearchTerms = undefined;
+					this.theVideos = []
+				},
+				deleteSavedSearchFailed: function () {
+					alert("deleting saved searches failed");
+					this.showingSavedSearchResults = false;
 				}
 			},
 			template: '\
 			<div id="searchpanel">\
 				<div id="savedsearchespanel">\
 					<div v-for="(phrase, index) in theSavedSearches">\
-						<div>{{phrase}}</div>\
+						<div><a v-on:click="onSavedSearchClicked(index)" href="#">{{phrase}}</a></div>\
 					</div>\
 				</div>\
 				<playerpanel v-bind:videoId="theVideoId" />\
@@ -101,7 +133,8 @@
 					<button id="submitSearchTermsButton" v-on:click="onSearchHandler">Search</button>\
 				</div>\
 				<div id="searchresultspanel">\
-					<div><button id="submitSaveSearchButton" v-on:click="onSaveSearchHandler">Save Search</button></div>\
+					<div><button v-if="theVideos.length > 0" id="submitSaveSearchButton" v-on:click="onSaveSearchHandler">Save Search</button></div>\
+					<div><button v-if="showingSavedSearchResults" id="deleteSavedSearchButton" v-on:click="onDeleteSavedSearchHandler">Delete Saved Search</button></div>\
 					<div v-for="(video, index) in theVideos">\
 						<div v-bind:id="`search-result-` + index" >\
 							<div v-bind:id="`search-result-` + index + `-video-` + video.videoId"><a v-bind:id="`search-result-` + index + `-watch`" v-on:click="watchVideo(video.videoId)" href="#"><img v-bind:src="video.thumbnailUrl"/>{{ video.title }}</a></div>\
@@ -182,7 +215,6 @@
 			',
 			created() {
 				this.childAddedHandler();
-				// api_getAllChildrenForParent(globalState.loggedInUsername, this.getAllChildrenSuccess, this.getAllChildrenFailed)
 			}
 		});
 
