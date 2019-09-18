@@ -1,5 +1,7 @@
 package com.djpedersen.mgyoutube.api_tests;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import org.junit.Assert;
 
 import com.djpedersen.mgyoutube.api_tests.apimodel.User;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -100,6 +103,49 @@ public class Helpers {
 				final Response putResponse = putRequestSpec.put(userUrl);
 				Assert.assertEquals("should have created parent user", HttpStatus.SC_OK, putResponse.getStatusCode());
 			}
+		} finally {
+			RestAssured.basePath = savedBasePath;
+		}
+	}
+
+	public static void ensureSearchExistsForParent(final String parentUsername, final String searchPhrase) {
+		final String savedBasePath = RestAssured.basePath;
+		try {
+			RestAssured.basePath = "/api/parents";
+
+			final RequestSpecification requestSpecPut = RestAssured.given();
+
+			final String putUrl = "/" + parentUsername + "/searches/" + searchPhrase;
+
+			final Response responsePut = requestSpecPut.put(putUrl);
+			Assert.assertEquals("saving a search should return status code 201", HttpStatus.SC_CREATED,
+					responsePut.getStatusCode());
+		} finally {
+			RestAssured.basePath = savedBasePath;
+		}
+	}
+
+	public static List<String> getSearchesForParent(String parentUsername) {
+		final String savedBasePath = RestAssured.basePath;
+		try {
+			RestAssured.basePath = "/api/parents";
+
+			final RequestSpecification requestSpecGet = RestAssured.given();
+
+			final String putUrl = "/" + parentUsername + "/searches";
+
+			final Response responseGet = requestSpecGet.get(putUrl);
+			Assert.assertEquals("saving a search should return status code 200", HttpStatus.SC_OK,
+					responseGet.getStatusCode());
+
+			final String bodyJson = responseGet.getBody().asString();
+
+			final Type listType = new TypeToken<ArrayList<String>>() {
+			}.getType();
+			final List<String> searches = new Gson().fromJson(bodyJson, listType);
+
+			return searches;
+
 		} finally {
 			RestAssured.basePath = savedBasePath;
 		}
