@@ -3,6 +3,8 @@ package com.djpedersen.mgyoutube.behavior_tests;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.djpedersen.mgyoutube.behavior_tests.apisdk.model.User;
 
@@ -45,6 +47,22 @@ public class BasicSiteOperationSteps extends BaseSteps {
 		verifyChildUserIsInScenario(username);
 
 		getWebDriver().get("http://localhost/parents/");
+	}
+
+	@When("the parent user (.*) logs out from the parents page")
+	public void thenParentUserLogsOut(final String username) {
+		this.verifyParentUserIsInScenario(username);
+
+		final WebElement logoutButton = getWebDriver().findElement(By.id("logoutButton"));
+		logoutButton.click();
+
+		final WebDriverWait wait = new WebDriverWait(this.getWebDriver(), 4 /* timeout in seconds */);
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("loginButton")));
+	}
+
+	@When("waits (.*) seconds")
+	public void waitsSomeSeconds(final int seconds) throws InterruptedException {
+		Thread.sleep(seconds * 1000);
 	}
 
 	@Then("the user none can see a link to the childrens page")

@@ -78,6 +78,15 @@ As an authenticated parent user, I would like to be able to delete search phrase
 
 Acceptance Criteria:
 - DELETE /api/parents/{parentusername}/searches/{searchphrase} remotes the searchphrase from the list of saved searches for the parent
+  - DELETE of non-existing parentusername returns 404
+  - DEELTE of existing or non-existing searchphrase for existing parentusername returns 204
 - GET /api/parents/{parentusername}/searches after a DELETE does not list the previously named searchphrase
 - an authenticated parent can affect a delete operation on any of the listed search phrases
 - the deleted search phrase does not re-appear after logging out and logging back in
+
+
+## Story #12: Parent can re-run a saved search
+As a parent, I would like to be able to re-run a saved search to double check I still want it available to my children
+
+Acceptance Criteria:
+- authenticated parent user can click on saved search and have it display the results

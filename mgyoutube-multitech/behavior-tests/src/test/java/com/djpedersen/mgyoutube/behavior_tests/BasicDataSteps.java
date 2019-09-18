@@ -11,17 +11,6 @@ import cucumber.api.java.en.Then;
 
 public class BasicDataSteps extends BaseSteps {
 
-	// private void ensureUserExists(final User user) throws IOException {
-	// final User existingUser = getApiSdk().getUser(user.username);
-	// if (existingUser == null) {
-	// final User createdUser = getApiSdk().createUser(user);
-	//
-	// Assert.assertNotNull("created user " + user.username + " should not be null",
-	// createdUser);
-	// }
-	//
-	// }
-
 	@Given("user (.*) currently does not exist")
 	public void givenAUserDoesNotExist(final String username) throws IOException {
 

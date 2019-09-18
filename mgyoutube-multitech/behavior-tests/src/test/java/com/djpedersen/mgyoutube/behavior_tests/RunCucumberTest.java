@@ -1,10 +1,11 @@
 package com.djpedersen.mgyoutube.behavior_tests;
 
-import cucumber.api.CucumberOptions;
-import cucumber.api.junit.Cucumber;
 import org.junit.runner.RunWith;
 
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
+
 @RunWith(Cucumber.class)
-@CucumberOptions(plugin = {"pretty"})
+@CucumberOptions(features = "src/test/resources/", plugin = { "pretty" })
 public class RunCucumberTest {
 }

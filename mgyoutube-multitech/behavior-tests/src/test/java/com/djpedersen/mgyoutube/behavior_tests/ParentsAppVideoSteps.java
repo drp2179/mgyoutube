@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.djpedersen.mgyoutube.behavior_tests.apisdk.model.User;
 import com.djpedersen.mgyoutube.behavior_tests.cucumber.ScenarioContext;
 import com.djpedersen.mgyoutube.behavior_tests.selenium.ByIdStartsWith;
+import com.djpedersen.mgyoutube.behavior_tests.selenium.ExtendedExpectedConditions;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -90,6 +91,22 @@ public class ParentsAppVideoSteps extends BaseSteps {
 		saveSearchButton.click();
 	}
 
+	@When("the parent user (.*) deletes saved search \"(.*)\"")
+	public void whenParentUserDeletesSavedSearch(final String parentUsername, final String searchPhrase) {
+		this.verifyParentUserIsInScenario(parentUsername);
+
+		final WebElement deleteSavedSearchButton = getWebDriver().findElement(By.id("deleteSavedSearchButton"));
+		deleteSavedSearchButton.click();
+	}
+
+	@When("the parent user (.*) clicks on the \"(.*)\" saved search")
+	public void whenParentUserClicksOnSavedSearch(final String parentUsername, final String searchPhrase) {
+		this.verifyParentUserIsInScenario(parentUsername);
+
+		final WebElement savedSearchLink = getWebDriver().findElement(By.linkText(searchPhrase));
+		savedSearchLink.click();
+	}
+
 	@Then("the parent user (.*) can see the youtube player with video (.*)")
 	public void thenParentCanSeeYouTubePlayerWithVideo(final String parentUsername, final int searchResultIndex) {
 		final User parentUser = getAUserFromScenario(parentUsername);
@@ -123,15 +140,18 @@ public class ParentsAppVideoSteps extends BaseSteps {
 	public void thenParentUserCanSeeSearchTheSavedSearchList(final String parentUsername, final String searchTerms) {
 		this.verifyParentUserIsInScenario(parentUsername);
 
-		// final WebElement savedSearchesPanel =
-		// this.getWebDriver().findElement(By.id("savedsearchespanel"));
-
 		final WebDriverWait wait = new WebDriverWait(this.getWebDriver(), 4 /* timeout in seconds */);
 		wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("savedsearchespanel"), searchTerms));
+	}
 
-		// Assert.assertTrue("Cannot find search terms " + searchTerms + " in the saved
-		// search panel",
-		// savedSearchesPanel.getText().contains(searchTerms));
+	@Then("the parent user (.*) cannot see \"(.*)\" in the saved search list")
+	public void thenParentUserCannotSeeSearchTheSavedSearchList(final String parentUsername, final String searchTerms) {
+		this.verifyParentUserIsInScenario(parentUsername);
+
+		final WebElement savedSearchesPanel = this.getWebDriver().findElement(By.id("savedsearchespanel"));
+
+		final WebDriverWait wait = new WebDriverWait(this.getWebDriver(), 4 /* timeout in seconds */);
+		wait.until(ExtendedExpectedConditions.textToBeMissingInElement(savedSearchesPanel, searchTerms));
 	}
 
 }
