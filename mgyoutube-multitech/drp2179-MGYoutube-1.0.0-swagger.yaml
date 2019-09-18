@@ -145,6 +145,29 @@ paths:
           description: created
         '404':
           description: Unable to find parentusername
+    delete:
+      tags:
+        - parents
+      summary: delete the search phrase
+      operationId: deleteSearch
+      parameters:
+        - name: parentusername
+          in: path
+          description: the parentusername to add to
+          required: true
+          schema:
+            type: string
+        - name: searchphrase
+          in: path
+          description: the search phrase to add
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Unable to find parentusername
   /api/children/auth/:
     post:
       tags:
