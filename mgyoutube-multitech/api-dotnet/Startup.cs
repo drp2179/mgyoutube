@@ -34,20 +34,16 @@ namespace api_dotnet
             YouTubeProperties youTubeProperties = new YouTubeProperties(Configuration);
             ModuleRepoRegistry.TheVideoModule = new DefaultVideoModuleImpl(youTubeProperties.ApiKey, youTubeProperties.ApplicationName);
 
-            string connectionString = "mongodb://localhost:27017";
-            string databaseName = "mgyoutube";
-            string couchConnectionString = "http://localhost:8091";
-            string couchUsername = "mgyoutube";
-            string couchPassword = "mgyoutubepassword";
+            DatastoresProperties datastoresProperties = new DatastoresProperties(Configuration);
 
             //UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
-            //UserDataRepo userDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName);
-            UserDataRepo userDataRepo = new CouchUserDataRepoImpl(couchConnectionString, couchUsername, couchPassword);
+            //UserDataRepo userDataRepo = new MongoUserDataRepoImpl(datastoresProperties.MongoConnectionString, datastoresProperties.MongoDatabaseName);
+            UserDataRepo userDataRepo = new CouchUserDataRepoImpl(datastoresProperties.CouchConnectionString, datastoresProperties.CouchUsername, datastoresProperties.CouchPassword);
             userDataRepo.RepositoryStartup();
 
             //SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
-            //SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
-            SearchesDataRepo searchesDataRepo = new CouchSearchesDataRepoImpl(couchConnectionString, couchUsername, couchPassword);
+            //SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(datastoresProperties.MongoConnectionString, datastoresProperties.MongoDatabaseName);
+            SearchesDataRepo searchesDataRepo = new CouchSearchesDataRepoImpl(datastoresProperties.CouchConnectionString, datastoresProperties.CouchUsername, datastoresProperties.CouchPassword);
             searchesDataRepo.RepositoryStartup();
 
             ModuleRepoRegistry.TheUserModule = new DefaultUserModuleImpl(userDataRepo);
