@@ -4,7 +4,7 @@ import "apimodel"
 
 // UserDataRepo - interface definition for a UserDataRepo
 type UserDataRepo interface {
-	RepositoryStartup()
+	RepositoryStartup() error
 
 	GetUserByUsername(username string) *apimodel.User
 

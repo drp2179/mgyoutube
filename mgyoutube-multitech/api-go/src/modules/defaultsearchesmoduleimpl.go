@@ -12,6 +12,11 @@ type DefaultSearchesModuleImpl struct {
 	searchesDataRepo repos.SearchesDataRepo
 }
 
+// RepositoryStartup - setup the repo
+func (module *DefaultSearchesModuleImpl) RepositoryStartup() error {
+	return nil
+}
+
 // GetSavedSearchesForParent - get the saved searches for the parent
 func (module *DefaultSearchesModuleImpl) GetSavedSearchesForParent(parentUsername string) ([]string, error) {
 	parentUser := module.userDataRepo.GetUserByUsername(parentUsername)
@@ -37,6 +42,19 @@ func (module *DefaultSearchesModuleImpl) AddSearchToParent(parentUsername string
 	}
 
 	module.searchesDataRepo.AddSearchToParentUser(parentUser.UserID, searchPhrase)
+
+	return nil
+}
+
+// RemoveSearchFromParent - remove the search from the named parent
+func (module *DefaultSearchesModuleImpl) RemoveSearchFromParent(parentUsername string, searchPhrase string) error {
+	parentUser := module.userDataRepo.GetUserByUsername(parentUsername)
+
+	if parentUser == nil {
+		return errors.New("unable to find user " + parentUsername)
+	}
+
+	module.searchesDataRepo.RemoveSearchFromParent(parentUser.UserID, searchPhrase)
 
 	return nil
 }

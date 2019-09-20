@@ -50,19 +50,27 @@ type MongoUserDataRepoImpl struct {
 }
 
 // RepositoryStartup - to initialize the repo
-func (repo *MongoUserDataRepoImpl) RepositoryStartup() {
+func (repo *MongoUserDataRepoImpl) RepositoryStartup() error {
 	ctx, contextCancel := context.WithTimeout(context.Background(), 16*time.Second)
 	defer contextCancel()
 
 	usersCollection := repo.database.Collection(UsersCollectionName)
 	if usersCollection != nil {
-		usersCollection.Drop(ctx)
+		userDropError := usersCollection.Drop(ctx)
+		if userDropError != nil {
+			return userDropError
+		}
 	}
 
 	parentChildCollection := repo.database.Collection(ParentChildCollectionName)
 	if parentChildCollection != nil {
-		parentChildCollection.Drop(ctx)
+		parentChildDropError := parentChildCollection.Drop(ctx)
+		if parentChildDropError != nil {
+			return parentChildDropError
+		}
 	}
+
+	return nil
 }
 
 // GetUserByUsername - get a user by username

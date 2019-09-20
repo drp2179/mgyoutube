@@ -17,7 +17,7 @@ const SearchesCollectionName string = "searches"
 const SearchesCollectionParentFieldname string = "parentUserId"
 
 // SearchesCollectionSearchPhraseFieldname - the name of the searches search phrase field
-//const SearchesCollectionSearchPhraseFieldname string = "phrase"
+const SearchesCollectionSearchPhraseFieldname string = "phrase"
 
 type mongoParentChild struct {
 	ParentUserID string `bson:"parentUserId"`
@@ -31,17 +31,22 @@ type MongoSearchesDataRepoImpl struct {
 }
 
 // RepositoryStartup - to initialize the repo
-func (repo *MongoSearchesDataRepoImpl) RepositoryStartup() {
+func (repo *MongoSearchesDataRepoImpl) RepositoryStartup() error {
 	ctx, contextCancel := context.WithTimeout(context.Background(), 16*time.Second)
 	defer contextCancel()
 
 	searchesCollection := repo.database.Collection(SearchesCollectionName)
 	if searchesCollection != nil {
-		searchesCollection.Drop(ctx)
+		dropErr := searchesCollection.Drop(ctx)
+		if dropErr != nil {
+			return dropErr
+		}
 	}
+
+	return nil
 }
 
-// GetSearchesForParentUser - get the searches for the give parent
+// GetSearchesForParentUser - get the searches for the given parent
 func (repo *MongoSearchesDataRepoImpl) GetSearchesForParentUser(parentUserID string) []string {
 	var searches = make([]string, 0)
 
@@ -73,7 +78,7 @@ func (repo *MongoSearchesDataRepoImpl) GetSearchesForParentUser(parentUserID str
 	return searches
 }
 
-// AddSearchToParentUser - add a search to the give parent
+// AddSearchToParentUser - add a search to the given parent
 func (repo *MongoSearchesDataRepoImpl) AddSearchToParentUser(parentUserID string, searchPhrase string) {
 	log.Println("AddSearchToParentUser parentUserID", parentUserID, "searchPhrase", searchPhrase)
 
@@ -92,6 +97,26 @@ func (repo *MongoSearchesDataRepoImpl) AddSearchToParentUser(parentUserID string
 
 	id := insertResult.InsertedID
 	log.Println("AddSearchToParentUser parentUserID", parentUserID, "searchPhrase", searchPhrase, "inserted id", id)
+}
+
+// RemoveSearchFromParent - remove a search from the given parent
+func (repo *MongoSearchesDataRepoImpl) RemoveSearchFromParent(parentUserID string, searchPhrase string) {
+	log.Println("RemoveSearchFromParent parentUserID", parentUserID, "searchPhrase", searchPhrase)
+
+	filter := bson.M{}
+	filter[SearchesCollectionParentFieldname] = parentUserID
+	filter[SearchesCollectionSearchPhraseFieldname] = searchPhrase
+
+	ctx, cancelContext := context.WithTimeout(context.Background(), 4*time.Second)
+	defer cancelContext()
+
+	searchesCollection := repo.database.Collection(SearchesCollectionName)
+	deleteResult, err := searchesCollection.DeleteOne(ctx, filter)
+	if err != nil {
+		log.Println("RemoveSearchFromParent unexpectedly failed", err)
+	}
+
+	log.Println("RemoveSearchFromParent parentUserID", parentUserID, "searchPhrase", searchPhrase, "deleted count", deleteResult.DeletedCount)
 }
 
 // NewMongoSearchesDataRepoImpl - create a new instance of MongoSearchesDataRepoImpl

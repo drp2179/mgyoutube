@@ -235,6 +235,36 @@ func (webService ParentsWebService) saveSearch(responseWriter http.ResponseWrite
 	}
 }
 
+func (webService ParentsWebService) deleteSearch(responseWriter http.ResponseWriter, request *http.Request) {
+	httpParams := mux.Vars(request)
+
+	parentUsername := httpParams["parentusername"]
+	searchPhrase := httpParams["searchphrase"]
+	decodedSearchPhrase, decodingError := url.QueryUnescape(searchPhrase)
+
+	log.Println("deleteSearch: parentUsername=", parentUsername, ", searchPhrase=", searchPhrase, ", decodedSearchPhrase=", decodedSearchPhrase, ", decodingError=", decodingError)
+
+	if decodingError != nil {
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: need to sanitize payload input before using
+	sanitizedParentUsername := parentUsername
+	sanitizedSearchPhrase := decodedSearchPhrase
+
+	removeErr := webService.searchesModule.RemoveSearchFromParent(sanitizedParentUsername, sanitizedSearchPhrase)
+
+	if removeErr != nil {
+		log.Println("deleteSearch.RemoveSearchFromParent for ", sanitizedParentUsername, " and ", sanitizedSearchPhrase, " failed ", removeErr)
+		responseWriter.WriteHeader(http.StatusNotFound)
+	} else {
+		log.Println("deleteSearch: RemoveSearchFromParent=", sanitizedParentUsername, ", searchPhrase=", sanitizedSearchPhrase, " returning NO CONTENT")
+		responseWriter.WriteHeader(http.StatusNoContent)
+		responseWriter.Write([]byte(""))
+	}
+}
+
 // NewParentWebService - creates and returns a new ParentsWebService
 func NewParentWebService(router *mux.Router, userModule modules.UserModule, searchesModule modules.SearchesModule) *ParentsWebService {
 
@@ -247,6 +277,7 @@ func NewParentWebService(router *mux.Router, userModule modules.UserModule, sear
 	router.HandleFunc("/api/parents/{parentusername}/children/{childusername}", webService.addUpdateChildToParent).Methods("PUT")
 	router.HandleFunc("/api/parents/{parentusername}/searches", webService.getSavedSearches).Methods("GET")
 	router.HandleFunc("/api/parents/{parentusername}/searches/{searchphrase}", webService.saveSearch).Methods("PUT")
+	router.HandleFunc("/api/parents/{parentusername}/searches/{searchphrase}", webService.deleteSearch).Methods("DELETE")
 
 	return &webService
 }

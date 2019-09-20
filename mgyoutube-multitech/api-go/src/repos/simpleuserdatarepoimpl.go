@@ -15,8 +15,9 @@ type SimpleUserDataRepoImpl struct {
 }
 
 // RepositoryStartup - to initialize the repo
-func (userDataRepo *SimpleUserDataRepoImpl) RepositoryStartup() {
+func (userDataRepo *SimpleUserDataRepoImpl) RepositoryStartup() error {
 	// nothing to do here
+	return nil
 }
 
 // GetUserByUsername - get a user by username

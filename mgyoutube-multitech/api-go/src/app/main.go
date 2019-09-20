@@ -27,14 +27,27 @@ func main() {
 
 	videoModule := modules.NewDefaultVideoModuleImpl(youTubeProperties.APIKey, youTubeProperties.ApplicationName)
 
-	const mongoConnectionString = "mongodb://localhost:27017"
-	const mongoDatabaseName = "mgyoutube"
+	datastoreProperties, errReadDatastoreProperties := ReadDatastoresProperties()
+	if errReadDatastoreProperties != nil {
+		log.Fatalln("Failed to read the datastore.json", errReadDatastoreProperties)
+	}
+
 	//searchesDataRepo := repos.NewSimplisticSearchesDataRepoImpl()
-	searchesDataRepo := repos.NewMongoSearchesDataRepoImpl(mongoConnectionString, mongoDatabaseName)
-	searchesDataRepo.RepositoryStartup()
+	//searchesDataRepo := repos.NewMongoSearchesDataRepoImpl(mongoConnectionString, mongoDatabaseName)
+	searchesDataRepo := repos.NewCouchSearchesDataRepoImpl(datastoreProperties.CouchConnectionString, datastoreProperties.CouchUsername, datastoreProperties.CouchPassword)
+	searchRepoStartupError := searchesDataRepo.RepositoryStartup()
+	if searchRepoStartupError != nil {
+		log.Panicln("error while initializing searches data repo", searchesDataRepo, searchRepoStartupError)
+	}
+
 	//userDataRepo := repos.NewSimpleUserDataRepoImpl()
-	userDataRepo := repos.NewMongoUserDataRepoImpl(mongoConnectionString, mongoDatabaseName)
-	userDataRepo.RepositoryStartup()
+	//userDataRepo := repos.NewMongoUserDataRepoImpl(mongoConnectionString, mongoDatabaseName)
+	userDataRepo := repos.NewCouchUserDataRepoImpl(datastoreProperties.CouchConnectionString, datastoreProperties.CouchUsername, datastoreProperties.CouchPassword)
+	userRepoSetupError := userDataRepo.RepositoryStartup()
+	if userRepoSetupError != nil {
+		log.Panicln("error while initializing user data repo", userDataRepo, userRepoSetupError)
+	}
+
 	userModule := modules.NewDefaultUserModuleImpl(userDataRepo)
 	searchesModule := modules.NewDefaultSearchesModuleImpl(userDataRepo, searchesDataRepo)
 

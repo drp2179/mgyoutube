@@ -5,4 +5,6 @@ type SearchesModule interface {
 	GetSavedSearchesForParent(parentUsername string) ([]string, error)
 
 	AddSearchToParent(parentUsername string, searchPhrase string) error
+
+	RemoveSearchFromParent(parentUsername string, searchPhrase string) error
 }
