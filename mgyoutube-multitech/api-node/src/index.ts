@@ -15,6 +15,9 @@ import { MongoSearchesDataRepoImpl } from "./repos/mongosearchesdatarepoimpl";
 import { SearchesDataRepo } from "./repos/searchesdatarepo";
 import { UserDataRepo } from "./repos/userdatarepo";
 import { MongoUserDataRepoImpl } from "./repos/mongouserdatarepoimpl";
+import { DatastoresProperties } from "./datastoresproperties";
+import { CouchSearchesDataRepoImpl } from "./repos/couchsearchesdatarepoimpl";
+import { CouchUserDataRepoImpl } from "./repos/couchuserdatarepoimpl";
 
 
 async function setupModulesAndRepos() {
@@ -22,17 +25,18 @@ async function setupModulesAndRepos() {
     const videoModule = new DefaultVideoModuleImpl(youTubeProperties.apiKey, youTubeProperties.applicationName);
     ModuleRepoRegistry.setVideosModule(videoModule);
 
-    const connectionString = "mongodb://localhost:27017"
-    const databaseName = "mgyoutube"
+    const datastoresProperties = new DatastoresProperties();
 
     //const userDataRepo = new SimplisticUserDataRepoImpl()
-    const userDataRepo: UserDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName)
-    userDataRepo.repositoryStartup();
+    //const userDataRepo: UserDataRepo = new MongoUserDataRepoImpl(datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName);
+    const userDataRepo: UserDataRepo = new CouchUserDataRepoImpl(datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword);
+    await userDataRepo.repositoryStartup();
     ModuleRepoRegistry.setUserDataRepo(userDataRepo);
 
     //const searchesDataRepo = new SimplisticSearchesDataRepoImpl();
-    const searchesDataRepo: SearchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
-    searchesDataRepo.repositoryStartup();
+    //const searchesDataRepo: SearchesDataRepo = new MongoSearchesDataRepoImpl(datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName));
+    const searchesDataRepo: SearchesDataRepo = new CouchSearchesDataRepoImpl(datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword);
+    await searchesDataRepo.repositoryStartup();
 
     const searchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo)
     ModuleRepoRegistry.setSearchesModule(searchesModule);
