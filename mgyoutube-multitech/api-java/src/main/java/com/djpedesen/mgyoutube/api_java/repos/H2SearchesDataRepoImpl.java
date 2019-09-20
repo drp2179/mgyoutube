@@ -14,6 +14,7 @@ public class H2SearchesDataRepoImpl implements SearchesDataRepo {
 	public static final String SEARCHES_INSERT = "INSERT INTO searches (parentUserId, phrase) VALUES( $, $)";
 	public static final String SEARCHES_DROP = "DROP TABLE IF EXISTS searches";
 	public static final String SEARCHES_CREATE = "CREATE TABLE searches (parentUserId VARCHAR2(64), phrase VARCHAR2(256))";
+	public static final String SEARCHES_DELETE_PHRASE_FOR_PARENT = "DELETE FROM searches WHERE parentUserId = ? AND phrase = ?";
 
 	private final String connectionString;
 
@@ -69,4 +70,15 @@ public class H2SearchesDataRepoImpl implements SearchesDataRepo {
 		}
 	}
 
+	@Override
+	public void removeSearchFromParentUser(final String parentUserId, final String searchPhrase) throws Exception {
+		try (final Connection connection = getConnection()) {
+			final PreparedStatement statement = connection.prepareStatement(SEARCHES_DELETE_PHRASE_FOR_PARENT);
+
+			statement.setString(1, parentUserId);
+			statement.setString(2, searchPhrase);
+
+			statement.executeUpdate();
+		}
+	}
 }

@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -215,4 +216,33 @@ public class ParentsWebService {
 		}
 	}
 
+	@DELETE
+	@Path("/{parentUsername}/searches/{searchphrase}")
+	public Response deleteSearch(@PathParam(value = "parentUsername") final String parentUsername,
+			@PathParam(value = "searchphrase") final String searchPhrase) throws UnsupportedEncodingException {
+		try {
+			final String decodedSearchPhrase = URLDecoder.decode(searchPhrase, StandardCharsets.UTF_8.toString());
+			System.out.println("deleteSearch: parentUsername=" + parentUsername + ", searchPhrase=" + searchPhrase
+					+ ", decodedSearchPhrase=" + decodedSearchPhrase);
+
+			// TODO: need to sanitize payload input before using
+			final String sanitizedParentUsername = parentUsername;
+			final String sanitizedSearchPhrase = decodedSearchPhrase;
+
+			try {
+				searchesModule.removeSearchFromParent(sanitizedParentUsername, sanitizedSearchPhrase);
+
+				System.out.println("deleteSearch: parentUsername=" + sanitizedParentUsername + ", searchPhrase="
+						+ sanitizedSearchPhrase + " returning NO CONTENT");
+				return Response.noContent().build();
+			} catch (UserNotFoundException unfe) {
+				System.out.println("deleteSearch: unable to find user " + unfe.username + " returning NOT_FOUND");
+				return Response.status(Status.NOT_FOUND).build();
+			}
+		} catch (Throwable thrown) {
+			System.out.println("deleteSearch, unhandled exception:");
+			thrown.printStackTrace(System.out);
+			return Response.serverError().build();
+		}
+	}
 }

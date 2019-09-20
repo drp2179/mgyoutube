@@ -52,4 +52,15 @@ public class DefaultSearchesModuleImpl implements SearchesModule {
 		this.searchesDataRepo.addSearchToParentUser(parentUser.userId, searchPhrase);
 	}
 
+	@Override
+	public void removeSearchFromParent(final String parentUsername, final String searchPhrase) throws Exception {
+		final User parentUser = this.userDataRepo.getUserByUsername(parentUsername);
+
+		if (parentUser == null) {
+			throw new UserNotFoundException(parentUsername);
+		}
+
+		this.searchesDataRepo.removeSearchFromParentUser(parentUser.userId, searchPhrase);
+	}
+
 }

@@ -61,4 +61,14 @@ export class MongoSearchesDataRepoImpl implements SearchesDataRepo {
         const searchesCollection = this.database.collection(SEARCHES_COLLECTION_NAME);
         await searchesCollection.insertOne(document);
     }
+
+    async removeSearchFromParentUser(parentUserId: string, searchPhrase: string): Promise<void> {
+        const documentFilter: any = {}
+        documentFilter[SEARCHES_COLLECTION_PARENT_FIELDNAME] = parentUserId;
+        documentFilter[SEARCHES_COLLECTION_SEARCH_PHRASE_FIELDNAME] = searchPhrase;
+
+        const searchesCollection = this.database.collection(SEARCHES_COLLECTION_NAME);
+        await searchesCollection.deleteOne(documentFilter);
+    }
+
 }

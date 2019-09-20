@@ -44,5 +44,15 @@ export class DefaultSearchesModuleImpl implements SearchesModule {
         await this.searchesDataRepo.addSearchToParentUser(parentUser.userId, searchPhrase);
     }
 
+    async removeSearchFromParent(parentUsername: string, searchPhrase: string): Promise<void> {
+        const parentUser = await this.userDataRepo.getUserByUsername(parentUsername);
+
+        if (parentUser == null) {
+            throw new UserNotFoundException(parentUsername);
+        }
+
+        await this.searchesDataRepo.removeSearchFromParentUser(parentUser.userId, searchPhrase);
+    }
+
 
 }

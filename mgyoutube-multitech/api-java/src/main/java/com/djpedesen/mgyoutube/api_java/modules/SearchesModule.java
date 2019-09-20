@@ -8,4 +8,6 @@ public interface SearchesModule {
 
 	void addSearchToParent(String parentUsername, String searchPhrase) throws Exception;
 
+	void removeSearchFromParent(String parentUsername, String searchPhrase) throws Exception;
+
 }

@@ -7,4 +7,6 @@ export interface SearchesDataRepo {
     getSearchesForParentUser(parentUserId: string): Promise<string[]>;
 
     addSearchToParentUser(parentUserId: string, searchPhrase: string): Promise<void>;
+
+    removeSearchFromParentUser(parentUserId: string, searchPhrase: string): Promise<void>;
 }

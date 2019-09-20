@@ -31,3 +31,12 @@ class DefaultSearchesModuleImpl(SearchesModule):
 
         self.searchesDataRepo.addSearchToParentUser(
             parentUser.userId, searchPhrase)
+
+    def removeSearchFromParent(self,  parentUsername: str, searchPhrase: str):
+        parentUser = self.userDataRepo.getUserByUsername(parentUsername)
+
+        if (parentUser is None):
+            raise UserNotFoundException(parentUsername)
+
+        self.searchesDataRepo.removeSearchFromParentUser(
+            parentUser.userId, searchPhrase)

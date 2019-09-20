@@ -49,7 +49,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("CreateUser, unhandled exception", e);
+                Console.WriteLine("CreateUser, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -82,7 +83,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("GetUserByUsername, unhandled exception", e);
+                Console.WriteLine("GetUserByUsername, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -109,7 +111,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("DeleteUserByUsername, unhandled exception", e);
+                Console.WriteLine("DeleteUserByUsername, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }

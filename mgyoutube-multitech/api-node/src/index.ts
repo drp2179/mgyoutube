@@ -30,7 +30,7 @@ async function setupModulesAndRepos() {
     userDataRepo.repositoryStartup();
     ModuleRepoRegistry.setUserDataRepo(userDataRepo);
 
-    //var searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+    //const searchesDataRepo = new SimplisticSearchesDataRepoImpl();
     const searchesDataRepo: SearchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
     searchesDataRepo.repositoryStartup();
 

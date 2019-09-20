@@ -126,7 +126,7 @@ def getSavedSearches(request: Request) -> Response:
         raise HTTPNotFound()
 
 
-@view_config(route_name='parents-addsearchphrase', request_method='PUT')
+@view_config(route_name='parents-adddeletesearchphrase', request_method='PUT')
 def saveSearch(request: Request) -> Response:
     parentUsername = request.matchdict['parentusername']
     searchPhrase = request.matchdict['searchphrase']
@@ -152,6 +152,31 @@ def saveSearch(request: Request) -> Response:
         return HTTPNotFound()
 
 
+@view_config(route_name='parents-adddeletesearchphrase', request_method='DELETE')
+def deleteSearch(request: Request) -> Response:
+    parentUsername = request.matchdict['parentusername']
+    searchPhrase = request.matchdict['searchphrase']
+    decodedSearchPhrase = urllib.parse.unquote_plus(searchPhrase)
+    print("deleteSearch: parentUsername=", parentUsername, ", searchPhrase=",
+          searchPhrase, ", decodedSearchPhrase=", decodedSearchPhrase)
+
+    # // TODO: need to sanitize payload input before using
+    sanitizedParentUsername = parentUsername
+    sanitizedSearchPhrase = decodedSearchPhrase
+
+    try:
+        ModuleRepoRegistry.getSearchesModule().removeSearchFromParent(
+            sanitizedParentUsername, sanitizedSearchPhrase)
+
+        print("deleteSearch: parentUsername=", sanitizedParentUsername,
+              ", searchPhrase=", sanitizedSearchPhrase, " returning NO CONTENT")
+        return Response(status=204)
+    except UserNotFoundException as unfe:
+        print("deleteSearch: unable to find user ",
+              unfe.username, " returning NOT_FOUND")
+        return HTTPNotFound()
+
+
 def setupParentsWebService(config: Configurator):
     config.add_route('parents-auth',        '/api/parents/auth')
     config.add_route('parents-children',
@@ -160,5 +185,5 @@ def setupParentsWebService(config: Configurator):
                      '/api/parents/{parentusername}/children/{childusername}')
     config.add_route('parents-searches',
                      '/api/parents/{parentusername}/searches')
-    config.add_route('parents-addsearchphrase',
+    config.add_route('parents-adddeletesearchphrase',
                      '/api/parents/{parentusername}/searches/{searchphrase}')

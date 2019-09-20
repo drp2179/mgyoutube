@@ -6,8 +6,8 @@ import com.djpedesen.mgyoutube.api_java.modules.DefaultSearchesModuleImpl;
 import com.djpedesen.mgyoutube.api_java.modules.DefaultVideoModuleImpl;
 import com.djpedesen.mgyoutube.api_java.modules.SearchesModule;
 import com.djpedesen.mgyoutube.api_java.modules.VideoModule;
-import com.djpedesen.mgyoutube.api_java.repos.H2SearchesDataRepoImpl;
-import com.djpedesen.mgyoutube.api_java.repos.H2UserDataRepoImpl;
+import com.djpedesen.mgyoutube.api_java.repos.CouchSearchesDataRepoImpl;
+import com.djpedesen.mgyoutube.api_java.repos.CouchUserDataRepoImpl;
 import com.djpedesen.mgyoutube.api_java.repos.SearchesDataRepo;
 import com.djpedesen.mgyoutube.api_java.repos.UserDataRepo;
 import com.djpedesen.mgyoutube.api_java.utils.jetty.JettyServerWrapper;
@@ -23,6 +23,7 @@ public class Main {
 	public static void main(final String[] args) throws Exception {
 
 		final YouTubeProperties youTubeProperties = new YouTubeProperties();
+		final DatastoresProperties dataStoresProperties = new DatastoresProperties();
 
 		final HttpTransport httpTransport = new ApacheHttpTransport();
 		final JsonFactory jsonFactory = new JacksonFactory();
@@ -30,13 +31,16 @@ public class Main {
 				youTubeProperties.applicationName, httpTransport, jsonFactory);
 		ModuleRepoRegistry.setVideoModule(videoModule);
 
-		final String h2ConnectionString = "jdbc:h2:~/test";
-		final String mongoConnectionString = "mongodb://localhost:27017";
-		final String mongoDatabaseName = "mgyoutube";
+//		final String h2ConnectionString = "jdbc:h2:~/test";
+//		final String mongoConnectionString = "mongodb://localhost:27017";
+//		final String mongoDatabaseName = "mgyoutube";
+
 		// final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+		final UserDataRepo userDataRepo = new CouchUserDataRepoImpl(dataStoresProperties.couchConnectionString,
+				dataStoresProperties.couchUsername, dataStoresProperties.couchPassword);
 		// final UserDataRepo userDataRepo = new
 		// MongoUserDataRepoImpl(mongoConnectionString, mongoDatabaseName);
-		final UserDataRepo userDataRepo = new H2UserDataRepoImpl(h2ConnectionString);
+		// final UserDataRepo userDataRepo = new H2UserDataRepoImpl(h2ConnectionString);
 		userDataRepo.repositoryStartup();
 		ModuleRepoRegistry.setUserDataRepo(userDataRepo);
 
@@ -44,7 +48,11 @@ public class Main {
 		// SimplisticSearchesDataRepoImpl();
 //		final SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(mongoConnectionString,
 //				mongoDatabaseName);
-		final SearchesDataRepo searchesDataRepo = new H2SearchesDataRepoImpl(h2ConnectionString);
+		final SearchesDataRepo searchesDataRepo = new CouchSearchesDataRepoImpl(
+				dataStoresProperties.couchConnectionString, dataStoresProperties.couchUsername,
+				dataStoresProperties.couchPassword);
+		// final SearchesDataRepo searchesDataRepo = new
+		// H2SearchesDataRepoImpl(h2ConnectionString);
 		searchesDataRepo.repositoryStartup();
 
 		final SearchesModule searchesModule = new DefaultSearchesModuleImpl(userDataRepo, searchesDataRepo);

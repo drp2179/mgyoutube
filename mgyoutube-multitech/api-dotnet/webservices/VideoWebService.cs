@@ -52,7 +52,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("VideosSearch, unhandled exception", e);
+                Console.WriteLine("VideosSearch, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }

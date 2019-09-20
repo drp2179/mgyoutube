@@ -60,4 +60,12 @@ public class MongoSearchesDataRepoImpl implements SearchesDataRepo {
 		searchesCollection.insertOne(document);
 	}
 
+	@Override
+	public void removeSearchFromParentUser(final String parentUserId, final String searchPhrase) throws Exception {
+		final MongoCollection<Document> searchesCollection = database.getCollection(SEARCHES_COLLECTION_NAME);
+		final Document document = new Document().append(SEARCHES_COLLECTION_PARENT_FIELDNAME, parentUserId)
+				.append(SEARCHES_COLLECTION_SEARCH_PHRASE_FIELDNAME, searchPhrase);
+		searchesCollection.deleteOne(document);
+	}
+
 }

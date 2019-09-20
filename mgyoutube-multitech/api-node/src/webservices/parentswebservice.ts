@@ -25,6 +25,9 @@ export class ParentsWebService {
         server.put('/api/parents/:parentusername/searches/:searchphrase', async (req, res, next) => {
             return UseNext.handleAsyncRestifyCall(await ParentsWebService.saveSearch(req, res), next);
         });
+        server.del('/api/parents/:parentusername/searches/:searchphrase', async (req, res, next) => {
+            return UseNext.handleAsyncRestifyCall(await ParentsWebService.deleteSearch(req, res), next);
+        });
     }
 
     private static async authParentUser(req: Request, res: Response): Promise<UseNext> {
@@ -205,4 +208,37 @@ export class ParentsWebService {
         }
     }
 
+    private static async deleteSearch(req: Request, res: Response): Promise<UseNext> {
+        const parentUsername = req.params.parentusername;
+        const searchPhrase = req.params.searchphrase;
+        // Javascript can't URL Decode properly?  really?  Is it 1994 or 2019?!?!?
+        const decodedSearchPhrase = decodeURI(searchPhrase.replace(/\+/g, " "));
+        console.log("deleteSearch: parentUsername=", parentUsername, ", searchPhrase="
+            , searchPhrase, ", decodedSearchPhrase=", decodedSearchPhrase);
+
+        // TODO: need to sanitize payload input before using
+        const sanitizedParentUsername = parentUsername;
+        const sanitizedSearchPhrase = decodedSearchPhrase;
+
+        try {
+            await ModuleRepoRegistry.getSearchesModule().removeSearchFromParent(sanitizedParentUsername, sanitizedSearchPhrase);
+
+            console.log("deleteSearch: parentUsername=", sanitizedParentUsername, ", searchPhrase="
+                , sanitizedSearchPhrase, " returning NO CONTENT");
+            res.status(204);
+            res.send();
+            return UseNext.Nothing
+        } catch (e) {
+            if (e.name == UserNotFoundException.NAME) {
+                console.warn("deleteSearch: unable to find user ", e.username, " returning NOT_FOUND");
+                const err404 = new NotFoundError();
+                return new UseNext(err404);
+            }
+            else {
+                console.error("deleteSearch exception", e);
+                const err500 = new InternalServerError();
+                return new UseNext(err500);
+            }
+        }
+    }
 }

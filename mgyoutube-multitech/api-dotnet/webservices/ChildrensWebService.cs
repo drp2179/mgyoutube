@@ -58,7 +58,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("AuthChildUser, unhandled exception", e);
+                Console.WriteLine("AuthChildUser, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -50,5 +51,36 @@ namespace api_dotnet.repos
 
             return searches;
         }
+
+        public async Task RemoveSearchFromParentUser(string parentUserId, string searchPhrase)
+        {
+            IMongoCollection<BsonDocument> searchesCollection = this.database.GetCollection<BsonDocument>(SEARCHES_COLLECTION_NAME);
+            using (IAsyncCursor<BsonDocument> cursor = await searchesCollection.FindAsync(new BsonDocument(SEARCHES_COLLECTION_PARENT_FIELDNAME, parentUserId)))
+            {
+                if (!await cursor.MoveNextAsync())
+                {
+                    Console.WriteLine("RemoveSearchFromParentUser MoveNextAsync failed");
+                    return;
+                }
+
+                IEnumerator<BsonDocument> docEnum = cursor.Current.GetEnumerator();
+                if (!docEnum.MoveNext())
+                {
+                    Console.WriteLine("RemoveSearchFromParentUser MoveNext failed");
+                    return;
+                }
+
+                BsonDocument userDoc = docEnum.Current;
+
+                if (userDoc == null)
+                {
+                    Console.WriteLine("RemoveSearchFromParentUser.userDoc is null");
+                    return;
+                }
+
+                await searchesCollection.DeleteOneAsync(userDoc);
+            }
+        }
+
     }
 }

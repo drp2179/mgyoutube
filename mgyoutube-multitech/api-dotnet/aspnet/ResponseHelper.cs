@@ -17,7 +17,7 @@ namespace api_dotnet.aspnet
             {
                 response.Headers.Add("Location", location);
             }
-            response.StatusCode = 201;
+            response.StatusCode = StatusCodes.Status201Created;
             return response.WriteAsync(data == null ? "" : data.ToString());
         }
         public static Task Created(HttpContext context, string location = null, object data = null, string contentType = null)
@@ -25,9 +25,20 @@ namespace api_dotnet.aspnet
             return Created(context.Response, location, data, contentType);
         }
 
+        public static Task NoContent(HttpResponse response)
+        {
+            return Task.Run(() =>
+           { response.StatusCode = StatusCodes.Status204NoContent; }
+            );
+        }
+        public static Task NoContent(HttpContext context)
+        {
+            return NoContent(context.Response);
+        }
+
         public static Task NotFound(HttpResponse response)
         {
-            response.StatusCode = 404;
+            response.StatusCode = StatusCodes.Status404NotFound;
             return response.WriteAsync(""); // this seems wrong
         }
         public static Task NotFound(HttpContext context)
@@ -41,13 +52,13 @@ namespace api_dotnet.aspnet
             {
                 response.Headers.Add("Content-Type", contentType);
             }
-            response.StatusCode = 200;
+            response.StatusCode = StatusCodes.Status200OK;
             return response.WriteAsync(payload);
         }
 
         public static Task BadRequest(HttpResponse response)
         {
-            response.StatusCode = 400;
+            response.StatusCode = StatusCodes.Status400BadRequest;
             return response.WriteAsync("");
         }
         public static Task BadRequest(HttpContext context)
@@ -66,7 +77,7 @@ namespace api_dotnet.aspnet
 
         public static Task Unauthorized(HttpResponse response)
         {
-            response.StatusCode = 401;
+            response.StatusCode = StatusCodes.Status401Unauthorized;
             return response.WriteAsync(""); // this seems wrong
         }
         public static Task Unauthorized(HttpContext context)
@@ -75,7 +86,7 @@ namespace api_dotnet.aspnet
         }
         public static Task InternalServerError(HttpResponse response)
         {
-            response.StatusCode = 500;
+            response.StatusCode = StatusCodes.Status500InternalServerError;
             return response.WriteAsync(""); // this seems wrong
         }
         public static Task InternalServerError(HttpContext context)

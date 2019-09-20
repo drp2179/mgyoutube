@@ -16,3 +16,8 @@ class SimplisticSearchesDataRepoImpl(SearchesDataRepo):
             self.parentSearches[parentUserId] = set()
         existingSet = self.parentSearches[parentUserId]
         existingSet.add(searchPhrase)
+
+    def removeSearchFromParentUser(self, parentUserId: str, searchPhrase: str):
+        if parentUserId in self.parentSearches:
+            existingSet = self.parentSearches[parentUserId]
+            existingSet.remove(searchPhrase)

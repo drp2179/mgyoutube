@@ -30,7 +30,15 @@ public class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
 			parentSearches.put(parentUserId, new HashSet<>());
 		}
 
-		parentSearches.get(parentUserId).add(searchPhrase);
+		final Set<String> phrases = parentSearches.get(parentUserId);
+		phrases.add(searchPhrase);
 	}
 
+	@Override
+	public void removeSearchFromParentUser(final String parentUserId, final String searchPhrase) throws Exception {
+		if (parentSearches.containsKey(parentUserId)) {
+			final Set<String> phrases = parentSearches.get(parentUserId);
+			phrases.remove(searchPhrase);
+		}
+	}
 }

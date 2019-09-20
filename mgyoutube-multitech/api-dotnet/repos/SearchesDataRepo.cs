@@ -10,5 +10,7 @@ namespace api_dotnet.repos
         Task<List<string>> GetSearchesForParentUser(string userId);
 
         Task AddSearchToParentUser(string parentUserId, string searchPhrase);
+
+        Task RemoveSearchFromParentUser(string parentUserId, string searchPhrase);
     }
 }

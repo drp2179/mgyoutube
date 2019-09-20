@@ -47,5 +47,22 @@ namespace api_dotnet.modules
 
             return searches;
         }
+
+
+        public async Task RemoveSearchFromParent(string parentUsername, string searchPhrase)
+        {
+            Console.WriteLine("RemoveSearchFromParent, parentUsername=" + parentUsername + ", searchPhrase=" + searchPhrase);
+            User parentUser = await this.UserDataRepo.GetUserByUsername(parentUsername);
+
+            if (parentUser == null)
+            {
+                Console.WriteLine("RemoveSearchFromParent, parentUsername=" + parentUsername + " parentUser is null so throwing UserNotFoundException");
+                throw new UserNotFoundException(parentUsername);
+            }
+
+            Console.WriteLine("RemoveSearchFromParent, parentUsername=" + parentUsername + ", found parent=" + parentUser);
+
+            await this.SearchesDataRepo.RemoveSearchFromParentUser(parentUser.userId, searchPhrase);
+        }
     }
 }

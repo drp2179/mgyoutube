@@ -29,6 +29,7 @@ namespace api_dotnet.webservices
             routeBuilder.MapPut("/api/parents/{parentUsername}/children/{childUsername}", AddUpdateChildToParent);
             routeBuilder.MapGet("/api/parents/{parentUsername}/searches", GetSearchesForParent);
             routeBuilder.MapPut("/api/parents/{parentUsername}/searches/{searchPhrase}", SaveSearchForParent);
+            routeBuilder.MapDelete("/api/parents/{parentUsername}/searches/{searchPhrase}", DeleteSavedSearchFromParent);
         }
 
 
@@ -66,7 +67,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("AuthParentUser, unhandled exception", e);
+                Console.WriteLine("AuthParentUser, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -101,7 +103,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("GetChildrenForParent, unhandled exception", e);
+                Console.WriteLine("GetChildrenForParent, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -144,7 +147,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("AddUpdateChildToParent, unhandled exception", e);
+                Console.WriteLine("AddUpdateChildToParent, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -177,7 +181,8 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("GetSearchesForParent, unhandled exception", e);
+                Console.WriteLine("GetSearchesForParent, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }
@@ -215,7 +220,47 @@ namespace api_dotnet.webservices
             }
             catch (Exception e)
             {
-                Console.WriteLine("SaveSearchForParent, unhandled exception", e);
+                Console.WriteLine("SaveSearchForParent, unhandled exception");
+                Console.WriteLine(e);
+                return ResponseHelper.InternalServerError(context);
+            }
+        }
+
+
+        public Task DeleteSavedSearchFromParent(HttpContext context)
+        {
+            try
+            {
+                string parentUsername = RequestHelper.GetRouteValue<string>(context, "parentUsername");
+                string searchPhrase = RequestHelper.GetRouteValue<string>(context, "searchPhrase");
+                string decodedSearchPhrase = System.Web.HttpUtility.UrlDecode(searchPhrase);
+                Console.WriteLine("deleteSearch: parentUsername=" + parentUsername + ", searchPhrase=" + searchPhrase
+                        + ", decodedSearchPhrase=" + decodedSearchPhrase);
+
+                // TODO: need to sanitize payload input before using
+                string sanitizedParentUsername = parentUsername;
+                string sanitizedSearchPhrase = decodedSearchPhrase;
+
+                try
+                {
+                    Console.WriteLine("deleteSearch: sanitizedParentUsername=" + sanitizedParentUsername + ", sanitizedSearchPhrase=" + sanitizedSearchPhrase);
+
+                    searchesModule.RemoveSearchFromParent(sanitizedParentUsername, sanitizedSearchPhrase).GetAwaiter().GetResult();
+
+                    Console.WriteLine("deleteSearch: parentUsername=" + sanitizedParentUsername + ", searchPhrase=" + sanitizedSearchPhrase
+                            + " returning NO CONTENT");
+                    return ResponseHelper.NoContent(context);
+                }
+                catch (UserNotFoundException unfe)
+                {
+                    Console.WriteLine("deleteSearch: unable to find user " + unfe.username + " returning NOT_FOUND");
+                    return ResponseHelper.NotFound(context);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("DeleteSavedSearchFromParent, unhandled exception");
+                Console.WriteLine(e);
                 return ResponseHelper.InternalServerError(context);
             }
         }

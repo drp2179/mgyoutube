@@ -9,5 +9,7 @@ namespace api_dotnet.modules
 
         Task AddSearchToParent(string parentUsername, string searchPhrase);
 
+        Task RemoveSearchFromParent(string parentUsername, string searchPhrase);
+
     }
 }

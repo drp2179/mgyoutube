@@ -38,5 +38,21 @@ namespace api_dotnet.repos
                 return new List<string>();
             });
         }
+
+        public async Task RemoveSearchFromParentUser(string parentUserId, string searchPhrase)
+        {
+            await Task.Run(() =>
+            {
+                if (this.parentSearches.ContainsKey(parentUserId))
+                {
+                    var s = this.parentSearches[parentUserId];
+
+                    if (s.Contains(searchPhrase))
+                    {
+                        s.Remove(searchPhrase);
+                    }
+                }
+            });
+        }
     }
 }

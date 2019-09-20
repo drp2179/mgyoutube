@@ -6,8 +6,10 @@ public interface SearchesDataRepo {
 
 	void repositoryStartup() throws Exception;
 
-	List<String> getSearchesForParentUser(String userId) throws Exception;
+	List<String> getSearchesForParentUser(String parentUserId) throws Exception;
 
 	void addSearchToParentUser(String parentUserId, String searchPhrase) throws Exception;
+
+	void removeSearchFromParentUser(String parentUserId, String searchPhrase) throws Exception;
 
 }

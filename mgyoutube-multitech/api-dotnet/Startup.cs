@@ -36,13 +36,13 @@ namespace api_dotnet
 
             string connectionString = "mongodb://localhost:27017";
             string databaseName = "mgyoutube";
-            
-            //UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
-            UserDataRepo userDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName);
+
+            UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
+            //UserDataRepo userDataRepo = new MongoUserDataRepoImpl(connectionString, databaseName);
             userDataRepo.RepositoryStartup();
 
-            //SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
-            SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
+            SearchesDataRepo searchesDataRepo = new SimplisticSearchesDataRepoImpl();
+            //SearchesDataRepo searchesDataRepo = new MongoSearchesDataRepoImpl(connectionString, databaseName);
             searchesDataRepo.RepositoryStartup();
 
             ModuleRepoRegistry.TheUserModule = new DefaultUserModuleImpl(userDataRepo);

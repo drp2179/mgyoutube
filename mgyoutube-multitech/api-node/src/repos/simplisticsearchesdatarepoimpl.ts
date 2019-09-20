@@ -13,8 +13,8 @@ export class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
     }
 
     async getSearchesForParentUser(parentUserId: string): Promise<string[]> {
-        var returnArray: string[] = [];
-        var existingSearches = this.parentSearches.get(parentUserId);
+        const returnArray: string[] = [];
+        const existingSearches = this.parentSearches.get(parentUserId);
 
         if (existingSearches != null) {
             existingSearches.forEach(s => returnArray.push(s));
@@ -31,5 +31,12 @@ export class SimplisticSearchesDataRepoImpl implements SearchesDataRepo {
         }
 
         existingSet.add(searchPhrase);
+    }
+
+    async removeSearchFromParentUser(parentUserId: string, searchPhrase: string): Promise<void> {
+        const existingSet = this.parentSearches.get(parentUserId)
+        if (existingSet != null) {
+            existingSet.delete(searchPhrase);
+        }
     }
 }
