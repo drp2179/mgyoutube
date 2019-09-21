@@ -40,4 +40,6 @@ In anticipation of an upcoming interview I decided to jump into the data repos a
 That all working (i.e. the API and Behavior tests all pass) I replaced the C# sync implementation with an async/await verion, and in Java created a SQL version using an embedded H2 db.  
 I may abandon the Simple implementations all around given the Mongo and H2 impls...
 
-Finishing work on Story 11 will help me decide...
+Then got another interview, so I reimplemented everything in Couchbase, including api-python, which I also implemented in Mongo.  
+
+Going to get rid of the "simple" implementations... now up to 5 APIs each with 3 repo implementations, plus the H2 for Java... just too many to maintain as the stories get implemented.
