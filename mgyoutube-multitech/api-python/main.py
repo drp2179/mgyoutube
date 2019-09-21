@@ -17,18 +17,18 @@ if __name__ == '__main__':
     datastoresProperties = DatastoresProperties.DatastoresProperties()
 
     #userDataRepo = SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl()
-    # userDataRepo = CouchUserDataRepoImpl.CouchUserDataRepoImpl(
-    #     datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
-    userDataRepo = MongoUserDataRepoImpl.MongoUserDataRepoImpl(
-        datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
+    userDataRepo = CouchUserDataRepoImpl.CouchUserDataRepoImpl(
+        datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    # userDataRepo = MongoUserDataRepoImpl.MongoUserDataRepoImpl(
+    #     datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
     userDataRepo.repositoryStartup()
     ModuleRepoRegistry.setUserDataRepo(userDataRepo)
 
     #serchesRepo = SimplisticSearchesDataRepoImpl.SimplisticSearchesDataRepoImpl()
-    # serchesRepo = CouchSearchesDataRepoImpl.CouchSearchesDataRepoImpl(
-    #     datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
-    serchesRepo = MongoSearchesDataRepoImpl.MongoSearchesDataRepoImpl(
-        datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
+    serchesRepo = CouchSearchesDataRepoImpl.CouchSearchesDataRepoImpl(
+        datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    # serchesRepo = MongoSearchesDataRepoImpl.MongoSearchesDataRepoImpl(
+    #     datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
     serchesRepo.repositoryStartup()
 
     searchesModule = DefaultSearchesModuleImpl.DefaultSearchesModuleImpl(

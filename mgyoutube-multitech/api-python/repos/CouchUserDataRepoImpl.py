@@ -3,6 +3,7 @@ from apimodel.User import User, cloneUser
 from couchbase.cluster import Cluster
 from couchbase.cluster import PasswordAuthenticator
 from couchbase.n1ql import N1QLQuery, CONSISTENCY_REQUEST
+from couchutils.couchutils import doesBucketExist, createBasicBucket
 import uuid
 
 
@@ -27,12 +28,25 @@ class CouchUserDataRepoImpl(UserDataRepo):
         self.cluster.authenticate(authenticator)
 
     def repositoryStartup(self) -> None:
-        usersBucket = self.cluster.open_bucket(
-            CouchUserDataRepoImpl.USERS_BUCKET_NAME)
-        usersBucket.flush()
-        parentChildBucket = self.cluster.open_bucket(
-            CouchUserDataRepoImpl.PARENT_CHILD_BUCKET_NAME)
-        parentChildBucket.flush()
+        if (not doesBucketExist(CouchUserDataRepoImpl.USERS_BUCKET_NAME, self.cluster)):
+            usersBucket = createBasicBucket(
+                CouchUserDataRepoImpl.USERS_BUCKET_NAME, self.cluster)
+            usersBucket.bucket_manager().create_n1ql_index(
+                CouchUserDataRepoImpl.USERS_USERNAME_INDEX_NAME, defer=False, ignore_exists=True, fields=[CouchUserDataRepoImpl.USERS_BUCKET_USERNAME_FIELDNAME])
+        else:
+            usersBucket = self.cluster.open_bucket(
+                CouchUserDataRepoImpl.USERS_BUCKET_NAME)
+            usersBucket.flush()
+
+        if (not doesBucketExist(CouchUserDataRepoImpl.PARENT_CHILD_BUCKET_NAME, self.cluster)):
+            parentChildBucket = createBasicBucket(
+                CouchUserDataRepoImpl.PARENT_CHILD_BUCKET_NAME, self.cluster)
+            parentChildBucket.bucket_manager().create_n1ql_index(
+                CouchUserDataRepoImpl.PARENT_CHILD_PARENT_INDEX_NAME, defer=False, ignore_exists=True, fields=[CouchUserDataRepoImpl.PARENT_CHILD_BUCKET_PARENT_FIELDNAME])
+        else:
+            parentChildBucket = self.cluster.open_bucket(
+                CouchUserDataRepoImpl.PARENT_CHILD_BUCKET_NAME)
+            parentChildBucket.flush()
 
     def getUserByUsername(self, username: str) -> User:
         query = N1QLQuery(
