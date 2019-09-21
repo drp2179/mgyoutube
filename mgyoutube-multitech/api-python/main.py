@@ -2,10 +2,11 @@ import json
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
 from modules import DefaultUserModuleImpl, DefaultVideoModuleImpl, DefaultSearchesModuleImpl
-from repos import SimplisticUserDataRepoImpl, SimplisticSearchesDataRepoImpl
+from repos import SimplisticUserDataRepoImpl, SimplisticSearchesDataRepoImpl, CouchSearchesDataRepoImpl, CouchUserDataRepoImpl
 from webservices import ParentsWebService, ChildrenWebService, SupportWebService, VideoWebService
 from webservices.ModuleRepoRegistry import ModuleRepoRegistry
 import YouTubeProperties
+import DatastoresProperties
 
 if __name__ == '__main__':
 
@@ -13,10 +14,19 @@ if __name__ == '__main__':
     ModuleRepoRegistry.setVideoModule(
         DefaultVideoModuleImpl.DefaultVideoModuleImpl(youTubeProperties.apiKey, youTubeProperties.applicationName))
 
-    userDataRepo = SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl()
+    datastoresProperties = DatastoresProperties.DatastoresProperties()
+
+    #userDataRepo = SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl()
+    userDataRepo = CouchUserDataRepoImpl.CouchUserDataRepoImpl(
+        datastoresProperties.couchConnectionstring, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    userDataRepo.repositoryStartup()
     ModuleRepoRegistry.setUserDataRepo(userDataRepo)
 
-    serchesRepo = SimplisticSearchesDataRepoImpl.SimplisticSearchesDataRepoImpl()
+    #serchesRepo = SimplisticSearchesDataRepoImpl.SimplisticSearchesDataRepoImpl()
+    serchesRepo = CouchSearchesDataRepoImpl.CouchSearchesDataRepoImpl(
+        datastoresProperties.couchConnectionstring, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    serchesRepo.repositoryStartup()
+
     searchesModule = DefaultSearchesModuleImpl.DefaultSearchesModuleImpl(
         userDataRepo, serchesRepo)
     ModuleRepoRegistry.setSearchesModule(searchesModule)

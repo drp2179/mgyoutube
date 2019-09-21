@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class SearchesDataRepo(ABC):
+    @abstractmethod
+    def repositoryStartup(self):
+        pass
 
     @abstractmethod
     def getSearchesForParentUser(self, parentUserId: str) -> list:

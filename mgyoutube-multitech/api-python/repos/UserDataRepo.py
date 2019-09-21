@@ -5,6 +5,10 @@ from apimodel.User import User
 class UserDataRepo(ABC):
 
     @abstractmethod
+    def repositoryStartup(self):
+        pass
+
+    @abstractmethod
     def getUserByUsername(self,  username: str) -> User:
         pass
 

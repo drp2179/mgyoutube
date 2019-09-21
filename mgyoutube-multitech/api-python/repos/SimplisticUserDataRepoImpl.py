@@ -10,6 +10,9 @@ class SimplisticUserDataRepoImpl(UserDataRepo):
         self.parentChildrenMap = dict()
         self.nextUserId = 1
 
+    def repositoryStartup(self):
+        pass
+
     def getUserByUsername(self, username: str) -> User:
         user = self.usernameMap.get(username)
         if (user != None):

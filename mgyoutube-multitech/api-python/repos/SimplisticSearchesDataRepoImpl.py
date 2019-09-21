@@ -6,6 +6,9 @@ class SimplisticSearchesDataRepoImpl(SearchesDataRepo):
     def __init__(self):
         self.parentSearches = dict()  # <userId:int, set(str)>
 
+    def repositoryStartup(self):
+        pass
+
     def getSearchesForParentUser(self, parentUserId: str) -> list:
         if (parentUserId in self.parentSearches):
             return list(self.parentSearches[parentUserId])
