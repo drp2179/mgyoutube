@@ -2,7 +2,7 @@ import json
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
 from modules import DefaultUserModuleImpl, DefaultVideoModuleImpl, DefaultSearchesModuleImpl
-from repos import SimplisticUserDataRepoImpl, SimplisticSearchesDataRepoImpl, CouchSearchesDataRepoImpl, CouchUserDataRepoImpl
+from repos import SimplisticUserDataRepoImpl, SimplisticSearchesDataRepoImpl, CouchSearchesDataRepoImpl, CouchUserDataRepoImpl, MongoSearchesDataRepoImpl, MongoUserDataRepoImpl
 from webservices import ParentsWebService, ChildrenWebService, SupportWebService, VideoWebService
 from webservices.ModuleRepoRegistry import ModuleRepoRegistry
 import YouTubeProperties
@@ -17,14 +17,18 @@ if __name__ == '__main__':
     datastoresProperties = DatastoresProperties.DatastoresProperties()
 
     #userDataRepo = SimplisticUserDataRepoImpl.SimplisticUserDataRepoImpl()
-    userDataRepo = CouchUserDataRepoImpl.CouchUserDataRepoImpl(
-        datastoresProperties.couchConnectionstring, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    # userDataRepo = CouchUserDataRepoImpl.CouchUserDataRepoImpl(
+    #     datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    userDataRepo = MongoUserDataRepoImpl.MongoUserDataRepoImpl(
+        datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
     userDataRepo.repositoryStartup()
     ModuleRepoRegistry.setUserDataRepo(userDataRepo)
 
     #serchesRepo = SimplisticSearchesDataRepoImpl.SimplisticSearchesDataRepoImpl()
-    serchesRepo = CouchSearchesDataRepoImpl.CouchSearchesDataRepoImpl(
-        datastoresProperties.couchConnectionstring, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    # serchesRepo = CouchSearchesDataRepoImpl.CouchSearchesDataRepoImpl(
+    #     datastoresProperties.couchConnectionString, datastoresProperties.couchUsername, datastoresProperties.couchPassword)
+    serchesRepo = MongoSearchesDataRepoImpl.MongoSearchesDataRepoImpl(
+        datastoresProperties.mongoConnectionString, datastoresProperties.mongoDatabaseName)
     serchesRepo.repositoryStartup()
 
     searchesModule = DefaultSearchesModuleImpl.DefaultSearchesModuleImpl(

@@ -1,10 +1,9 @@
 # MGYouTube api-python
 
 ## Required Libraries
-- pip install "pyramid==1.10.4"
-- pip install couchbase
-- pip install --upgrade google-api-python-client
+- python -m pip install "pyramid==1.10.4"
+- python -m pip install couchbase
+- python -m pip install --upgrade google-api-python-client
+- python -m pip install pymongo
 
-N.B. pip is found at:
-- &"C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python37_64/python.exe" -m pip
-- and has to be run with admin privs
+Installation has to be run with admin privs...
