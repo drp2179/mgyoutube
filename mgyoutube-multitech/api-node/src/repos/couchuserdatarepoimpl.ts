@@ -32,11 +32,13 @@ export class CouchUserDataRepoImpl implements UserDataRepo {
 
         return new Promise<void>((resolve, reject) => {
             const usersBucket: Bucket = paraThis.cluster.openBucket(USERS_BUCKET_NAME);
+            //console.log("usersBucket.manager()", usersBucket.manager())
             console.log("Flushing ", USERS_BUCKET_NAME);
             usersBucket.manager().flush(() => {
                 console.log("flush of ", USERS_BUCKET_NAME, " finished.");
 
                 const parentChildBucket: Bucket = paraThis.cluster.openBucket(PARENT_CHILD_BUCKET_NAME);
+                //console.log("parentChildBucket.manager()", parentChildBucket.manager())
                 console.log("Flushing ", PARENT_CHILD_BUCKET_NAME);
                 parentChildBucket.manager().flush(() => {
                     console.log("flush of ", PARENT_CHILD_BUCKET_NAME, " finished.");

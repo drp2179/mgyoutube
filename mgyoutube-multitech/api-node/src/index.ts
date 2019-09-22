@@ -57,5 +57,7 @@ setupModulesAndRepos().then(() => {
         console.log('%s listening at %s', server.name, server.url);
     });
 }).catch(err => {
+    console.log("index.ts setupModulesAndRepos.catch handler");
     console.error(err);
+    process.exit();
 })

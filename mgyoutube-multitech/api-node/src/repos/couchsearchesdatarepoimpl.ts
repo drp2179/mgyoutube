@@ -2,6 +2,7 @@ import { SearchesDataRepo } from "./searchesdatarepo";
 import { Cluster, Bucket, N1qlQuery } from "couchbase";
 
 import uuidv4 = require('uuid/v4');
+import { CouchbaseUtils } from "../couchutils/couchutils";
 
 
 
@@ -22,12 +23,25 @@ export class CouchSearchesDataRepoImpl implements SearchesDataRepo {
     }
 
     async repositoryStartup(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const searchsBucket: Bucket = this.cluster.openBucket(SEARCHES_BUCKET_NAME);
-            searchsBucket.manager().flush(() => {
-                console.log("flush of ", SEARCHES_BUCKET_NAME, " finished.");
+        const paraThis = this;
+
+        return new Promise<void>(async (resolve, reject) => {
+            const bucketExists = await CouchbaseUtils.doesBucketExistAsync(SEARCHES_BUCKET_NAME, paraThis.cluster)
+            if (!bucketExists) {
+                const searchsBucket = await CouchbaseUtils.createBasicBucketAsync(SEARCHES_BUCKET_NAME, paraThis.cluster);
+                searchsBucket.manager().createIndex(SEARCHES_PARENT_INDEX_NAME, [SEARCHES_BUCKET_PARENT_FIELDNAME], (err) => {
+                    if (err) {
+                        reject("createIndex for " + SEARCHES_PARENT_INDEX_NAME + " failed:" + err);
+                    }
+                    else {
+                        resolve();
+                    }
+                })
+            }
+            else {
+                await CouchbaseUtils.flushBucketAsync(SEARCHES_BUCKET_NAME, paraThis.cluster);
                 resolve();
-            });
+            }
         });
     }
 
