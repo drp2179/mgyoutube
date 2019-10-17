@@ -31,10 +31,6 @@ public class Main {
 				youTubeProperties.applicationName, httpTransport, jsonFactory);
 		ModuleRepoRegistry.setVideoModule(videoModule);
 
-//		final String h2ConnectionString = "jdbc:h2:~/test";
-//		final String mongoConnectionString = "mongodb://localhost:27017";
-//		final String mongoDatabaseName = "mgyoutube";
-
 		// final UserDataRepo userDataRepo = new SimplisticUserDataRepoImpl();
 //		final UserDataRepo userDataRepo = new CouchUserDataRepoImpl(dataStoresProperties.couchConnectionString,
 //				dataStoresProperties.couchUsername, dataStoresProperties.couchPassword);
