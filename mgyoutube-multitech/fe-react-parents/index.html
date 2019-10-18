@@ -55,7 +55,7 @@
             constructor(props) {
                 super(props);
 
-                this.state = {theSearchTerms: null, theVideos: [], theVideoId: null, theSavedSearches: [] };
+                this.state = {theSearchTerms: null, theVideos: [], theVideoId: null, theSavedSearches: [], deleteSavedSearchSuccess:false };
 
                 this.onSaveSearchHandler = this.onSaveSearchHandler.bind(this);
                 this.saveSearchSuccess = this.saveSearchSuccess.bind(this);
@@ -67,6 +67,11 @@
                 this.searchFailed = this.searchFailed.bind(this);
                 
                 this.watchVideo = this.watchVideo.bind(this);
+                this.onSavedSearchClicked = this.onSavedSearchClicked.bind(this);
+                
+                this.onDeleteSavedSearchHandler = this.onDeleteSavedSearchHandler.bind(this);
+                this.deleteSavedSearchSuccess = this.deleteSavedSearchSuccess.bind(this);
+                this.deleteSavedSearchFailed = this.deleteSavedSearchFailed.bind(this);
 
                 this.getSavedSearchesSuccess = this.getSavedSearchesSuccess.bind(this);
                 this.getSavedSearchesFailed = this.getSavedSearchesFailed.bind(this);
@@ -112,9 +117,42 @@
                 alert("retrieving saved searches failed");
             }
 
+            onDeleteSavedSearchHandler(event) {
+                if (this.state.theSearchTerms) {
+                    api_deleteSavedSearch(globalState.loggedInUsername, this.state.theSearchTerms, () => this.deleteSavedSearchSuccess(), () => this.deleteSavedSearchFailed());
+                }
+                else {
+                    alert("no search phrase to delete")
+                }
+            }
+
+            deleteSavedSearchSuccess() {
+                api_getSavedSearchesForParent(globalState.loggedInUsername, (savedSearches) => this.getSavedSearchesSuccess(savedSearches), () => this.getSavedSearchesFailed());
+                this.setState({showingSavedSearchResults: false, theSearchTerms: undefined, theVideos: []});
+                // this.theSearchTerms = undefined;
+                // this.theVideos = []
+            }
+
+            deleteSavedSearchFailed() {
+                alert("deleting saved searches failed");
+                this.setState({showingSavedSearchResults : false});
+            }
+
             watchVideo(event) {
                 console.log("watchVideo, " + event);
                 this.setState( {theVideoId: event});
+            }
+
+            onSavedSearchClicked(event) {
+                console.log( "onSavedSearchClicked, event: " + JSON.stringify(event) )
+                var index = event.index;
+                console.log( "onSavedSearchClicked, index: " + index )
+                var searchPhrase = this.state.theSavedSearches[index];
+                console.log( "onSavedSearchClicked, searchPhrase: " + searchPhrase )
+                api_getVideoSearchResults(searchPhrase, (videos) => this.searchSuccess(videos), () => this.searchFailed());
+                // this.theSearchTerms = searchPhrase;
+                // this.showingSavedSearchResults = true;
+                this.setState( {theSearchTerms : searchPhrase, showingSavedSearchResults : true});
             }
             
             componentDidMount() {
@@ -123,13 +161,21 @@
             }
 
             render() {
+                let deleteButton;
+                if ( this.state.showingSavedSearchResults ) {
+                    deleteButton = <div><button id="deleteSavedSearchButton" onClick={this.onDeleteSavedSearchHandler}>Delete Saved Search</button></div>
+                } else {
+                    deleteButton = <div></div>
+                }
                 return(
                     <div id="searchpanel">
                         <div id="savedsearchespanel">
                             <div>
                             {this.state.theSavedSearches.map((phrase, index) => {
                                 return(
-                                    <div key={index}>{phrase}</div>
+                                    <div key={index} >
+                                        <a onClick={() => this.onSavedSearchClicked({index})} href="#">{phrase}</a>
+                                    </div>
                                 );
                             })}
                             </div>
@@ -144,6 +190,7 @@
                         </div>
                         <div id="searchresultspanel">
                             <div><button id="submitSaveSearchButton" onClick={this.onSaveSearchHandler}>Save Search</button></div>
+                            {deleteButton}
                             {this.state.theVideos.map((video, index) => {
                                 var divId = 'search-result-' + index
                                 var videoDivId = 'search-result-' + index + "-video-" + video.videoId

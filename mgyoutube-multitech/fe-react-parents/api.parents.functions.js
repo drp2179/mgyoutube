@@ -215,3 +215,53 @@ function api_getSavedSearchesForParent(parentUsername, successCallback, failureC
         console.log(url, "POST-GET")
     }
 }
+
+function api_deleteSavedSearch(parentUsername, searchPhrase, successCallback, failureCallback) {
+    const url = '/api/parents/' + parentUsername + '/searches/' + searchPhrase;
+
+    const httpRequest = new XMLHttpRequest();
+    httpRequest.onReadyStateChange = function () {
+        console.warn(url, "onReadyStateChange");
+
+        if (this.readyState === XMLHttpRequest.DONE) {
+            if (this.status === 204) {
+                if (successCallback) {
+                    console.log("should be calling success callback");
+                    successCallback();
+                }
+                else {
+                    console.log("status(" + this.status + ") == 204 and success callback not defined");
+                }
+            }
+            else if (failureCallback) {
+                console.log("should be calling failure callback");
+                failureCallback();
+            }
+            else {
+                console.log("status(" + this.status + ") != 204 and failure callback not defined");
+            }
+        }
+    }
+    httpRequest.onError = (e) => {
+        console.warn(url, JSON.stringify(e));
+        if (failureCallback) {
+            failureCallback();
+        }
+    }
+    httpRequest.onloadend = httpRequest.onReadyStateChange;
+
+    try {
+        httpRequest.open("DELETE", url, true);
+        console.log(url, "PRE-DELETE")
+        httpRequest.send();
+    }
+    catch (err) {
+        console.warn(url, err, JSON.stringify(err));
+        if (failureCallback) {
+            failureCallback();
+        }
+    }
+    finally {
+        console.log(url, "POST-DELETE")
+    }
+}
